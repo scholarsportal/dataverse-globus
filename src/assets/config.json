@@ -1,8 +1,8 @@
 {
     "baseUrl": "",
     "id": "",
-    "redirectURL": "http://localhost",
-    "basicGlobusToken": "ODA0ODBhNzEtODA5ZC00ZTJhLWExNmQtY2JkMzA1NTk0ZDdhOmQvM3NFd1BVUGY0V20ra2hkSkF3NTZMWFJPaFZSTVhnRmR3TU5qM2Q3TjA9",
-    "globusClientId": "80480a71-809d-4e2a-a16d-cbd305594d7a",
-    "globusEndpoint": "5102894b-f28f-47f9-bc9a-d8e1b4e9e62c"
+    "redirectURL": "",
+    "basicGlobusToken": "",
+    "globusClientId": "",
+    "globusEndpoint": ""
 }
