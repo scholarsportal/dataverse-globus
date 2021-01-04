@@ -14,6 +14,12 @@ import {HttpClient, HttpClientModule} from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { GlobusDirective } from './globus.directive';
 import { UploadFileComponent } from './upload-file/upload-file.component';
+import {MatTabsModule} from '@angular/material/tabs';
+import { PersonalConnectComponent } from './personal-connect/personal-connect.component';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatListModule} from '@angular/material/list';
+import {MatIconModule} from '@angular/material/icon';
 
 export function load(http: HttpClient, config: ConfigService): (() => Promise<boolean>) {
   return (): Promise<boolean> => {
@@ -51,14 +57,20 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     InterfaceComponent,
     GlobusDirective,
     UploadFileComponent,
+    PersonalConnectComponent,
   ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    NoopAnimationsModule,
-    MatSelectModule,
-    MatomoModule
-  ],
+    imports: [
+        BrowserModule,
+        HttpClientModule,
+        NoopAnimationsModule,
+        MatSelectModule,
+        MatomoModule,
+        MatTabsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatListModule,
+        MatIconModule
+    ],
   providers: [GlobusService, {
     provide: APP_INITIALIZER,
     useFactory: load,

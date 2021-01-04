@@ -2,16 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { GlobusService } from '../globus.service';
 import {v4 as uuid } from 'uuid';
 import {Observable, of, merge, from, forkJoin } from 'rxjs';
-import {flatMap, map, tap, filter } from 'rxjs/operators';
+import {flatMap, map, tap, filter, concatMap} from 'rxjs/operators';
 import {ConfigService} from '../config.service';
 
-interface Directory {
-  name: string;
-  path: string;
-  files: Array<string>;
-  directories: Array<string>;
+export interface Permissions {
+    DATA_TYPE: string;
+    principal_type: string;
+    principal: string;
+    path: string;
+    permissions: string;
 }
-
 
 @Component({
   selector: 'app-interface',
@@ -24,88 +24,154 @@ export class InterfaceComponent implements OnInit {
               private config: ConfigService) { }
   title: string;
   userAccessToken: string;
+  userToken: string;
   personalConnectEndpoints: Array<object>;
   selectedValue: string;
   selectedEndPont: any;
   personalDirectories: any;
   selectedDirectory: any;
-  clientToken: string;
+  basicClientToken: string;
   submissionId: string;
   directoryContent: any;
   listOfAllFiles: Array<string>;
   listOfFileNames: Array<string>;
   listOfAllStorageIdentifiers: Array<string>;
+  datasetPid: string;
+  key: string;
+  datasetDirectory: string;
+  userIdentity: string;
+  globusEndpoint: string;
+
+  userAccessTokenData: any;
 
   ngOnInit(): void {
-    this.title = 'Globus';
-
-    const code = this.globusService.getParameterByName('code');
-    console.log(code);
-    if (code === null || code === '') {
-      this.getCode();
-    } else {
+      this.title = 'Globus';
+      this.datasetDirectory = null;
+      this.basicClientToken = this.config.basicGlobusToken;
+      this.globusEndpoint = this.config.globusEndpoint;
+      const code = this.globusService.getParameterByName('code');
       console.log(code);
-      this.generateStorageIdentifier();
-      this.getUserAccessToken(code);
-    }
+      if (code === null || code === '') {
+          this.datasetPid = this.globusService.getParameterByName('datasetPid');
+          this.key = this.globusService.getParameterByName('apiToken');
+          const state = btoa(this.datasetPid + '_' + this.key); // encode
+          this.getCode(state);
+      } else {
+          console.log(code);
+          const state = this.globusService.getParameterByName('state');
+          const decodedState = atob(state);
+          console.log(decodedState);
+          const parameters = decodedState.split('_');
+          this.datasetPid = parameters[0];
+          this.datasetDirectory = '/' + this.datasetPid.substring(this.datasetPid.indexOf(':') + 1) + '/';
+          console.log(this.datasetPid);
+          this.key = parameters[1];
+          console.log(this.key);
+       /*   this.getUserAccessToken(code)
+              .pipe(flatMap(obj => this.getPersonalConnect(obj)))
+              .pipe(flatMap(data => this.findDirectories(data)))
+              .subscribe(
+                  data => this.processDirectories(data),
+                  error => console.log(error),
+                  () => {}
+              );*/
+          this.getUserAccessToken(code);
+      }
+  }
 
+  getPermission(clientToken, userIdentity) {
+      const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + this.config.globusEndpoint + '/access';
+      const key = 'Bearer ' + clientToken;
+      const permissions: Permissions = {
+          DATA_TYPE: 'access',
+          principal_type: 'identity',
+          principal: userIdentity,
+          path: this.datasetDirectory,
+          permissions: 'rw'
+      };
+      const stringPermissions = JSON.stringify(permissions);
+      console.log(stringPermissions);
+      return this.globusService
+          .postGlobus(url,  stringPermissions, key);
+     /*     .subscribe(
+              data => {
+                  console.log('Data ');
+                  console.log(data);
+              },
+              error => {
+                  console.log(error);
+                  if (error.status === 409) {
+                      console.log('Rule already exists');
+                      this.getPersonalConnect();
+                  }
+              },
+              () => {
+                  this.getPersonalConnect();
+              });*/
   }
 
   getUserAccessToken(code) {
-    const redirectURL = this.config.redirectURL;
-    const url = 'https://auth.globus.org/v2/oauth2/token?code=' + code + '&redirect_uri=' + redirectURL + '&grant_type=authorization_code';
-    console.log(url);
-    const key = 'Basic ' + this.config.basicGlobusToken;
-    this.globusService
-      .postGlobus(url,  '', key)
-      .subscribe(
-        data => {
-          console.log('Data ');
-          console.log(data);
-          this.processUserToken(data);
-        },
-        error => {
-          console.log(error);
-        },
-        () => {
-          this.getPersonalConnect();
-        });
+      console.log(code);
+      const redirectURL = this.config.redirectURL;
+      const url = 'https://auth.globus.org/v2/oauth2/token?code=' + code + '&redirect_uri=' + redirectURL + '&grant_type=authorization_code';
+      console.log(url);
+      const key = 'Basic ' + this.config.basicGlobusToken;
+      return this.globusService.postGlobus(url,  '', key)
+      /*----------------------*/
+          .subscribe(
+               data => {
+                   console.log('Data ');
+                   console.log(data);
+                   this.userAccessTokenData = data;
+               },
+               error => {
+                   console.log(error);
+               },
+               () => {
+               });
+   }
 
+   getPersonalConnect(userAccessToken) {
+       const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=my-gcp-endpoints';
+       console.log(userAccessToken);
+       this.userAccessToken = userAccessToken.other_tokens[0].access_token;
+       this.userToken = userAccessToken.access_token;
+       return this.globusService
+           .getGlobus(url, 'Bearer ' + userAccessToken.other_tokens[0].access_token);
+   }
+
+   getUserInfo(userToken) {
+     const url = 'https://auth.globus.org/v2/oauth2/userinfo';
+     console.log(userToken);
+     return this.globusService
+           .getGlobus(url,  'Bearer ' + userToken);
+       /*    .subscribe(
+               data => {
+                   console.log('Data ');
+                   console.log(data);
+                   this.processUserInfo(data);
+               },
+               error => {
+                   console.log(error);
+               },
+               () => {
+                   this.getPermission();
+               });*/
   }
 
-  getPersonalConnect() {
-    const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=my-gcp-endpoints';
-    this.globusService
-      .getGlobus(url,  'Bearer ' + this.userAccessToken)
-      .subscribe(
-        data => {
-          console.log('Data ');
-          console.log(data);
-          this.processPersonalConnect(data);
-        },
-        error => {
-          console.log(error);
-        },
-        () => {
-          this.findDirectories();
-        });
+  processUserInfo(data) {
+      this.userIdentity = data.sub;
   }
 
-  findDirectories() {
-    const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPont.id + '/ls';
-    this.globusService
-      .getGlobus(url,  'Bearer ' + this.userAccessToken)
-      .subscribe(
-        data => {
-          console.log('Data ');
-          console.log(data);
-          this.processDirectories(data);
-        },
-        error => {
-          console.log(error);
-        },
-        () => {
-        });
+
+
+
+  findDirectories(data) {
+      console.log(data);
+      this.processPersonalConnect(data);
+      const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPont.id + '/ls';
+      return this.globusService
+      .getGlobus(url,  'Bearer ' + this.userAccessToken);
   }
 
   processDirectories(data) {
@@ -115,6 +181,7 @@ export class InterfaceComponent implements OnInit {
         this.personalDirectories.push(obj);
       }
     }
+    console.log(this.personalDirectories);
   }
 
   getInnerDirectories(directory) {
@@ -158,13 +225,14 @@ export class InterfaceComponent implements OnInit {
 
   processUserToken(data) {
     this.userAccessToken = data.other_tokens[0].access_token;
+    this.userToken = data.access_token;
   }
 
-  getCode() {
+  getCode(state) {
     const scope = encodeURI('openid+email+profile+urn:globus:auth:scope:transfer.api.globus.org:all');
     const client_id = this.config.globusClientId;
     let new_url =  'https://auth.globus.org/v2/oauth2/authorize?client_id=' + client_id + '&response_type=code&' +
-      'scope=' + scope;
+      'scope=' + scope + '&state=' + state;
     new_url = new_url + '&redirect_uri=' + this.config.redirectURL ;
 
     const myWindows = window.location.replace(new_url);
@@ -175,8 +243,8 @@ export class InterfaceComponent implements OnInit {
 
     const key = 'Basic ' + this.config.basicGlobusToken;
     this.globusService
-      .postGlobus(url,  '', key)
-      .subscribe(
+      .postGlobus(url,  '', key);
+     /* .subscribe(
         data => {
           console.log('Data ');
           console.log(data);
@@ -186,12 +254,20 @@ export class InterfaceComponent implements OnInit {
           console.log(error);
         },
         () => {
-          this.submitTransfer();
-        });
+          this.getUserInfo();
+        });*/
 
   }
 
-  submitTransfer() {
+  onSubmitTransfer() {
+      this.getClientToken();
+      //this.getUserInfo()
+
+
+
+  }
+
+  /*submitTransfer() {
     console.log(this.clientToken);
     const url = 'https://transfer.api.globusonline.org/v0.10/submission_id';
     this.globusService
@@ -209,7 +285,7 @@ export class InterfaceComponent implements OnInit {
         () => {
           this.transferItem();
         });
-  }
+  }*/
 
   generateStorageIdentifier() {
     const identifier = uuid();
@@ -267,7 +343,7 @@ export class InterfaceComponent implements OnInit {
       const taskItem = {
         DATA_TYPE: 'transfer_item',
         source_path: this.listOfAllFiles[i],
-        destination_path :  '/10.5072/FK2/8KMCMQ/' + this.listOfAllStorageIdentifiers[i],
+        destination_path : this.datasetDirectory + this.listOfAllStorageIdentifiers[i],
         recursive: false
       };
       taskItemsArray.push(taskItem);
@@ -297,10 +373,10 @@ export class InterfaceComponent implements OnInit {
         });
   }
 
-  onSubmitTransfer() {
+ /* onSubmitTransfer() {
     console.log('Submitting');
     this.getClientToken();
-  }
+  }*/
 
   personalConnectExist() {
     if (typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0) {

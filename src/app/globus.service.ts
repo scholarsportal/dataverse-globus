@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
+import {Observable, forkJoin, of, merge, from} from 'rxjs';
+import {filter, flatMap} from 'rxjs/operators';
+import {v4 as uuid } from 'uuid';
+import {Permissions} from './interface/interface.component';
 
 @Injectable()
 export class GlobusService {
@@ -56,6 +59,122 @@ export class GlobusService {
       return '';
     }
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  }
+
+  getClientToken(basicGlobusToken) {
+    const url = 'https://auth.globus.org/v2/oauth2/token?scope=openid+email+profile+urn:globus:auth:scope:transfer.api.globus.org:all&grant_type=client_credentials';
+
+    const key = 'Basic ' + basicGlobusToken;
+    return this.postGlobus(url,  '', key);
+  }
+
+  getUserInfo(userAccessToken) {
+    const url = 'https://auth.globus.org/v2/oauth2/userinfo';
+    console.log(userAccessToken);
+    return this.getGlobus(url, 'Bearer ' + userAccessToken);
+  }
+
+  getPermission(clientToken, userIdentity, datasetDirectory, globusEndpoint) {
+    console.log(userIdentity);
+    console.log(clientToken);
+    const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + globusEndpoint + '/access';
+    const key = 'Bearer ' + clientToken.other_tokens[0].access_token;
+    console.log(key);
+    const permissions: Permissions = {
+      DATA_TYPE: 'access',
+      principal_type: 'identity',
+      principal: userIdentity.sub,
+      path: datasetDirectory,
+      permissions: 'rw'
+    };
+    const stringPermissions = JSON.stringify(permissions);
+    console.log(stringPermissions);
+    return this.postGlobus(url, stringPermissions, key);
+  }
+
+  submitTransfer( userOtherAccessToken ) {
+    console.log("submitting transfer");
+    const url = 'https://transfer.api.globusonline.org/v0.10/submission_id';
+    return this.getGlobus(url,  'Bearer ' + userOtherAccessToken);
+  }
+
+  getInnerDirectories(directory, selectedEndPointId, userOtherAccessToken) {
+    if (directory.DATA.length > 0) {
+      const path = directory.path;
+      console.log("Path");
+      console.log(path);
+      return merge(
+          of(directory),
+          from(directory.DATA)
+              .pipe(filter(d => d['type'] === 'dir' ))
+              .pipe( flatMap(obj => this.getDirectory(path + obj['name'], selectedEndPointId, userOtherAccessToken  )))
+              .pipe(flatMap(d => this.getInnerDirectories(d, selectedEndPointId, userOtherAccessToken)) ));
+    } else {
+      return of(directory);
+    }
+  }
+
+  getDirectory(path, selectedEndPointId, userOtherAccessToken) {
+    console.log("start getDirectory");
+    const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + selectedEndPointId +
+        '/ls?path=' + path;
+    return this
+        .getGlobus(url,  'Bearer ' + userOtherAccessToken);
+  }
+
+  generateStorageIdentifier() {
+    const identifier = uuid();
+    console.log(identifier);
+
+    // last 6 bytes, of the random UUID, in hex:
+
+    const hexRandom = identifier.substring(24);
+    console.log( hexRandom);
+    const hexTimestamp = new Date().getTime().toString(16);
+    console.log(hexTimestamp);
+    const storageIdentifier = hexTimestamp + '-' + hexRandom;
+    console.log(storageIdentifier);
+    return storageIdentifier;
+  }
+
+  submitTransferItems(listOfAllFiles, datasetDirectory, listOfAllStorageIdentifiers, submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
+    console.log("Starting submit transfer Item");
+    console.log(submissionId);
+    const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
+    const taskItemsArray = new Array();
+    for (let i = 0; i < listOfAllFiles.length; i++) {
+        const taskItem = {
+          DATA_TYPE: 'transfer_item',
+          source_path: listOfAllFiles[i],
+          destination_path : datasetDirectory + listOfAllStorageIdentifiers[i],
+          recursive: false
+        };
+        taskItemsArray.push(taskItem);
+      }
+    const body = {
+        DATA_TYPE: 'transfer',
+        DATA: taskItemsArray,
+        submission_id: submissionId,
+        notify_on_succeeded: true,
+        notify_on_failed: true,
+        source_endpoint: selectedEndPointId,
+        destination_endpoint: globusEndpoint
+      };
+    const bodyString = JSON.stringify(body);
+    console.log(bodyString);
+    return this.postGlobus(url,  bodyString,'Bearer ' + userOtherAccessToken);
+  }
+
+  saveDirectories(dir, listOfAllFiles, listOfFileNames, listOfAllStorageIdentifiers  ) {
+    console.log(dir);
+    for (const obj of dir["DATA"]) {
+      if (obj.type === 'file') {
+        console.log(obj);
+        listOfAllFiles.push(dir["absolute_path"] + obj.name);
+        listOfFileNames.push(obj.name);
+        listOfAllStorageIdentifiers.push(this.generateStorageIdentifier());
+      }
+    }
   }
 
 

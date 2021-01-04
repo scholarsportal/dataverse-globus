@@ -1,25 +1,47 @@
 <ng-container class="interface-container">
   <h1 class="center">{{title}}</h1>
-  <span class="fill-space"></span>
-<mat-form-field class="center" *ngIf="personalConnectExist()" appearance="fill">
-  <mat-label>Personal connect endpoints</mat-label>
-  <mat-select [(value)]="selectedEndPont">
-    <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
-      {{endpoint.display_name}}
-    </mat-option>
-  </mat-select>
-</mat-form-field  >
-  <mat-form-field class="center" *ngIf="personalDirectoryExist()" appearance="fill">
-    <mat-label>Select directory to upload</mat-label>
-    <mat-select [(value)]="selectedDirectory">
-      <mat-option *ngFor="let directory of personalDirectories" [value]="directory">
-        {{directory.name}}
+  <mat-tab-group>
+    <mat-tab label="Active Personal Endpoints">
+      <ng-template matTabContent>
+        <app-personal-connect [userAccessTokenData]="userAccessTokenData"
+                              [basicClientToken]="basicClientToken"
+                              [datasetDirectory]="datasetDirectory"
+                              [globusEndpoint]="globusEndpoint"></app-personal-connect>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Active Recently Viewed Endpoints">
+      <ng-template matTabContent>
+        Content 2 - Loaded:
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Search For Active Endpoints">
+      <ng-template matTabContent>
+        Content 3 - Loaded:
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+
+
+
+  <!--<mat-form-field class="center" *ngIf="personalConnectExist()" appearance="fill">
+    <mat-label>Personal connect endpoints</mat-label>
+    <mat-select [(value)]="selectedEndPont">
+      <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
+        {{endpoint.display_name}}
       </mat-option>
     </mat-select>
-  </mat-form-field>
+  </mat-form-field  >
+    <mat-form-field class="center" *ngIf="personalDirectoryExist()" appearance="fill">
+      <mat-label>Select directory to upload</mat-label>
+      <mat-select [(value)]="selectedDirectory">
+        <mat-option *ngFor="let directory of personalDirectories" [value]="directory">
+          {{directory.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field> -->
   <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
 
-  <div class="center" *ngIf="preparedForTransfer()">
+  <!--<div class="center" *ngIf="preparedForTransfer()">
     <button mat-raised-button color="primary" (click)="onSubmitTransfer()">Submit transfer</button>
-  </div>
+  </div> -->
 </ng-container>

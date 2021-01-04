@@ -1,0 +1,36 @@
+<div class="center">
+<mat-form-field  *ngIf="personalConnectExist()" appearance="fill" >
+    <mat-label>Personal connect endpoints</mat-label>
+    <mat-select [(value)]="selectedEndPont">
+        <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
+            {{endpoint.display_name}}
+        </mat-option>
+    </mat-select>
+</mat-form-field >
+</div>
+<div class="center">
+
+<mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
+    <mat-label>Directory</mat-label>
+    <input type="search" matInput placeholder="Directory" value="{{selectedDirectory}}" (keydown.enter)="searchDirectory($event.target.value)" >
+    <mat-icon matSuffix>search</mat-icon>
+    <mat-hint>Search for Directory</mat-hint>
+</mat-form-field>
+
+</div>
+
+<div class="center" *ngIf="preparedForTransfer()">
+<mat-selection-list #directory  (selectionChange)="onSelection($event, directory.selectedOptions)" >
+    <mat-list-option class="mat-action-list" *ngFor="let item of personalDirectories" [value]="item">
+        <div  (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item)">
+            {{item.name}}
+        </div>
+    </mat-list-option>
+</mat-selection-list>
+</div>
+<p></p>
+<!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
+<div *ngIf="preparedForTransfer()" class="center">
+  <button mat-raised-button color="primary" (click)="onSubmitTransfer()">Submit transfer</button>
+</div>
+

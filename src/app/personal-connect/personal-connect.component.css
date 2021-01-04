@@ -1,0 +1,12 @@
+.center {
+    display: flex;
+    justify-content: center;
+}
+
+.mat-action-list {
+    justify-content: right;
+    max-width: 100%;
+}
+ .only_center {
+     justify-content: center;
+ }
