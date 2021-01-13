@@ -1,8 +1,11 @@
-import {Component, Input, NgModule, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, NgModule, OnChanges, OnInit, ElementRef, ViewChild, AfterViewInit, Renderer2} from '@angular/core';
 import {GlobusService} from '../globus.service';
 import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
+
+
+
 
 @Component({
   selector: 'app-personal-connect',
@@ -25,6 +28,10 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   listOfAllStorageIdentifiers: Array<string>;
   submissionId: string;
   selectedFiles: any;
+  isSingleClick: boolean;
+  selectedOptions: any;
+  checkFlag: boolean;
+
 
   constructor(private globusService: GlobusService) { }
 
@@ -32,13 +39,23 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   @Input() basicClientToken: string;
   @Input() datasetDirectory: string;
   @Input() globusEndpoint: string;
+  @Input() datasetPid: string;
+  @Input() key: string;
+
 
   ngOnInit(): void {
     console.log(this.userAccessTokenData);
     this.selectedDirectory = null;
+    this.selectedFiles = new Array();
+    this.isSingleClick = true;
+    this.checkFlag = false;
   }
 
   ngOnChanges() {
+
+    this.selectedFiles = new Array();
+    this.checkFlag = false;
+    this.isSingleClick = true;
     console.log(this.userAccessTokenData);
     this.listOfAllFiles = new Array<string>();
     this.listOfFileNames = new Array<string>();
@@ -50,6 +67,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
               data => this.processDirectories(data),
               error => console.log(error),
               () => {
+                console.log(this.checkFlag);
               }
           );
     }
@@ -94,8 +112,9 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   }
 
   processDirectories(data) {
-    this.selectedDirectory = data.path;
+    this.selectedOptions = new Array<object>();
     this.personalDirectories = new Array<object>();
+    this.selectedDirectory = data.path;
     for (const obj of data.DATA) {
      // if (obj.type === 'dir') {
         this.personalDirectories.push(obj);
@@ -228,14 +247,38 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
             },
             () => {
               console.log('Transfer submitted');
+              this.writeToDataverse();
             }
         );
   }
 
-  openDirectory($event, item) {
+  writeToDataverse() {
+    /*{
+      "taskIdentifier":"d2ae147e-446a-11eb-8ffa-0a34088e79f9",
+        "files": [
+      {
+        "description":"My jpg-j description.",
+        "directoryLabel":"data/subdir2",
+        "restrict":"false",
+        "storageIdentifier":"s3://1762f94da75-e29bf77450b0",
+        "fileName":"test-j.jpg",
+        "contentType":"image/jpeg"
+      }
+    ]
+    } */
+
+   // curl -H X-Dataverse-key:c1428301-e301-4818-95d8-0fc01fd1d242 -X POST https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=doi:10.5072/FK2/IMK6JR -F jsonData=@mytest.json
+    const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid
+    //let body =
+    //this.globusService.postDataverse(url, body, this.key);
+  }
+
+  openDirectory($event, item, directory, check) {
     console.log($event);
     console.log("Open Directory");
     console.log(item);
+    this.isSingleClick = false;
+    this.selectedOptions = new Array<object>();
     if (item.type === 'dir') {
       this.selectedDirectory = this.selectedDirectory + item.name;
 
@@ -249,6 +292,9 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
                 console.log(error);
               },
               () => {
+                this.selectedOptions = new Array<object>();
+                directory.writeValue(this.selectedOptions);
+                check.checked = false;
               }
           );
     }
@@ -257,9 +303,14 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   checkBox($event, item) {
     console.log("Check box");
     console.log($event);
+    console.log("Unchecking box");
+    if (!$event.checked) {
+      this.checkFlag = false;
+    }
   }
 
   searchDirectory(directory) {
+    this.checkFlag = false;
     console.log(directory);
     this.selectedDirectory = directory;
     this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
@@ -276,12 +327,127 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         );
   }
 
-  onSelection($event, selectedFiles) {
-    this.selectedFiles = new Array();
-    for (let obj of selectedFiles._selection) {
-      this.selectedFiles.push(obj._value);
-    }
+  onSelection($event,  selectedFiles) {
+    this.isSingleClick = true;
+    setTimeout(() => {
+      if (this.isSingleClick ){
+        if ($event.option._selected) {
+          console.log($event);
+          this.selectedFiles.push($event.option._value);
+        } else {
+          console.log($event.option._value);
+          const indx = this.selectedFiles.indexOf($event.option._value);
+          console.log(indx);
+          console.log(this.selectedFiles);
+          console.log(indx);
+          if ( indx !== -1) {
+            this.selectedFiles.splice(indx, 1);
+          }
+          this.checkFlag = false;
+        }
+      }
+    }, 250);
+  }
 
+  onRemoving($event, selectedList) {
+    if ($event.option._selected) {
+      console.log($event.option._value);
+      const indx = this.selectedFiles.indexOf($event.option._value);
+      console.log(indx);
+      console.log(this.selectedFiles);
+      console.log(indx);
+      if ( indx !== -1) {
+        this.selectedFiles.splice(indx, 1);
+        const indx2 = this.selectedOptions.indexOf($event.option._value);
+        if (indx2 !== -1) {
+          this.selectedOptions.splice(indx2, 1);
+          selectedList.writeValue(this.selectedOptions);
+          this.checkFlag = false;
+        }
+      }
+    }
+  }
+
+  setSelectedEndpoint(event) {
+    console.log(event.value.id);
+    this.selectedEndPont = event.value;
+    const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPont.id + '/ls';
+    return this.globusService
+        .getGlobus(url,  'Bearer ' + this.userOtherAccessToken)
+  .subscribe(
+        data => this.processDirectories(data),
+        error => console.log(error),
+        () => {
+          this.selectedFiles = new Array();
+        }
+    );
+  }
+
+  selectAll($event, directory) {
+    console.log(directory);
+    console.log($event);
+    this.checkFlag = false;
+    if ($event.checked) {
+      for (const obj of this.personalDirectories) {
+        this.selectedOptions.push(obj);
+        this.selectedFiles.push(obj);
+      }
+      this.checkFlag = true;
+      directory.writeValue(this.personalDirectories);
+    } else {
+      console.log('unchecked');
+      this.checkFlag = false;
+      for (const obj of this.personalDirectories) {
+        const indx = this.selectedFiles.indexOf(obj);
+        console.log(indx);
+        console.log(this.selectedFiles);
+        console.log(indx);
+        if (indx !== -1) {
+          this.selectedFiles.splice(indx, 1);
+        }
+      }
+      this.selectedOptions = new Array<object>();
+      directory.writeValue(this.selectedOptions);
+    }
+  }
+
+  UpOneFolder() {
+    console.log(this.selectedDirectory);
+    console.log(this.selectedEndPont);
+    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
+        .pipe(flatMap(data => this.upFolderProcess(data)))
+        .subscribe(
+            data => {
+              if (data !== null) {
+                this.processDirectories(data);
+              }
+            },
+            error => {
+              console.log(error);
+            },
+            () => {
+              this.checkFlag = false;
+            }
+        );
+  }
+  upFolderProcess(data) {
+    const absolutePath = data['absolute_path'];
+    if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
+      console.log(absolutePath);
+      const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
+      const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
+      console.log(path);
+      return this.globusService.getDirectory(path, this.selectedEndPont.id, this.userOtherAccessToken);
+    } else {
+      return of(null);
+    }
+  }
+
+  removeAllFromSelected(directory) {
+    this.selectedFiles = new Array();
+    directory.writeValue(null);
+    this.selectedOptions = new Array();
+    this.checkFlag = false;
   }
 
 }

@@ -46,6 +46,15 @@ export class GlobusService {
     return this.http.post(url, body, httpOptions);
     // return this.http.post(url,body, httpOptions);
   }
+  postDataverse(url: string, body: string,  key: string)  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'X-Dataverse-key': key
+      })
+    };
+    return this.http.post(url, body, httpOptions);
+  }
 
   getParameterByName(name) {
     const url = window.location.href;

@@ -20,6 +20,10 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
 import {MatIconModule} from '@angular/material/icon';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {FormsModule} from '@angular/forms';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 export function load(http: HttpClient, config: ConfigService): (() => Promise<boolean>) {
   return (): Promise<boolean> => {
@@ -69,7 +73,11 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         MatFormFieldModule,
         MatInputModule,
         MatListModule,
-        MatIconModule
+        MatIconModule,
+        MatGridListModule,
+        MatTooltipModule,
+        FormsModule,
+        MatCheckboxModule
     ],
   providers: [GlobusService, {
     provide: APP_INITIALIZER,

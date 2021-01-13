@@ -1,7 +1,7 @@
 <div class="center">
 <mat-form-field  *ngIf="personalConnectExist()" appearance="fill" >
     <mat-label>Personal connect endpoints</mat-label>
-    <mat-select [(value)]="selectedEndPont">
+    <mat-select [(value)]="selectedEndPont" (selectionChange)="setSelectedEndpoint($event)" >
         <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
             {{endpoint.display_name}}
         </mat-option>
@@ -19,7 +19,8 @@
 
 </div>
 
-<div class="center" *ngIf="preparedForTransfer()">
+<!--<div class="center" *ngIf="preparedForTransfer()"> -->
+    <!--
 <mat-selection-list #directory  (selectionChange)="onSelection($event, directory.selectedOptions)" >
     <mat-list-option class="mat-action-list" *ngFor="let item of personalDirectories" [value]="item">
         <div  (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item)">
@@ -27,6 +28,60 @@
         </div>
     </mat-list-option>
 </mat-selection-list>
+-->
+<p></p>
+<p></p>
+<div  class="center" *ngIf="preparedForTransfer()" >
+
+
+    <table >
+        <td>
+    <table >
+        <tr>
+            <th style="text-align:left">
+                <mat-checkbox #check  [checked]="checkFlag" (change)="selectAll($event, directory)">Select All</mat-checkbox>
+                <button mat-flat-button (click)="UpOneFolder()" >
+                    <mat-icon matSuffix>subdirectory_arrow_left</mat-icon>
+                    <span>Up one folder</span>
+                </button>
+            </th>
+        </tr>
+        <div class="table">
+        <tr >
+            <mat-selection-list #directory  [(ngModel)]="selectedOptions"  (selectionChange)="onSelection($event, directory.selectedOptions)" >
+
+                <h3 matSubheader>Subdirectories and files</h3>
+                <mat-list-option  *ngFor="let item of personalDirectories" [value]="item">
+                    <a mat-list-item (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item, directory, check)"> <span>{{item.name}}</span> </a>
+                </mat-list-option>
+            </mat-selection-list>
+        </tr>
+        </div>
+    </table>
+        </td>
+
+        <td>
+    <table>
+        <tr>
+            <th style="text-align:left">
+                <button mat-flat-button color="accent" (click)="removeAllFromSelected(directory)">
+                    Remove all from selected
+                </button>
+            </th>
+        </tr>
+        <div class="table">
+        <tr>
+            <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
+                <h3 matSubheader>Selected files and folders</h3>
+                <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
+                    <a mat-list-item> <span>{{file.name}}</span></a>
+                </mat-list-option>
+            </mat-selection-list>
+        </tr>
+        </div>
+    </table>
+        </td>
+        </table>
 </div>
 <p></p>
 <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
