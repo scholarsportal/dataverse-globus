@@ -74,7 +74,7 @@
             <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
                 <h3 matSubheader>Selected files and folders</h3>
                 <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
-                    <a mat-list-item> <span>{{file.name}}</span></a>
+                    <a mat-list-item> <span>{{file.fileNameObject.name}}</span></a>
                 </mat-list-option>
             </mat-selection-list>
         </tr>

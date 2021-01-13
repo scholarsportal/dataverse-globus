@@ -3,8 +3,12 @@ import {GlobusService} from '../globus.service';
 import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
+import {newArray} from '@angular/compiler/src/util';
 
-
+interface SelFilesType {
+  fileNameObject: any;
+  directory: string;
+}
 
 
 @Component({
@@ -13,6 +17,7 @@ import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
   styleUrls: ['./personal-connect.component.css']
 })
 export class PersonalConnectComponent implements OnChanges, OnInit {
+
 
   selectedEndPont: any;
   personalConnectEndpoints: Array<object>;
@@ -27,7 +32,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   listOfFileNames: Array<string>;
   listOfAllStorageIdentifiers: Array<string>;
   submissionId: string;
-  selectedFiles: any;
+  selectedFiles: Array<SelFilesType>;
   isSingleClick: boolean;
   selectedOptions: any;
   checkFlag: boolean;
@@ -46,14 +51,14 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   ngOnInit(): void {
     console.log(this.userAccessTokenData);
     this.selectedDirectory = null;
-    this.selectedFiles = new Array();
+    this.selectedFiles = new Array<SelFilesType>();
     this.isSingleClick = true;
     this.checkFlag = false;
   }
 
   ngOnChanges() {
 
-    this.selectedFiles = new Array();
+    this.selectedFiles = new Array<SelFilesType>();
     this.checkFlag = false;
     this.isSingleClick = true;
     console.log(this.userAccessTokenData);
@@ -152,15 +157,16 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     console.log(this.selectedFiles);
 
     const directoriesArray = new Array();
+    console.log(this.selectedFiles);
     for (const obj of this.selectedFiles ) {
 
-      console.log(this.selectedDirectory + obj.name);
-      if (obj['type'] === 'dir') {
-        directoriesArray.push(this.selectedDirectory + obj.name);
+      console.log(this.selectedDirectory + obj.fileNameObject.name);
+      if (obj.fileNameObject['type'] === 'dir') {
+        directoriesArray.push(obj.directory + obj.fileNameObject.name);
       } else {
 
-        this.listOfAllFiles.push(this.selectedDirectory + obj.name);
-        this.listOfFileNames.push(obj.name);
+        this.listOfAllFiles.push(obj.directory + obj.fileNameObject.name);
+        this.listOfFileNames.push(obj.fileNameObject.name);
         this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
       }
     }
@@ -331,12 +337,13 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     this.isSingleClick = true;
     setTimeout(() => {
       if (this.isSingleClick ){
+        const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
         if ($event.option._selected) {
           console.log($event);
-          this.selectedFiles.push($event.option._value);
+          this.selectedFiles.push(file);
         } else {
           console.log($event.option._value);
-          const indx = this.selectedFiles.indexOf($event.option._value);
+          const indx = this.selectedFiles.indexOf(file);
           console.log(indx);
           console.log(this.selectedFiles);
           console.log(indx);
@@ -358,7 +365,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
       console.log(indx);
       if ( indx !== -1) {
         this.selectedFiles.splice(indx, 1);
-        const indx2 = this.selectedOptions.indexOf($event.option._value);
+        const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
         if (indx2 !== -1) {
           this.selectedOptions.splice(indx2, 1);
           selectedList.writeValue(this.selectedOptions);
@@ -378,7 +385,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         data => this.processDirectories(data),
         error => console.log(error),
         () => {
-          this.selectedFiles = new Array();
+          this.selectedFiles = new Array<SelFilesType>();
         }
     );
   }
@@ -390,7 +397,8 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     if ($event.checked) {
       for (const obj of this.personalDirectories) {
         this.selectedOptions.push(obj);
-        this.selectedFiles.push(obj);
+        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
+        this.selectedFiles.push(file);
       }
       this.checkFlag = true;
       directory.writeValue(this.personalDirectories);
@@ -398,7 +406,8 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
       console.log('unchecked');
       this.checkFlag = false;
       for (const obj of this.personalDirectories) {
-        const indx = this.selectedFiles.indexOf(obj);
+        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
+        const indx = this.selectedFiles.indexOf(file);
         console.log(indx);
         console.log(this.selectedFiles);
         console.log(indx);
@@ -444,7 +453,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   }
 
   removeAllFromSelected(directory) {
-    this.selectedFiles = new Array();
+    this.selectedFiles = new Array<SelFilesType>();
     directory.writeValue(null);
     this.selectedOptions = new Array();
     this.checkFlag = false;
