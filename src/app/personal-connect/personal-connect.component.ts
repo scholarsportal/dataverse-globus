@@ -4,6 +4,7 @@ import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
 import {newArray} from '@angular/compiler/src/util';
+import * as FileSaver from 'file-saver';
 
 interface SelFilesType {
   fileNameObject: any;
@@ -31,11 +32,13 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   listOfAllFiles: Array<string>;
   listOfFileNames: Array<string>;
   listOfAllStorageIdentifiers: Array<string>;
+  listOfDirectoryLabels: Array<string>;
   submissionId: string;
   selectedFiles: Array<SelFilesType>;
   isSingleClick: boolean;
   selectedOptions: any;
   checkFlag: boolean;
+  taskId: string;
 
 
   constructor(private globusService: GlobusService) { }
@@ -64,6 +67,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     console.log(this.userAccessTokenData);
     this.listOfAllFiles = new Array<string>();
     this.listOfFileNames = new Array<string>();
+    this.listOfDirectoryLabels = new Array<string>();
     this.listOfAllStorageIdentifiers = new Array<string>();
     if (typeof this.userAccessTokenData !== 'undefined') {
       this.getPersonalConnect(this.userAccessTokenData)
@@ -157,22 +161,22 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     console.log(this.selectedFiles);
 
     const directoriesArray = new Array();
+    const labelsArray = new Array();
     console.log(this.selectedFiles);
     for (const obj of this.selectedFiles ) {
-
-      console.log(this.selectedDirectory + obj.fileNameObject.name);
       if (obj.fileNameObject['type'] === 'dir') {
         directoriesArray.push(obj.directory + obj.fileNameObject.name);
+        labelsArray.push(obj.directory);
       } else {
-
         this.listOfAllFiles.push(obj.directory + obj.fileNameObject.name);
         this.listOfFileNames.push(obj.fileNameObject.name);
         this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
+        this.listOfDirectoryLabels.push('');
       }
     }
     console.log(directoriesArray);
     if (directoriesArray.length > 0) {
-      this.findAllSubFiles(directoriesArray, 0);
+      this.findAllSubFiles(directoriesArray, 0, labelsArray );
     } else {
       if (this.listOfAllFiles.length > 0) {
         const user = this.globusService.getUserInfo(this.userAccessToken);
@@ -185,12 +189,14 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     }
   }
 
-  findAllSubFiles(directory, i) {
+  findAllSubFiles(directory, i, labelsArray) {
+    console.log("Starting findAllSubFiles");
+    console.log(directory);
     this.globusService.getDirectory(directory[i], this.selectedEndPont.id, this.userOtherAccessToken)
         .pipe(flatMap(d => this.globusService.getInnerDirectories(d, this.selectedEndPont.id, this.userOtherAccessToken)))
         .subscribe(
             dir => {
-              this.saveDirectories(dir);
+              this.saveDirectories(dir, i, labelsArray);
             },
             error => {
               console.log(error);
@@ -198,7 +204,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
             () => {
               i = i + 1;
               if (i < directory.length) {
-                this.findAllSubFiles(directory, i);
+                this.findAllSubFiles(directory, i, labelsArray);
                 // this.submit(array);
               } else {
                 const user = this.globusService.getUserInfo(this.userAccessToken);
@@ -212,14 +218,17 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         );
   }
 
-  saveDirectories(dir) {
+  saveDirectories(dir, i, labelsArray) {
     console.log(dir);
+    const label = dir['path'].substr(labelsArray[i].length);
     for (const obj of dir["DATA"]) {
       if (obj.type === 'file') {
         console.log(obj);
         this.listOfAllFiles.push(dir["absolute_path"] + obj.name);
         this.listOfFileNames.push(obj.name);
         this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
+
+        this.listOfDirectoryLabels.push(label);
       }
     }
   }
@@ -247,6 +256,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         .subscribe(
             data => {
               console.log(data);
+              this.taskId = data['task_id'];
             },
             error => {
               console.log(error);
@@ -274,9 +284,56 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     } */
 
    // curl -H X-Dataverse-key:c1428301-e301-4818-95d8-0fc01fd1d242 -X POST https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=doi:10.5072/FK2/IMK6JR -F jsonData=@mytest.json
-    const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid
-    //let body =
-    //this.globusService.postDataverse(url, body, this.key);
+    // "Content-Type", "application/json;
+    const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
+
+    //const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
+    const formData: any = new FormData();
+
+    console.log(this.listOfDirectoryLabels);
+    console.log(this.listOfAllStorageIdentifiers);
+    let body = '{ \"taskIdentifier\": \"' + this.taskId + '\", \"files\": [';
+    let file = '';
+    for (let i = 0; i < this.listOfAllStorageIdentifiers.length; i++) {
+      if (i > 0) {
+        file = ',';
+      } else {
+        file = '';
+      }
+      file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
+          this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
+          '\"storageIdentifier\":' + '\"s3://' + this.listOfAllStorageIdentifiers[i] + '\",' +
+          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\",' +
+          '\"contentType\": \"plain/text\" }';
+      body = body + file;
+    }
+    body = body + ']}';
+    console.log(body);
+    /* {
+          description: '',
+          directoryLabel: this.listOfDirectoryLabels[0],
+          restrict: 'false',
+          storageIdentifier: 's3://' + this.listOfAllStorageIdentifiers[0],
+          fileName: this.listOfFileNames[0],
+          contentType: 'plain/text'
+        }
+
+
+    const bodyString = JSON.stringify(body);
+*/
+    formData.append('jsonData', body);
+    this.globusService.postDataverse(url, formData, this.key)
+        .subscribe(
+            data => {
+              console.log(data);
+            },
+            error => {
+              console.log(error);
+            },
+            () => {
+              console.log('Submitted to dataverse');
+            }
+        );
   }
 
   openDirectory($event, item, directory, check) {
@@ -337,6 +394,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     this.isSingleClick = true;
     setTimeout(() => {
       if (this.isSingleClick ){
+
         const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
         if ($event.option._selected) {
           console.log($event);
@@ -406,6 +464,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
       console.log('unchecked');
       this.checkFlag = false;
       for (const obj of this.personalDirectories) {
+
         const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
         const indx = this.selectedFiles.indexOf(file);
         console.log(indx);
