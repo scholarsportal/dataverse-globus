@@ -3,8 +3,7 @@ import {GlobusService} from '../globus.service';
 import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
-import {newArray} from '@angular/compiler/src/util';
-import * as FileSaver from 'file-saver';
+
 
 interface SelFilesType {
   fileNameObject: any;
