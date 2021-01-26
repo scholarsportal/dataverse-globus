@@ -39,7 +39,7 @@
         <tr>
             <th style="text-align:left">
                 <mat-checkbox class="mat-checkbox"  #check  [checked]="checkFlag" (change)="selectAll($event, directory)">Select All</mat-checkbox>
-                <button mat-flat-button class="button" (click)="UpOneFolder()" >
+                <button mat-stroked-button (click)="UpOneFolder()" >
                     <mat-icon class="class-icon" matSuffix>subdirectory_arrow_left</mat-icon>
                     Up one folder
                 </button>
@@ -49,7 +49,7 @@
         <tr >
             <mat-selection-list #directory  [(ngModel)]="selectedOptions"  (selectionChange)="onSelection($event, directory.selectedOptions)" >
 
-                <h3 matSubheader style="min-width: 250px">Subdirectories and files</h3>
+                <h2 matSubheader style="min-width: 250px">Subdirectories and files</h2>
                 <mat-list-option  *ngFor="let item of personalDirectories" [value]="item">
                     <mat-list-item color="primary" (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item, directory, check)">
                         <mat-icon class="class-icon" matSuffix *ngIf="isFolder(item)">folder</mat-icon>
@@ -66,7 +66,7 @@
     <table class="table-right">
         <tr>
             <th style="text-align:left">
-                <button class="button" mat-flat-button color="accent" (click)="removeAllFromSelected(directory)">
+                <button mat-stroked-button (click)="removeAllFromSelected(directory)">
                     <mat-icon class="class-icon"  matSuffix>remove_circle</mat-icon>
                     Remove All
                 </button>
@@ -75,7 +75,7 @@
         <div class="table">
         <tr>
             <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
-                <h3 matSubheader>Selected files and folders</h3>
+                <h2 matSubheader>Selected files and folders</h2>
                 <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
 
                     <mat-list-item>
@@ -95,7 +95,7 @@
 <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
 <div class="center" *ngIf="preparedForTransfer()" >
 
-  <button class="button" mat-raised-button (click)="onSubmitTransfer()">
+  <button mat-stroked-button (click)="onSubmitTransfer()">
       <mat-icon class="class-icon"  matSuffix>cloud_upload</mat-icon>
       Submit transfer
   </button>

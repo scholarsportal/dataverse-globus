@@ -16,6 +16,7 @@ import { GlobusDirective } from './globus.directive';
 import { UploadFileComponent } from './upload-file/upload-file.component';
 import {MatTabsModule} from '@angular/material/tabs';
 import { PersonalConnectComponent } from './personal-connect/personal-connect.component';
+import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
@@ -71,6 +72,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         NoopAnimationsModule,
         MatSelectModule,
         MatomoModule,
+        MatButtonModule,
         MatTabsModule,
         MatFormFieldModule,
         MatInputModule,

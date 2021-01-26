@@ -2,21 +2,20 @@
     display: flex;
     justify-content: center;
     margin: auto;
-
 }
 
 .mat-action-list {
     justify-content: right;
     max-width: 100%;
 }
- .only_center {
-     justify-content: center;
- }
 
+.only_center {
+    justify-content: center;
+}
 
-.mat-selection-list{
+.mat-selection-list {
     max-height: 90%;
-    min-height: 30% ;
+    min-height: 30%;
     overflow: auto;
     border: 1px solid #ddd;
     width: 100%;
@@ -26,7 +25,6 @@
 
 .mat-grid-list {
     margin: auto;
-
     width: 90%;
 }
 
@@ -53,24 +51,3 @@
 .table-right {
     padding-left: 100px;
 }
-
-.button {
-    border: none;
-    background-color: white;
-    font-weight: bold;
-    pudding-top: 10px;
-    box-shadow: -3px 3px mediumblue, -2px 2px mediumblue, -1px 1px mediumblue;
-    border: 1px solid mediumblue;
-}
-
-.button:hover {background-color: lightblue}
-
-
-
-
-
-
-
-
-
-
