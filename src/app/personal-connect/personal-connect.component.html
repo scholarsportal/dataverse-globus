@@ -35,13 +35,13 @@
 
     <table >
         <td>
-    <table >
+    <table class="table-left">
         <tr>
             <th style="text-align:left">
-                <mat-checkbox #check  [checked]="checkFlag" (change)="selectAll($event, directory)">Select All</mat-checkbox>
-                <button mat-flat-button (click)="UpOneFolder()" >
-                    <mat-icon matSuffix>subdirectory_arrow_left</mat-icon>
-                    <span>Up one folder</span>
+                <mat-checkbox class="mat-checkbox"  #check  [checked]="checkFlag" (change)="selectAll($event, directory)">Select All</mat-checkbox>
+                <button mat-flat-button class="button" (click)="UpOneFolder()" >
+                    <mat-icon class="class-icon" matSuffix>subdirectory_arrow_left</mat-icon>
+                    Up one folder
                 </button>
             </th>
         </tr>
@@ -49,9 +49,12 @@
         <tr >
             <mat-selection-list #directory  [(ngModel)]="selectedOptions"  (selectionChange)="onSelection($event, directory.selectedOptions)" >
 
-                <h3 matSubheader>Subdirectories and files</h3>
+                <h3 matSubheader style="min-width: 250px">Subdirectories and files</h3>
                 <mat-list-option  *ngFor="let item of personalDirectories" [value]="item">
-                    <a mat-list-item (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item, directory, check)"> <span>{{item.name}}</span> </a>
+                    <mat-list-item color="primary" (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item, directory, check)">
+                        <mat-icon class="class-icon" matSuffix *ngIf="isFolder(item)">folder</mat-icon>
+                        {{item.name}}
+                    </mat-list-item>
                 </mat-list-option>
             </mat-selection-list>
         </tr>
@@ -60,11 +63,12 @@
         </td>
 
         <td>
-    <table>
+    <table class="table-right">
         <tr>
             <th style="text-align:left">
-                <button mat-flat-button color="accent" (click)="removeAllFromSelected(directory)">
-                    Remove all from selected
+                <button class="button" mat-flat-button color="accent" (click)="removeAllFromSelected(directory)">
+                    <mat-icon class="class-icon"  matSuffix>remove_circle</mat-icon>
+                    Remove All
                 </button>
             </th>
         </tr>
@@ -73,7 +77,11 @@
             <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
                 <h3 matSubheader>Selected files and folders</h3>
                 <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
-                    <a mat-list-item> <span>{{file.fileNameObject.name}}</span></a>
+
+                    <mat-list-item>
+                        <mat-icon class="class-icon" matSuffix *ngIf="isFolder(file.fileNameObject)">folder</mat-icon>
+                        {{file.fileNameObject.name}}
+                    </mat-list-item>
                 </mat-list-option>
             </mat-selection-list>
         </tr>
@@ -81,10 +89,15 @@
     </table>
         </td>
         </table>
+
 </div>
 <p></p>
 <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
-<div *ngIf="preparedForTransfer()" class="center">
-  <button mat-raised-button color="primary" (click)="onSubmitTransfer()">Submit transfer</button>
+<div class="center" *ngIf="preparedForTransfer()" >
+
+  <button class="button" mat-raised-button (click)="onSubmitTransfer()">
+      <mat-icon class="class-icon"  matSuffix>cloud_upload</mat-icon>
+      Submit transfer
+  </button>
 </div>
 

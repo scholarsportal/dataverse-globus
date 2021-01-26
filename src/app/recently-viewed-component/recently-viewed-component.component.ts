@@ -1,29 +1,24 @@
-import {Component, Input, NgModule, OnChanges, OnInit, ElementRef, ViewChild, AfterViewInit, Renderer2} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {GlobusService} from '../globus.service';
-import {catchError, filter, flatMap} from 'rxjs/operators';
-import {v4 as uuid } from 'uuid';
-import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
-import {newArray} from '@angular/compiler/src/util';
-import * as FileSaver from 'file-saver';
+import {catchError, flatMap} from 'rxjs/operators';
+import {forkJoin, of, throwError} from 'rxjs';
 
 interface SelFilesType {
   fileNameObject: any;
   directory: string;
 }
 
-
 @Component({
-  selector: 'app-personal-connect',
-  templateUrl: './personal-connect.component.html',
-  styleUrls: ['./personal-connect.component.css']
+  selector: 'app-recently-viewed-component',
+  templateUrl: './recently-viewed-component.component.html',
+  styleUrls: ['./recently-viewed-component.component.css']
 })
-export class PersonalConnectComponent implements OnChanges, OnInit {
-
+export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
 
   selectedEndPont: any;
-  personalConnectEndpoints: Array<object>;
+  recentlyViewedEndpoints: Array<object>;
   selectedDirectory: any;
-  personalDirectories: any;
+  recentlyViewedDirectories: any;
 
   userOtherAccessToken: string;
   userAccessToken: string;
@@ -40,7 +35,6 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   checkFlag: boolean;
   taskId: string;
 
-
   constructor(private globusService: GlobusService) { }
 
   @Input() userAccessTokenData: any;
@@ -49,7 +43,6 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   @Input() globusEndpoint: string;
   @Input() datasetPid: string;
   @Input() key: string;
-
 
   ngOnInit(): void {
     console.log(this.userAccessTokenData);
@@ -70,7 +63,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     this.listOfDirectoryLabels = new Array<string>();
     this.listOfAllStorageIdentifiers = new Array<string>();
     if (typeof this.userAccessTokenData !== 'undefined') {
-      this.getPersonalConnect(this.userAccessTokenData)
+      this.getRecentlyViewedEndpoints(this.userAccessTokenData)
           .pipe(flatMap(data => this.findDirectories(data)))
           .subscribe(
               data => this.processDirectories(data),
@@ -82,8 +75,9 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     }
   }
 
-  getPersonalConnect(userAccessTokenData) {
-    const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=my-gcp-endpoints';
+
+  getRecentlyViewedEndpoints(userAccessTokenData) {
+    const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=recently-used';
     console.log(userAccessTokenData);
     this.userOtherAccessToken = userAccessTokenData.other_tokens[0].access_token;
     this.userAccessToken = userAccessTokenData.access_token;
@@ -92,6 +86,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   }
 
   findDirectories(data) {
+    console.log(data);
     this.processPersonalConnect(data);
     const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPont.id + '/ls';
     return this.globusService
@@ -99,17 +94,17 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   }
 
   processPersonalConnect(data) {
-    this.personalConnectEndpoints = new Array<object>();
+    console.log("Process personal connect");
+    this.recentlyViewedEndpoints = new Array<object>();
+    console.log(data);
     for (const obj of data.DATA) {
-      if (obj.gcp_connected) {
-        this.personalConnectEndpoints.push(obj);
-        console.log(obj);
-      }
+        this.recentlyViewedEndpoints.push(obj);
+
     }
-    if (this.personalConnectEndpoints.length === 0) {
+    if (this.recentlyViewedEndpoints.length === 0) {
       console.log('Globus Personal Connect is not connected');
     } else {
-      this.selectedEndPont = this.personalConnectEndpoints[0];
+      this.selectedEndPont = this.recentlyViewedEndpoints[0];
       if (this.selectedEndPont.default_directory == null) {
         this.selectedDirectory = '~/';
       } else {
@@ -121,29 +116,52 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
 
   processDirectories(data) {
     this.selectedOptions = new Array<object>();
-    this.personalDirectories = new Array<object>();
+    this.recentlyViewedDirectories = new Array<object>();
     this.selectedDirectory = data.path;
     for (const obj of data.DATA) {
-     // if (obj.type === 'dir') {
-        this.personalDirectories.push(obj);
+      // if (obj.type === 'dir') {
+      this.recentlyViewedDirectories.push(obj);
       //}
     }
   }
 
-  personalConnectExist() {
-    if (typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0) {
+  recentlyViewedExist() {
+    if (typeof this.recentlyViewedEndpoints !== 'undefined' && this.recentlyViewedEndpoints.length > 0) {
       return true;
     } else {
       return false;
     }
   }
 
-  personalDirectoryExist() {
-    if (typeof this.personalDirectories !== 'undefined' && this.personalDirectories.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+  setSelectedEndpoint(event) {
+    this.selectedEndPont = event.value;
+    const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPont.id + '/ls';
+    return this.globusService
+        .getGlobus(url,  'Bearer ' + this.userOtherAccessToken)
+        .subscribe(
+            data => this.processDirectories(data),
+            error => console.log(error),
+            () => {
+              this.selectedFiles = new Array<SelFilesType>();
+            }
+        );
+  }
+
+  searchDirectory(directory) {
+    this.checkFlag = false;
+    this.selectedDirectory = directory;
+    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
+        .subscribe(
+            data => {
+              console.log(data);
+              this.processDirectories(data);
+            },
+            error => {
+              console.log(error);
+            },
+            () => {
+            }
+        );
   }
 
   preparedForTransfer() {
@@ -154,6 +172,141 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     }
   }
 
+  selectAll($event, directory) {
+    this.checkFlag = false;
+    if ($event.checked) {
+      for (const obj of this.recentlyViewedDirectories) {
+        this.selectedOptions.push(obj);
+        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
+        this.selectedFiles.push(file);
+      }
+      this.checkFlag = true;
+      directory.writeValue(this.recentlyViewedDirectories);
+    } else {
+      this.checkFlag = false;
+      for (const obj of this.recentlyViewedDirectories) {
+
+        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
+        const indx = this.selectedFiles.indexOf(file);
+        if (indx !== -1) {
+          this.selectedFiles.splice(indx, 1);
+        }
+      }
+      this.selectedOptions = new Array<object>();
+      directory.writeValue(this.selectedOptions);
+    }
+  }
+
+  UpOneFolder() {
+
+    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
+        .pipe(flatMap(data => this.upFolderProcess(data)))
+        .subscribe(
+            data => {
+              if (data !== null) {
+                this.processDirectories(data);
+              }
+            },
+            error => {
+              console.log(error);
+            },
+            () => {
+              this.checkFlag = false;
+            }
+        );
+  }
+
+  upFolderProcess(data) {
+    const absolutePath = data['absolute_path'];
+    if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
+      const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
+      const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
+      return this.globusService.getDirectory(path, this.selectedEndPont.id, this.userOtherAccessToken);
+    } else {
+      return of(null);
+    }
+  }
+
+  onSelection($event,  selectedFiles) {
+    this.isSingleClick = true;
+    setTimeout(() => {
+      if (this.isSingleClick ){
+
+        const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
+        if ($event.option._selected) {
+          this.selectedFiles.push(file);
+        } else {
+          const indx = this.selectedFiles.indexOf(file);
+          if ( indx !== -1) {
+            this.selectedFiles.splice(indx, 1);
+          }
+          this.checkFlag = false;
+        }
+      }
+    }, 250);
+  }
+
+  checkBox($event, item) {
+    if (!$event.checked) {
+      this.checkFlag = false;
+    }
+  }
+
+  openDirectory($event, item, directory, check) {
+    this.isSingleClick = false;
+    this.selectedOptions = new Array<object>();
+    if (item.type === 'dir') {
+      this.selectedDirectory = this.selectedDirectory + item.name;
+
+      this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
+          .subscribe(
+              data => {
+                console.log(data);
+                this.processDirectories(data);
+              },
+              error => {
+                console.log(error);
+              },
+              () => {
+                this.selectedOptions = new Array<object>();
+                directory.writeValue(this.selectedOptions);
+                check.checked = false;
+              }
+          );
+    }
+  }
+
+  isFolder(item) {
+    if (item['type'] === 'dir') {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
+  removeAllFromSelected(directory) {
+    this.selectedFiles = new Array<SelFilesType>();
+    directory.writeValue(null);
+    this.selectedOptions = new Array();
+    this.checkFlag = false;
+  }
+
+  onRemoving($event, selectedList) {
+    if ($event.option._selected) {
+      const indx = this.selectedFiles.indexOf($event.option._value);
+
+      if ( indx !== -1) {
+        this.selectedFiles.splice(indx, 1);
+        const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
+        if (indx2 !== -1) {
+          this.selectedOptions.splice(indx2, 1);
+          selectedList.writeValue(this.selectedOptions);
+          this.checkFlag = false;
+        }
+      }
+    }
+  }
 
   onSubmitTransfer() {
     const directoriesArray = new Array();
@@ -211,19 +364,6 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         );
   }
 
-  saveDirectories(dir, i, labelsArray) {
-    const label = dir['path'].substr(labelsArray[i].length);
-    for (const obj of dir["DATA"]) {
-      if (obj.type === 'file') {
-        this.listOfAllFiles.push(dir["absolute_path"] + obj.name);
-        this.listOfFileNames.push(obj.name);
-        this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
-
-        this.listOfDirectoryLabels.push(label);
-      }
-    }
-  }
-
   submit(array) {
     forkJoin(array)
         .pipe(flatMap(obj => this.globusService.getPermission(obj[1], obj[0], this.datasetDirectory, this.globusEndpoint)),
@@ -259,7 +399,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         );
   }
 
-  writeToDataverse() {
+ writeToDataverse() {
     /*{
       "taskIdentifier":"d2ae147e-446a-11eb-8ffa-0a34088e79f9",
         "files": [
@@ -274,9 +414,9 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
     ]
     } */
 
-   // curl -H X-Dataverse-key:c1428301-e301-4818-95d8-0fc01fd1d242 -X POST https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=doi:10.5072/FK2/IMK6JR -F jsonData=@mytest.json
+    // curl -H X-Dataverse-key:c1428301-e301-4818-95d8-0fc01fd1d242 -X POST https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=doi:10.5072/FK2/IMK6JR -F jsonData=@mytest.json
     // "Content-Type", "application/json;
-   // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
+    // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
 
     const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
     const formData: any = new FormData();
@@ -327,172 +467,17 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
         );
   }
 
-  openDirectory($event, item, directory, check) {
-    this.isSingleClick = false;
-    this.selectedOptions = new Array<object>();
-    if (item.type === 'dir') {
-      this.selectedDirectory = this.selectedDirectory + item.name;
+  saveDirectories(dir, i, labelsArray) {
+    const label = dir['path'].substr(labelsArray[i].length);
+    for (const obj of dir["DATA"]) {
+      if (obj.type === 'file') {
+        this.listOfAllFiles.push(dir["absolute_path"] + obj.name);
+        this.listOfFileNames.push(obj.name);
+        this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
 
-      this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
-          .subscribe(
-              data => {
-                console.log(data);
-                this.processDirectories(data);
-              },
-              error => {
-                console.log(error);
-              },
-              () => {
-                this.selectedOptions = new Array<object>();
-                directory.writeValue(this.selectedOptions);
-                check.checked = false;
-              }
-          );
-    }
-  }
-
-  checkBox($event, item) {
-    if (!$event.checked) {
-      this.checkFlag = false;
-    }
-  }
-
-  searchDirectory(directory) {
-    this.checkFlag = false;
-    this.selectedDirectory = directory;
-    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
-        .subscribe(
-            data => {
-              console.log(data);
-              this.processDirectories(data);
-            },
-            error => {
-              console.log(error);
-            },
-            () => {
-            }
-        );
-  }
-
-  onSelection($event,  selectedFiles) {
-    this.isSingleClick = true;
-    setTimeout(() => {
-      if (this.isSingleClick ){
-
-        const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
-        if ($event.option._selected) {
-          this.selectedFiles.push(file);
-        } else {
-          const indx = this.selectedFiles.indexOf(file);
-          if ( indx !== -1) {
-            this.selectedFiles.splice(indx, 1);
-          }
-          this.checkFlag = false;
-        }
-      }
-    }, 250);
-  }
-
-  onRemoving($event, selectedList) {
-    if ($event.option._selected) {
-      const indx = this.selectedFiles.indexOf($event.option._value);
-
-      if ( indx !== -1) {
-        this.selectedFiles.splice(indx, 1);
-        const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
-        if (indx2 !== -1) {
-          this.selectedOptions.splice(indx2, 1);
-          selectedList.writeValue(this.selectedOptions);
-          this.checkFlag = false;
-        }
+        this.listOfDirectoryLabels.push(label);
       }
     }
   }
-
-  setSelectedEndpoint(event) {
-    this.selectedEndPont = event.value;
-    const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPont.id + '/ls';
-    return this.globusService
-        .getGlobus(url,  'Bearer ' + this.userOtherAccessToken)
-  .subscribe(
-        data => this.processDirectories(data),
-        error => console.log(error),
-        () => {
-          this.selectedFiles = new Array<SelFilesType>();
-        }
-    );
-  }
-
-  selectAll($event, directory) {
-    this.checkFlag = false;
-    if ($event.checked) {
-      for (const obj of this.personalDirectories) {
-        this.selectedOptions.push(obj);
-        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        this.selectedFiles.push(file);
-      }
-      this.checkFlag = true;
-      directory.writeValue(this.personalDirectories);
-    } else {
-      this.checkFlag = false;
-      for (const obj of this.personalDirectories) {
-
-        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        const indx = this.selectedFiles.indexOf(file);
-        if (indx !== -1) {
-          this.selectedFiles.splice(indx, 1);
-        }
-      }
-      this.selectedOptions = new Array<object>();
-      directory.writeValue(this.selectedOptions);
-    }
-  }
-
-  UpOneFolder() {
-
-    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPont.id, this.userOtherAccessToken)
-        .pipe(flatMap(data => this.upFolderProcess(data)))
-        .subscribe(
-            data => {
-              if (data !== null) {
-                this.processDirectories(data);
-              }
-            },
-            error => {
-              console.log(error);
-            },
-            () => {
-              this.checkFlag = false;
-            }
-        );
-  }
-  upFolderProcess(data) {
-    const absolutePath = data['absolute_path'];
-    if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
-      const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
-      const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
-      return this.globusService.getDirectory(path, this.selectedEndPont.id, this.userOtherAccessToken);
-    } else {
-      return of(null);
-    }
-  }
-
-  removeAllFromSelected(directory) {
-    this.selectedFiles = new Array<SelFilesType>();
-    directory.writeValue(null);
-    this.selectedOptions = new Array();
-    this.checkFlag = false;
-  }
-
-  isFolder(item) {
-    if (item['type'] === 'dir') {
-      return true;
-    } else {
-      return false;
-    }
-
-  }
-
-
 
 }

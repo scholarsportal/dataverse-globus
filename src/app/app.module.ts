@@ -24,6 +24,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {FormsModule} from '@angular/forms';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { RecentlyViewedComponentComponent } from './recently-viewed-component/recently-viewed-component.component';
 
 export function load(http: HttpClient, config: ConfigService): (() => Promise<boolean>) {
   return (): Promise<boolean> => {
@@ -62,6 +63,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     GlobusDirective,
     UploadFileComponent,
     PersonalConnectComponent,
+    RecentlyViewedComponentComponent,
   ],
     imports: [
         BrowserModule,

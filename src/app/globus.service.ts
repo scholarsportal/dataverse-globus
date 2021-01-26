@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import {Observable, forkJoin, of, merge, from} from 'rxjs';
-import {filter, flatMap} from 'rxjs/operators';
+import {Observable, forkJoin, of, merge, from, throwError} from 'rxjs';
+import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {Permissions} from './interface/interface.component';
 
 @Injectable()
 export class GlobusService {
+
+  userOtherAccessToken: string;
+  userAccessToken: string;
 
   constructor(private http: HttpClient) {
   }
@@ -18,6 +21,7 @@ export class GlobusService {
         Authorization: key
       })
     };
+    console.log("start");
     return this.http.get(url, httpOptions);
   }
 
@@ -34,7 +38,7 @@ export class GlobusService {
     // return this.http.post(url,body, httpOptions);
   }
 
-  postGlobus(url: string, body: string,  key: string) {
+  postGlobus(url: string, body: string, key: string) {
     console.log("Start posting Globus");
     const httpOptions = {
       headers: new HttpHeaders({
@@ -46,7 +50,8 @@ export class GlobusService {
     return this.http.post(url, body, httpOptions);
     // return this.http.post(url,body, httpOptions);
   }
-  postDataverse(url: string, body: FormData,  key: string)  {
+
+  postDataverse(url: string, body: FormData, key: string) {
     const httpOptions = {
       headers: new HttpHeaders({
         'X-Dataverse-key': key
@@ -73,7 +78,7 @@ export class GlobusService {
     const url = 'https://auth.globus.org/v2/oauth2/token?scope=openid+email+profile+urn:globus:auth:scope:transfer.api.globus.org:all&grant_type=client_credentials';
 
     const key = 'Basic ' + basicGlobusToken;
-    return this.postGlobus(url,  '', key);
+    return this.postGlobus(url, '', key);
   }
 
   getUserInfo(userAccessToken) {
@@ -100,10 +105,10 @@ export class GlobusService {
     return this.postGlobus(url, stringPermissions, key);
   }
 
-  submitTransfer( userOtherAccessToken ) {
+  submitTransfer(userOtherAccessToken) {
     console.log("submitting transfer");
     const url = 'https://transfer.api.globusonline.org/v0.10/submission_id';
-    return this.getGlobus(url,  'Bearer ' + userOtherAccessToken);
+    return this.getGlobus(url, 'Bearer ' + userOtherAccessToken);
   }
 
   getInnerDirectories(directory, selectedEndPointId, userOtherAccessToken) {
@@ -114,9 +119,9 @@ export class GlobusService {
       return merge(
           of(directory),
           from(directory.DATA)
-              .pipe(filter(d => d['type'] === 'dir' ))
-              .pipe( flatMap(obj => this.getDirectory(path + obj['name'], selectedEndPointId, userOtherAccessToken  )))
-              .pipe(flatMap(d => this.getInnerDirectories(d, selectedEndPointId, userOtherAccessToken)) ));
+              .pipe(filter(d => d['type'] === 'dir'))
+              .pipe(flatMap(obj => this.getDirectory(path + obj['name'], selectedEndPointId, userOtherAccessToken)))
+              .pipe(flatMap(d => this.getInnerDirectories(d, selectedEndPointId, userOtherAccessToken))));
     } else {
       return of(directory);
     }
@@ -127,7 +132,7 @@ export class GlobusService {
     const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + selectedEndPointId +
         '/ls?path=' + path;
     return this
-        .getGlobus(url,  'Bearer ' + userOtherAccessToken);
+        .getGlobus(url, 'Bearer ' + userOtherAccessToken);
   }
 
   generateStorageIdentifier() {
@@ -137,7 +142,7 @@ export class GlobusService {
     // last 6 bytes, of the random UUID, in hex:
 
     const hexRandom = identifier.substring(24);
-    console.log( hexRandom);
+    console.log(hexRandom);
     const hexTimestamp = new Date().getTime().toString(16);
     console.log(hexTimestamp);
     const storageIdentifier = hexTimestamp + '-' + hexRandom;
@@ -151,29 +156,29 @@ export class GlobusService {
     const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
     const taskItemsArray = new Array();
     for (let i = 0; i < listOfAllFiles.length; i++) {
-        const taskItem = {
-          DATA_TYPE: 'transfer_item',
-          source_path: listOfAllFiles[i],
-          destination_path : datasetDirectory + listOfAllStorageIdentifiers[i],
-          recursive: false
-        };
-        taskItemsArray.push(taskItem);
-      }
-    const body = {
-        DATA_TYPE: 'transfer',
-        DATA: taskItemsArray,
-        submission_id: submissionId,
-        notify_on_succeeded: true,
-        notify_on_failed: true,
-        source_endpoint: selectedEndPointId,
-        destination_endpoint: globusEndpoint
+      const taskItem = {
+        DATA_TYPE: 'transfer_item',
+        source_path: listOfAllFiles[i],
+        destination_path: datasetDirectory + listOfAllStorageIdentifiers[i],
+        recursive: false
       };
+      taskItemsArray.push(taskItem);
+    }
+    const body = {
+      DATA_TYPE: 'transfer',
+      DATA: taskItemsArray,
+      submission_id: submissionId,
+      notify_on_succeeded: true,
+      notify_on_failed: true,
+      source_endpoint: selectedEndPointId,
+      destination_endpoint: globusEndpoint
+    };
     const bodyString = JSON.stringify(body);
     console.log(bodyString);
-    return this.postGlobus(url,  bodyString,'Bearer ' + userOtherAccessToken);
+    return this.postGlobus(url, bodyString, 'Bearer ' + userOtherAccessToken);
   }
 
-  saveDirectories(dir, listOfAllFiles, listOfFileNames, listOfAllStorageIdentifiers  ) {
+  saveDirectories(dir, listOfAllFiles, listOfFileNames, listOfAllStorageIdentifiers) {
     console.log(dir);
     for (const obj of dir["DATA"]) {
       if (obj.type === 'file') {
@@ -185,7 +190,7 @@ export class GlobusService {
     }
   }
 
-
+  ////////////////////////////////////////////////////////////////////////////////
 
 
 }

@@ -8,12 +8,21 @@
                               [datasetDirectory]="datasetDirectory"
                               [globusEndpoint]="globusEndpoint"
                               [datasetPid]="datasetPid"
-                              [key]="key"></app-personal-connect>
+                              [key]="key">
+
+        </app-personal-connect>
       </ng-template>
     </mat-tab>
     <mat-tab label="Active Recently Viewed Endpoints">
       <ng-template matTabContent>
-        Content 2 - Loaded:
+        <app-recently-viewed-component [userAccessTokenData]="userAccessTokenData"
+                              [basicClientToken]="basicClientToken"
+                              [datasetDirectory]="datasetDirectory"
+                              [globusEndpoint]="globusEndpoint"
+                              [datasetPid]="datasetPid"
+                              [key]="key">
+
+        </app-recently-viewed-component>
       </ng-template>
     </mat-tab>
     <mat-tab label="Search For Active Endpoints">

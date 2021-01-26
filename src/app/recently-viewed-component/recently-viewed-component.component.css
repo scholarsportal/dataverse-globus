@@ -9,9 +9,9 @@
     justify-content: right;
     max-width: 100%;
 }
- .only_center {
-     justify-content: center;
- }
+.only_center {
+    justify-content: center;
+}
 
 
 .mat-selection-list{
@@ -37,6 +37,7 @@
 }
 
 .table {
+
     max-height: 550px;
     overflow: auto;
 }
@@ -64,13 +65,4 @@
 }
 
 .button:hover {background-color: lightblue}
-
-
-
-
-
-
-
-
-
 
