@@ -1,2 +1,5 @@
 # globus
-Dataverse external tool for globus integration
+
+_In development_.
+
+A Dataverse external tool for globus integration to enable larger file uploads.
