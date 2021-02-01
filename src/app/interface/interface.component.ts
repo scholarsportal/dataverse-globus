@@ -41,6 +41,7 @@ export class InterfaceComponent implements OnInit {
   datasetDirectory: string;
   userIdentity: string;
   globusEndpoint: string;
+  siteUrl: string;
 
   userAccessTokenData: any;
 
@@ -54,7 +55,9 @@ export class InterfaceComponent implements OnInit {
       if (code === null || code === '') {
           this.datasetPid = this.globusService.getParameterByName('datasetPid');
           this.key = this.globusService.getParameterByName('apiToken');
-          const state = btoa(this.datasetPid + '_' + this.key); // encode
+          this.siteUrl = this.globusService.getParameterByName('siteUrl');
+          console.log(this.siteUrl);
+          const state = btoa(this.datasetPid + '_' + this.key + '_' + this.siteUrl); // encode
           this.getCode(state);
       } else {
           console.log(code);
@@ -63,6 +66,9 @@ export class InterfaceComponent implements OnInit {
           console.log(decodedState);
           const parameters = decodedState.split('_');
           this.datasetPid = parameters[0];
+          this.siteUrl = parameters[2];
+          console.log(this.datasetPid);
+          console.log(this.siteUrl);
           this.datasetDirectory = '/' + this.datasetPid.substring(this.datasetPid.indexOf(':') + 1) + '/';
           console.log(this.datasetPid);
           this.key = parameters[1];

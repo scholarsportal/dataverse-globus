@@ -1,0 +1,25 @@
+.center {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.padding {
+    padding-top: 50px;
+}
+
+table {
+    width: 100%;
+
+
+}
+.mat-paginator {
+    background: transparent;
+}
+
+.mat-header-cell {
+    padding: 8px 8px 8px 0;
+}
+
+
+

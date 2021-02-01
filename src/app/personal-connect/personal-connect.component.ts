@@ -3,6 +3,7 @@ import {GlobusService} from '../globus.service';
 import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 interface SelFilesType {
@@ -40,7 +41,8 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   taskId: string;
 
 
-  constructor(private globusService: GlobusService) { }
+  constructor(private globusService: GlobusService,
+              public snackBar: MatSnackBar) { }
 
   @Input() userAccessTokenData: any;
   @Input() basicClientToken: string;
@@ -48,6 +50,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   @Input() globusEndpoint: string;
   @Input() datasetPid: string;
   @Input() key: string;
+  @Input() siteUrl: string;
 
 
   ngOnInit(): void {
@@ -155,6 +158,9 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
 
 
   onSubmitTransfer() {
+    this.snackBar.open("Preparing transfer", '', {
+      duration: 3000
+    });
     const directoriesArray = new Array();
     const labelsArray = new Array();
 
@@ -250,6 +256,9 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
             },
             error => {
               console.log(error);
+              this.snackBar.open("There was an error in transfer submittion.  ", '', {
+                duration: 3000
+              });
             },
             () => {
               console.log('Transfer submitted');
@@ -319,9 +328,16 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
             },
             error => {
               console.log(error);
+              this.snackBar.open('There was an error in transfer submittion. ', '', {
+                duration: 3000
+              });
             },
             () => {
               console.log('Submitted to dataverse');
+              const urlDataset = this.siteUrl + '/' + 'dataset.xhtml?persistentId=' + this.datasetPid;
+              this.snackBar.open('Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.', '', {
+                duration: 5000
+              });
             }
         );
   }

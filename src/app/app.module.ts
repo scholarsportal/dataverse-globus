@@ -26,6 +26,13 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {FormsModule} from '@angular/forms';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { RecentlyViewedComponentComponent } from './recently-viewed-component/recently-viewed-component.component';
+import { SearchEndpointComponent } from './search-endpoint/search-endpoint.component';
+import {MatTableModule} from '@angular/material/table';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { NavigateDirectoriesComponent } from './navigate-directories/navigate-directories.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 export function load(http: HttpClient, config: ConfigService): (() => Promise<boolean>) {
   return (): Promise<boolean> => {
@@ -65,6 +72,8 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     UploadFileComponent,
     PersonalConnectComponent,
     RecentlyViewedComponentComponent,
+    SearchEndpointComponent,
+    NavigateDirectoriesComponent,
   ],
     imports: [
         BrowserModule,
@@ -81,8 +90,14 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         MatGridListModule,
         MatTooltipModule,
         FormsModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatToolbarModule,
+        MatSnackBarModule,
+        MatDialogModule
     ],
+    entryComponents: [NavigateDirectoriesComponent],
   providers: [GlobusService, {
     provide: APP_INITIALIZER,
     useFactory: load,
