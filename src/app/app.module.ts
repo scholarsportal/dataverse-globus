@@ -33,6 +33,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { NavigateDirectoriesComponent } from './navigate-directories/navigate-directories.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { NavigateTemplateComponent } from './navigate-template/navigate-template.component';
 
 export function load(http: HttpClient, config: ConfigService): (() => Promise<boolean>) {
   return (): Promise<boolean> => {
@@ -74,6 +75,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     RecentlyViewedComponentComponent,
     SearchEndpointComponent,
     NavigateDirectoriesComponent,
+    NavigateTemplateComponent,
   ],
     imports: [
         BrowserModule,

@@ -6,6 +6,16 @@ import {MatPaginator} from '@angular/material/paginator';
 import { NavigateDirectoriesComponent } from '../navigate-directories/navigate-directories.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 
+interface PassingDataType {
+   userAccessTokenData: any;
+   basicClientToken: string;
+   datasetDirectory: string;
+   globusEndpoint: string;
+   datasetPid: string;
+   key: string;
+   data: any;
+}
+
 @Component({
   selector: 'app-search-endpoint',
   templateUrl: './search-endpoint.component.html',
@@ -133,8 +143,18 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   openDialog(data): void {
+    const passingData: PassingDataType = {
+      userAccessTokenData: this.userAccessTokenData,
+      basicClientToken: this.basicClientToken,
+      datasetDirectory: this.datasetDirectory,
+      globusEndpoint: this.globusEndpoint,
+      datasetPid: this.datasetPid,
+      key: this.key,
+      data
+    };
+
     this.dialogRef = this.dialog.open(NavigateDirectoriesComponent, {
-      data: data,
+      data: passingData,
       panelClass: 'field_width'
     });
   }
