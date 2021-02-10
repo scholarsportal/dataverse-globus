@@ -1,5 +1,4 @@
-<div mat-dialog-content >
-    <div class="center">
+ <div class="center" *ngIf="selectedDirectoryExist()">
 
         <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
             <mat-label>Directory</mat-label>
@@ -8,8 +7,8 @@
             <mat-hint>Search for Directory</mat-hint>
         </mat-form-field>
 
-    </div>
-    <div  class="center" *ngIf="preparedForTransfer()" >
+ </div>
+ <div  class="center" *ngIf="preparedForTransfer() && selectedDirectoryExist()" >
 
         <table >
             <td>
@@ -68,14 +67,12 @@
             </td>
         </table>
 
-    </div>
-    <p></p>
+ </div>
     <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
-    <div class="center" *ngIf="preparedForTransfer()" >
+ <div class="center" *ngIf="preparedForTransfer() && selectedDirectoryExist()" >
 
         <button mat-stroked-button (click)="onSubmitTransfer()">
             <mat-icon class="class-icon"  matSuffix>cloud_upload</mat-icon>
             Submit transfer
         </button>
-    </div>
-</div>
+ </div>

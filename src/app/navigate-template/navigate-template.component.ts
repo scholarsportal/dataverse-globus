@@ -1,4 +1,4 @@
-import {Component, Inject, Input, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnChanges, OnInit} from '@angular/core';
 import {catchError, flatMap} from 'rxjs/operators';
 import {forkJoin, of, throwError} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
@@ -15,7 +15,7 @@ interface SelFilesType {
   templateUrl: './navigate-template.component.html',
   styleUrls: ['./navigate-template.component.css']
 })
-export class NavigateTemplateComponent implements OnInit {
+export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
               public snackBar: MatSnackBar) { }
@@ -53,16 +53,43 @@ export class NavigateTemplateComponent implements OnInit {
     this.listOfFileNames = new Array<string>();
     this.listOfDirectoryLabels = new Array<string>();
     this.listOfAllStorageIdentifiers = new Array<string>();
-    this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
-    this.userAccessToken = this.userAccessTokenData.access_token;
-    this.findDirectories()
-        .subscribe(
-            data => this.processDirectories(data),
-            error => console.log(error),
-            () => {
-              console.log(this.checkFlag);
-            }
-        );
+    if (typeof this.userAccessTokenData !== 'undefined') {
+      this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
+      this.userAccessToken = this.userAccessTokenData.access_token;
+      this.findDirectories()
+          .subscribe(
+              data => this.processDirectories(data),
+              error => console.log(error),
+              () => {
+                console.log(this.checkFlag);
+              }
+          );
+    }
+  }
+
+  ngOnChanges() {
+
+    console.log(this.userAccessTokenData);
+    this.selectedFiles = new Array<SelFilesType>();
+    this.checkFlag = false;
+    this.isSingleClick = true;
+    console.log(this.userAccessTokenData);
+    this.listOfAllFiles = new Array<string>();
+    this.listOfFileNames = new Array<string>();
+    this.listOfDirectoryLabels = new Array<string>();
+    this.listOfAllStorageIdentifiers = new Array<string>();
+    if (typeof this.userAccessTokenData !== 'undefined') {
+      this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
+      this.userAccessToken = this.userAccessTokenData.access_token;
+      this.findDirectories()
+          .subscribe(
+              data => this.processDirectories(data),
+              error => console.log(error),
+              () => {
+                console.log(this.checkFlag);
+              }
+          );
+    }
   }
 
   findDirectories() {
@@ -344,7 +371,7 @@ export class NavigateTemplateComponent implements OnInit {
             },
             error => {
               console.log(error);
-              this.snackBar.open("There was an error in transfer submittion.  ", '', {
+              this.snackBar.open("There was an error in transfer submittion. BIIG ", '', {
                 duration: 3000
               });
             },
@@ -409,6 +436,7 @@ export class NavigateTemplateComponent implements OnInit {
     const bodyString = JSON.stringify(body);
 */
     formData.append('jsonData', body);
+    console.log(this.key);
     this.globusService.postDataverse(url, formData, this.key)
         .subscribe(
             data => {
@@ -428,6 +456,14 @@ export class NavigateTemplateComponent implements OnInit {
               });
             }
         );
+  }
+
+  selectedDirectoryExist() {
+    if (typeof this.selectedDirectory !== 'undefined' && this.selectedDirectory !== null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

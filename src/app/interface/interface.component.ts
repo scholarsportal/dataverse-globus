@@ -55,6 +55,7 @@ export class InterfaceComponent implements OnInit {
       if (code === null || code === '') {
           this.datasetPid = this.globusService.getParameterByName('datasetPid');
           this.key = this.globusService.getParameterByName('apiToken');
+          console.log(this.key);
           this.siteUrl = this.globusService.getParameterByName('siteUrl');
           console.log(this.siteUrl);
           const state = btoa(this.datasetPid + '_' + this.key + '_' + this.siteUrl); // encode

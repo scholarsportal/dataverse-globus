@@ -154,8 +154,8 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
     };
 
     this.dialogRef = this.dialog.open(NavigateDirectoriesComponent, {
-      data: passingData,
-      panelClass: 'field_width'
+      data: passingData
+      //panelClass: 'field_width'
     });
   }
 

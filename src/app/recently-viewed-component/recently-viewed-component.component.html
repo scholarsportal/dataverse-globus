@@ -1,7 +1,7 @@
 <div class="center">
-    <mat-form-field  *ngIf="recentlyViewedExist" appearance="fill" >
-        <mat-label>Recently viewed endpoints</mat-label>
-        <mat-select [(value)]="selectedEndPont" (selectionChange)="setSelectedEndpoint($event)" >
+    <mat-form-field  *ngIf="recentlyViewedExist()" appearance="fill" >
+        <mat-label>Personal connect endpoints</mat-label>
+        <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
             <mat-option *ngFor="let endpoint of recentlyViewedEndpoints" [value]="endpoint">
                 {{endpoint.display_name}}
             </mat-option>
@@ -9,85 +9,18 @@
     </mat-form-field >
 </div>
 
-<div class="center">
-    <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
-        <mat-label>Directory</mat-label>
-        <input type="search" matInput placeholder="Directory" value="{{selectedDirectory}}" (keydown.enter)="searchDirectory($event.target.value)" >
-        <mat-icon matSuffix>search</mat-icon>
-        <mat-hint>Search for Directory</mat-hint>
-    </mat-form-field>
+<ng-container class="interface-container">
+    <app-navigate-template [userAccessTokenData]="userAccessTokenData"
+                           [basicClientToken]="basicClientToken"
+                           [datasetDirectory]="datasetDirectory"
+                           [globusEndpoint]="globusEndpoint"
+                           [datasetPid]="datasetPid"
+                           [key]="key"
+                           [siteUrl]="siteUrl"
+                           [selectedEndPoint]="selectedEndPoint">
 
-</div>
+    </app-navigate-template>
+</ng-container>
 
 
-<p></p>
-<p></p>
-<div  class="center" *ngIf="preparedForTransfer()" >
-
-    <table >
-        <td>
-            <table class="table-left">
-                <tr>
-                    <th style="text-align:left">
-                        <mat-checkbox class="mat-checkbox" #check  [checked]="checkFlag" (change)="selectAll($event, directory)">Select All</mat-checkbox>
-                        <button mat-stroked-button (click)="UpOneFolder()" >
-                            <mat-icon class="class-icon" matSuffix>subdirectory_arrow_left</mat-icon>
-                            Up one folder
-                        </button>
-                    </th>
-                </tr>
-                <div class="table">
-                    <tr >
-                        <mat-selection-list #directory  [(ngModel)]="selectedOptions"  (selectionChange)="onSelection($event, directory.selectedOptions)" >
-
-                            <h2 matSubheader style="min-width: 250px">Subdirectories and files</h2>
-                            <mat-list-option  *ngFor="let item of recentlyViewedDirectories" [value]="item">
-                                <mat-list-item color="primary" (click)="checkBox($event, item)" (dblclick)="openDirectory($event, item, directory, check)">
-                                    <mat-icon class="class-icon" matSuffix *ngIf="isFolder(item)">folder</mat-icon>
-                                    {{item.name}}
-                                </mat-list-item>
-                            </mat-list-option>
-                        </mat-selection-list>
-                    </tr>
-                </div>
-            </table>
-        </td>
-
-        <td>
-            <table class="table-right">
-                <tr>
-                    <th style="text-align:left">
-                        <button mat-stroked-button (click)="removeAllFromSelected(directory)">
-                            <mat-icon class="class-icon"  matSuffix>remove_circle</mat-icon>
-                            Remove All
-                        </button>
-                    </th>
-                </tr>
-                <div class="table">
-                    <tr>
-                        <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
-                            <h2 matSubheader>Selected files and folders</h2>
-                            <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
-
-                                <mat-list-item>
-                                    <mat-icon class="class-icon" matSuffix *ngIf="isFolder(file.fileNameObject)">folder</mat-icon>
-                                    {{file.fileNameObject.name}}
-                                </mat-list-item>
-                            </mat-list-option>
-                        </mat-selection-list>
-                    </tr>
-                </div>
-            </table>
-        </td>
-    </table>
-
-</div>
-<p></p>
-<!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
-    <div class="center" *ngIf="preparedForTransfer()" >
-
-    <button mat-stroked-button (click)="onSubmitTransfer()">
-        <mat-icon class="class-icon" matSuffix>cloud_upload</mat-icon>
-        Submit transfer</button>
-</div>
 
