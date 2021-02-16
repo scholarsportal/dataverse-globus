@@ -1,4 +1,4 @@
- <div class="center" *ngIf="selectedDirectoryExist()">
+ <div class="center" *ngIf="selectedDirectoryExist() && accessEndpointFlag">
 
         <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
             <mat-label>Directory</mat-label>
@@ -8,7 +8,11 @@
         </mat-form-field>
 
  </div>
- <div  class="center" *ngIf="preparedForTransfer() && selectedDirectoryExist()" >
+ <div class="center" *ngIf="!accessEndpointFlag && this.load">
+     <br>
+     <h3 class="center">You do not have permissions to see the endpoint selected "{{this.selectedEndPoint.display_name}}"</h3>
+ </div>
+ <div  class="center" *ngIf="preparedForTransfer() && selectedDirectoryExist() && accessEndpointFlag" >
 
         <table >
             <td>
@@ -69,7 +73,7 @@
 
  </div>
     <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
- <div class="center" *ngIf="preparedForTransfer() && selectedDirectoryExist()" >
+ <div class="center" *ngIf="preparedForTransfer() && selectedDirectoryExist() && accessEndpointFlag" >
 
         <button mat-stroked-button (click)="onSubmitTransfer()">
             <mat-icon class="class-icon"  matSuffix>cloud_upload</mat-icon>

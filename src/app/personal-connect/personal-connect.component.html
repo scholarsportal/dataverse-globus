@@ -8,6 +8,14 @@
     </mat-select>
 </mat-form-field >
 </div>
+<div class="center" *ngIf="!personalConnectExist()">
+    <h3>
+    You do not have personal connect endpoint running.<br>
+    Please either start you personal connect<br>
+        or use "Active Recently Viewed Endpoints" tab,<br>
+    or search active endpoints in "Search For Active Endpoints" tab.<br>
+    </h3>
+</div>
 
 <ng-container class="interface-container">
         <app-navigate-template [userAccessTokenData]="userAccessTokenData"

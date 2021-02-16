@@ -42,34 +42,21 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   listOfAllStorageIdentifiers: Array<string>;
   listOfDirectoryLabels: Array<string>;
   taskId: string;
+  accessEndpointFlag: boolean;
+  load: boolean;
 
   ngOnInit(): void {
-    console.log(this.userAccessTokenData);
-    this.selectedFiles = new Array<SelFilesType>();
-    this.checkFlag = false;
-    this.isSingleClick = true;
-    console.log(this.userAccessTokenData);
-    this.listOfAllFiles = new Array<string>();
-    this.listOfFileNames = new Array<string>();
-    this.listOfDirectoryLabels = new Array<string>();
-    this.listOfAllStorageIdentifiers = new Array<string>();
-    if (typeof this.userAccessTokenData !== 'undefined') {
-      this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
-      this.userAccessToken = this.userAccessTokenData.access_token;
-      this.findDirectories()
-          .subscribe(
-              data => this.processDirectories(data),
-              error => console.log(error),
-              () => {
-                console.log(this.checkFlag);
-              }
-          );
-    }
+    this.startComponenet();
   }
 
   ngOnChanges() {
+    this.startComponenet();
+  }
 
+  startComponenet() {
     console.log(this.userAccessTokenData);
+    this.load = false;
+    this.accessEndpointFlag = false;
     this.selectedFiles = new Array<SelFilesType>();
     this.checkFlag = false;
     this.isSingleClick = true;
@@ -78,15 +65,20 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     this.listOfFileNames = new Array<string>();
     this.listOfDirectoryLabels = new Array<string>();
     this.listOfAllStorageIdentifiers = new Array<string>();
-    if (typeof this.userAccessTokenData !== 'undefined') {
+    if (typeof this.userAccessTokenData !== 'undefined' && typeof this.selectedEndPoint !== 'undefined') {
       this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
       this.userAccessToken = this.userAccessTokenData.access_token;
       this.findDirectories()
           .subscribe(
               data => this.processDirectories(data),
-              error => console.log(error),
+              error => {
+                console.log(error);
+                this.load = true;
+              },
               () => {
                 console.log(this.checkFlag);
+                this.accessEndpointFlag = true;
+                this.load = true;
               }
           );
     }
@@ -101,7 +93,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     }
     const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPoint.id + '/ls';
     return this.globusService
-      .getGlobus(url,  'Bearer ' + this.userOtherAccessToken);
+        .getGlobus(url, 'Bearer ' + this.userOtherAccessToken);
+
   }
 
   searchDirectory(directory) {
