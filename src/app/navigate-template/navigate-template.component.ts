@@ -46,14 +46,14 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   load: boolean;
 
   ngOnInit(): void {
-    this.startComponenet();
+    this.startComponent();
   }
 
   ngOnChanges() {
-    this.startComponenet();
+    this.startComponent();
   }
 
-  startComponenet() {
+  startComponent() {
     console.log(this.userAccessTokenData);
     this.load = false;
     this.accessEndpointFlag = false;
@@ -163,7 +163,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   upFolderProcess(data) {
-    const absolutePath = data['absolute_path'];
+    const absolutePath = data.absolute_path;
     if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
       const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
       const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
@@ -180,7 +180,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     for (const obj of data.DATA) {
       // if (obj.type === 'dir') {
       this.personalDirectories.push(obj);
-      //}
+      // }
     }
   }
 
@@ -191,7 +191,16 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
         const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
         if ($event.option._selected) {
-          this.selectedFiles.push(file);
+          console.log(file);
+          console.log(this.selectedFiles);
+          const indx = this.selectedFiles.findIndex(x =>
+            x.fileNameObject === file.fileNameObject &&
+            x.directory === file.directory
+          );
+          console.log(indx);
+          if ( indx === -1) {
+            this.selectedFiles.push(file);
+          }
         } else {
           const indx = this.selectedFiles.indexOf(file);
           if ( indx !== -1) {
@@ -234,7 +243,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   isFolder(item) {
-    if (item['type'] === 'dir') {
+    if (item.type === 'dir') {
       return true;
     } else {
       return false;
@@ -266,14 +275,14 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   onSubmitTransfer() {
-    this.snackBar.open("Preparing transfer", '', {
+    this.snackBar.open('Preparing transfer', '', {
       duration: 3000
     });
     const directoriesArray = new Array();
     const labelsArray = new Array();
 
     for (const obj of this.selectedFiles ) {
-      if (obj.fileNameObject['type'] === 'dir') {
+      if (obj.fileNameObject.type === 'dir') {
         directoriesArray.push(obj.directory + obj.fileNameObject.name);
         labelsArray.push(obj.directory);
       } else {
@@ -325,10 +334,10 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   saveDirectories(dir, i, labelsArray) {
-    const label = dir['path'].substr(labelsArray[i].length);
-    for (const obj of dir["DATA"]) {
+    const label = dir.path.substr(labelsArray[i].length);
+    for (const obj of dir.DATA) {
       if (obj.type === 'file') {
-        this.listOfAllFiles.push(dir["absolute_path"] + obj.name);
+        this.listOfAllFiles.push(dir.absolute_path + obj.name);
         this.listOfFileNames.push(obj.name);
         this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
 
@@ -364,7 +373,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
             },
             error => {
               console.log(error);
-              this.snackBar.open("There was an error in transfer submittion. BIIG ", '', {
+              this.snackBar.open('There was an error in transfer submittion. BIIG ', '', {
                 duration: 3000
               });
             },

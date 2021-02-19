@@ -23,7 +23,7 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
   userOtherAccessToken: string;
   userAccessToken: string;
   clientToken: string;
-
+  load: boolean;
   constructor(private globusService: GlobusService) { }
 
   @Input() userAccessTokenData: any;
@@ -35,6 +35,7 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
   @Input() siteUrl: string;
 
   ngOnInit(): void {
+    this.load = false;
     console.log(this.userAccessTokenData);
     this.selectedDirectory = null;
   }
@@ -45,8 +46,9 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
       this.getRecentlyViewedEndpoints(this.userAccessTokenData)
           .subscribe(
               data => this.processPersonalConnect(data),
-              error => console.log(error),
+              error => {console.log(error); this.load = true; },
               () => {
+                this.load = true;
               }
           );
     }

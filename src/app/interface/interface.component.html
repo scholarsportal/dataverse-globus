@@ -1,6 +1,16 @@
-<ng-container class="interface-container">
-  <h1 class="center">{{title}}</h1>
-  <mat-tab-group>
+<ng-container class="interface-container" *ngIf="load">
+  <mat-toolbar class="interface-header">
+    <mat-toolbar-row>
+      <h1 class="header-text title">{{title}}</h1>
+      <span class="fill-space"></span>
+      <mat-form-field class="lang-select">
+        <select matNativeControl title="{{'INTERFACE.LANG' | translate}}" [attr.aria-label]="'INTERFACE.LANG' | translate" #langSelect (change)="translate.use(langSelect.value)">
+          <option *ngFor="let lang of translate.getLangs()" [value]="lang" [selected]="lang === translate.currentLang">{{lang}}</option>
+        </select>
+      </mat-form-field>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <mat-tab-group >
     <mat-tab label="Active Personal Endpoints">
       <ng-template matTabContent>
         <app-personal-connect [userAccessTokenData]="userAccessTokenData"
@@ -39,28 +49,4 @@
       </ng-template>
     </mat-tab>
   </mat-tab-group>
-
-
-
-  <!--<mat-form-field class="center" *ngIf="personalConnectExist()" appearance="fill">
-    <mat-label>Personal connect endpoints</mat-label>
-    <mat-select [(value)]="selectedEndPont">
-      <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
-        {{endpoint.display_name}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field  >
-    <mat-form-field class="center" *ngIf="personalDirectoryExist()" appearance="fill">
-      <mat-label>Select directory to upload</mat-label>
-      <mat-select [(value)]="selectedDirectory">
-        <mat-option *ngFor="let directory of personalDirectories" [value]="directory">
-          {{directory.name}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field> -->
-  <!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
-
-  <!--<div class="center" *ngIf="preparedForTransfer()">
-    <button mat-raised-button color="primary" (click)="onSubmitTransfer()">Submit transfer</button>
-  </div> -->
 </ng-container>

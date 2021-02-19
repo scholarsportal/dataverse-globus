@@ -2,41 +2,18 @@
     display: flex;
     justify-content: center;
     margin: auto;
+    padding-right: 20px;
+    padding-left:20px;
+    padding-bottom: 20px;
 }
-
-.mat-action-list {
-    justify-content: right;
-    max-width: 100%;
-}
-
-.only_center {
+.center-grid {
+    display: flex;
     justify-content: center;
-}
-
-.mat-selection-list {
-    max-height: 90%;
-    min-height: 30%;
-    overflow: auto;
-    border: 1px solid #ddd;
-    width: 100%;
-    border-spacing: 0;
-    border-collapse: collapse;
-}
-
-.mat-grid-list {
     margin: auto;
-    width: 90%;
-}
-
-.mat-checkbox {
-    margin: auto;
-    justify-content: right;
-    padding-right: 10px;
-}
-
-.table {
-    max-height: 550px;
-    overflow: auto;
+    padding-right: 20px;
+    padding-left:20px;
+    padding-bottom: 20px;
+    height:600px;
 }
 
 .class-icon {
@@ -44,10 +21,16 @@
     padding-right: 10px;
 }
 
-.table-left {
-    padding-right: 100px;
+.mat-selection-list {
+    height: 75%;
+    width: 100%;
+    overflow: auto;
 }
 
-.table-right {
-    padding-left: 100px;
+.mat-grid-list {
+    height:450px;
+    width:100%;
 }
+
+
+

@@ -9,15 +9,15 @@
     </mat-form-field >
 </div>
 
-<div class="center" *ngIf="!recentlyViewedExist()">
+<div class="center" *ngIf="!recentlyViewedExist() && load">
     <h3>
-        You do not recently viewed endpoints.<br>
+        You do not have recently viewed endpoints.<br>
         Please either use personal connect in "Active Personal Connect Endpoints"<br>
         or search active endpoints in "Search For Active Endpoints" tab.<br>
     </h3>
 </div>
 
-<ng-container class="interface-container">
+<ng-container >
     <app-navigate-template [userAccessTokenData]="userAccessTokenData"
                            [basicClientToken]="basicClientToken"
                            [datasetDirectory]="datasetDirectory"

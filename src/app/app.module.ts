@@ -34,6 +34,16 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { NavigateDirectoriesComponent } from './navigate-directories/navigate-directories.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigateTemplateComponent } from './navigate-template/navigate-template.component';
+import {TranslateLoader, TranslateModule, TranslateParser, TranslateService} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+
+export function createTranslateLoader(http: HttpClient) {
+    return new TranslateHttpLoader(http);
+}
+
+export function HttpLoaderFactory(httpClient: HttpClient) {
+    return new TranslateHttpLoader(httpClient, './assets/i18n/', '.json');
+}
 
 export function load(http: HttpClient, config: ConfigService): (() => Promise<boolean>) {
   return (): Promise<boolean> => {
@@ -97,7 +107,14 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         MatPaginatorModule,
         MatToolbarModule,
         MatSnackBarModule,
-        MatDialogModule
+        MatDialogModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        }),
     ],
     entryComponents: [NavigateDirectoriesComponent],
   providers: [GlobusService, {
@@ -105,7 +122,9 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     useFactory: load,
     deps: [
       HttpClient,
-      ConfigService
+      ConfigService,
+        TranslateService,
+        TranslateParser
     ],
     multi: true
   }],

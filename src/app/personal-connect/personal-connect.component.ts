@@ -27,6 +27,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   userOtherAccessToken: string;
   userAccessToken: string;
   clientToken: string;
+  load: boolean;
   constructor(private globusService: GlobusService,
               public snackBar: MatSnackBar) { }
 
@@ -40,17 +41,22 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
 
 
   ngOnInit(): void {
+    this.load = false;
   }
 
   ngOnChanges() {
-
+    this.load = false;
     if (typeof this.userAccessTokenData !== 'undefined') {
       console.log(this.userAccessTokenData);
       this.getPersonalConnect(this.userAccessTokenData)
           .subscribe(
               data => this.processPersonalConnect(data),
-              error => console.log(error),
+              error => {
+                console.log(error),
+                    this.load = true;
+              },
               () => {
+                this.load = true;
               }
           );
     }
