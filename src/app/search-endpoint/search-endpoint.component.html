@@ -1,6 +1,6 @@
 <div class="center">
     <mat-form-field class="padding">
-        <mat-label>Search endpoint</mat-label>
+        <mat-label [attr.aria-label]="'SEARCH.ENDPOINTS' | translate">{{'SEARCH.ENDPOINTS' | translate}}</mat-label>
         <input matInput type="search" value="{{value}}" (keydown.enter)="searchEndpoints($event.target.value)">
         <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
@@ -9,33 +9,33 @@
     <table mat-table [dataSource]="dataSource">
 
         <ng-container matColumnDef="display_name">
-            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <th mat-header-cell *matHeaderCellDef>{{'SEARCH.NAME' | translate}}</th>
             <td mat-cell *matCellDef="let element">
                 <button mat-button  color="primary" (click)="openDialog(element)">{{element.display_name}}</button>
             </td>
         </ng-container>
 
         <ng-container matColumnDef="owner_string">
-            <th mat-header-cell *matHeaderCellDef>Owner</th>
+            <th mat-header-cell *matHeaderCellDef>{{'SEARCH.OWNER' | translate}}</th>
             <td mat-cell *matCellDef="let element"> {{element.owner_string}} </td>
         </ng-container>
 
         <ng-container matColumnDef="organization">
-            <th mat-header-cell *matHeaderCellDef>Organization</th>
+            <th mat-header-cell *matHeaderCellDef>{{'SEARCH.ORGANIZATION' | translate}}</th>
             <td mat-cell *matCellDef="let element">
                     {{element.department}}
             </td>
         </ng-container>
 
         <ng-container matColumnDef="department">
-            <th class="description-cell"  mat-header-cell *matHeaderCellDef>Department</th>
+            <th class="description-cell"  mat-header-cell *matHeaderCellDef>{{'SEARCH.DEPARTMENT' | translate}}</th>
             <td mat-cell *matCellDef="let element">
                     {{element.department}}
             </td>
         </ng-container>
 
         <ng-container matColumnDef="description">
-            <th mat-header-cell *matHeaderCellDef>      Description</th>
+            <th mat-header-cell *matHeaderCellDef>{{'SEARCH.DESCRIPTION' | translate}}</th>
             <td mat-cell *matCellDef="let element"> {{element.description}} </td>
         </ng-container>
 

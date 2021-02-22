@@ -4,3 +4,7 @@
     margin: auto;
     padding-top: 20px;
 }
+
+.my-translated-paragraph{
+    white-space: pre-wrap;
+}

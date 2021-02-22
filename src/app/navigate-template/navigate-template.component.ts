@@ -115,7 +115,11 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   preparedForTransfer() {
-    return true;
+    if (this.selectedFiles.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   selectAll($event, directory) {
@@ -261,7 +265,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   onRemoving($event, selectedList) {
     if ($event.option._selected) {
       const indx = this.selectedFiles.indexOf($event.option._value);
-
       if ( indx !== -1) {
         this.selectedFiles.splice(indx, 1);
         const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);

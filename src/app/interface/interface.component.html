@@ -1,7 +1,7 @@
 <ng-container class="interface-container" *ngIf="load">
   <mat-toolbar class="interface-header">
     <mat-toolbar-row>
-      <h1 class="header-text title">{{title}}</h1>
+      <h1 class="header-text title">{{'INTERFACE.TITLE' | translate}}</h1>
       <span class="fill-space"></span>
       <mat-form-field class="lang-select">
         <select matNativeControl title="{{'INTERFACE.LANG' | translate}}" [attr.aria-label]="'INTERFACE.LANG' | translate" #langSelect (change)="translate.use(langSelect.value)">
@@ -11,7 +11,7 @@
     </mat-toolbar-row>
   </mat-toolbar>
   <mat-tab-group >
-    <mat-tab label="Active Personal Endpoints">
+    <mat-tab label="{{'INTERFACE.PERSONAL' | translate}}" [attr.aria-label]="'INTERFACE.PERSONAL' | translate">
       <ng-template matTabContent>
         <app-personal-connect [userAccessTokenData]="userAccessTokenData"
                               [basicClientToken]="basicClientToken"
@@ -24,7 +24,7 @@
         </app-personal-connect>
       </ng-template>
     </mat-tab>
-    <mat-tab label="Active Recently Viewed Endpoints">
+    <mat-tab label="{{'INTERFACE.RECENT' | translate}}" [attr.aria-label]="'INTERFACE.RECENT' | translate">
       <ng-template matTabContent>
         <app-recently-viewed-component [userAccessTokenData]="userAccessTokenData"
                               [basicClientToken]="basicClientToken"
@@ -36,7 +36,7 @@
         </app-recently-viewed-component>
       </ng-template>
     </mat-tab>
-    <mat-tab label="Search For Active Endpoints">
+    <mat-tab label="{{'INTERFACE.SEARCH' | translate}}" [attr.aria-label]="'INTERFACE.SEARCH' | translate">
       <ng-template matTabContent>
         <app-search-endpoint [userAccessTokenData]="userAccessTokenData"
                                        [basicClientToken]="basicClientToken"

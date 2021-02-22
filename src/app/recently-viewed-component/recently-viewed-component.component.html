@@ -1,6 +1,8 @@
 <div class="center">
     <mat-form-field  *ngIf="recentlyViewedExist()" appearance="fill" >
-        <mat-label>Personal connect endpoints</mat-label>
+        <mat-label [attr.aria-label]="'RECENT.ENDPOINTS' | translate">
+            {{'RECENT.ENDPOINTS' | translate}}
+        </mat-label>
         <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
             <mat-option *ngFor="let endpoint of recentlyViewedEndpoints" [value]="endpoint">
                 {{endpoint.display_name}}
@@ -10,10 +12,8 @@
 </div>
 
 <div class="center" *ngIf="!recentlyViewedExist() && load">
-    <h3>
-        You do not have recently viewed endpoints.<br>
-        Please either use personal connect in "Active Personal Connect Endpoints"<br>
-        or search active endpoints in "Search For Active Endpoints" tab.<br>
+    <h3 class="my-translated-paragraph">
+        {{'PRECENT.ERROR' | translate}}
     </h3>
 </div>
 

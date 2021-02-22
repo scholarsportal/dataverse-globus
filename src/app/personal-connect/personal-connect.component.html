@@ -1,6 +1,8 @@
 <div class="center">
 <mat-form-field  *ngIf="personalConnectExist()" appearance="fill" >
-    <mat-label>Personal connect endpoints</mat-label>
+    <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
+        {{'PERSONAL.ENDPOINTS' | translate}}
+    </mat-label>
     <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
         <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
             {{endpoint.display_name}}
@@ -9,11 +11,8 @@
 </mat-form-field >
 </div>
 <div class="center" *ngIf="!personalConnectExist() && load">
-    <h3>
-    You do not have personal connect endpoint running.<br>
-    Please either start you personal connect<br>
-        or use "Active Recently Viewed Endpoints" tab,<br>
-    or search active endpoints in "Search For Active Endpoints" tab.<br>
+    <h3 class="my-translated-paragraph">
+    {{'PERSONAL.ERROR' | translate}}
     </h3>
 </div>
 
