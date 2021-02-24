@@ -64,21 +64,6 @@ export class InterfaceComponent implements OnInit {
       this.load = false;
       this.title = 'Globus';
 
-      this.dvLocale = this.globusService.getParameterByName('dvLocale');
-      if (this.dvLocale != null) {
-          if (this.dvLocale === 'en') {
-              this.translate.use('English');
-          } else if (this.dvLocale === 'fr') {
-              this.translate.use('Français');
-          } else {
-              const browserLang = this.translate.getBrowserLang();
-              this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
-          }
-      } else {
-          const browserLang = this.translate.getBrowserLang();
-          this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
-      }
-
       this.datasetDirectory = null;
       this.basicClientToken = this.config.basicGlobusToken;
       this.globusEndpoint = this.config.globusEndpoint;
@@ -90,7 +75,9 @@ export class InterfaceComponent implements OnInit {
           console.log(this.key);
           this.siteUrl = this.globusService.getParameterByName('siteUrl');
           console.log(this.siteUrl);
-          const state = btoa(this.datasetPid + '_' + this.key + '_' + this.siteUrl); // encode
+          this.dvLocale = this.globusService.getParameterByName('dvLocale');
+          this.setLanguage();
+          const state = btoa(this.datasetPid + '_' + this.key + '_' + this.siteUrl + '_' + this.dvLocale); // encode
           this.getCode(state);
       } else {
           console.log(code);
@@ -102,6 +89,9 @@ export class InterfaceComponent implements OnInit {
           this.siteUrl = parameters[2];
           console.log(this.datasetPid);
           console.log(this.siteUrl);
+          this.dvLocale = parameters[3];
+          console.log(this.dvLocale);
+          this.setLanguage();
           this.datasetDirectory = '/' + this.datasetPid.substring(this.datasetPid.indexOf(':') + 1) + '/';
           console.log(this.datasetPid);
           this.key = parameters[1];
@@ -115,6 +105,22 @@ export class InterfaceComponent implements OnInit {
                   () => {}
               );*/
           this.getUserAccessToken(code);
+      }
+  }
+  setLanguage() {
+
+      if (this.dvLocale != null) {
+          if (this.dvLocale === 'en') {
+              this.translate.use('English');
+          } else if (this.dvLocale === 'fr') {
+              this.translate.use('Français');
+          } else {
+              const browserLang = this.translate.getBrowserLang();
+              this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+          }
+      } else {
+          const browserLang = this.translate.getBrowserLang();
+          this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
       }
   }
 

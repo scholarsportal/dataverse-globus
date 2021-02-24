@@ -127,8 +127,20 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     if ($event.checked) {
       for (const obj of this.personalDirectories) {
         this.selectedOptions.push(obj);
+
         const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        this.selectedFiles.push(file);
+        console.log(file);
+        console.log(this.selectedFiles);
+        const indx = this.selectedFiles.findIndex(x =>
+              x.fileNameObject === file.fileNameObject &&
+              x.directory === file.directory
+        );
+        console.log(indx);
+        if ( indx === -1) {
+            this.selectedFiles.push(file);
+        }
+        // const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
+        // this.selectedFiles.push(file);
       }
       this.checkFlag = true;
       directory.writeValue(this.personalDirectories);
@@ -278,34 +290,41 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   onSubmitTransfer() {
-    this.snackBar.open('Preparing transfer', '', {
-      duration: 3000
-    });
-    const directoriesArray = new Array();
-    const labelsArray = new Array();
+    console.log(this.datasetPid);
+    if (this.datasetPid.localeCompare('null') !== 0) {
+      this.snackBar.open('Preparing transfer', '', {
+        duration: 3000
+      });
+      const directoriesArray = new Array();
+      const labelsArray = new Array();
 
-    for (const obj of this.selectedFiles ) {
-      if (obj.fileNameObject.type === 'dir') {
-        directoriesArray.push(obj.directory + obj.fileNameObject.name);
-        labelsArray.push(obj.directory);
+      for (const obj of this.selectedFiles) {
+        if (obj.fileNameObject.type === 'dir') {
+          directoriesArray.push(obj.directory + obj.fileNameObject.name);
+          labelsArray.push(obj.directory);
+        } else {
+          this.listOfAllFiles.push(obj.directory + obj.fileNameObject.name);
+          this.listOfFileNames.push(obj.fileNameObject.name);
+          this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
+          this.listOfDirectoryLabels.push('');
+        }
+      }
+      if (directoriesArray.length > 0) {
+        this.findAllSubFiles(directoriesArray, 0, labelsArray);
       } else {
-        this.listOfAllFiles.push(obj.directory + obj.fileNameObject.name);
-        this.listOfFileNames.push(obj.fileNameObject.name);
-        this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
-        this.listOfDirectoryLabels.push('');
+        if (this.listOfAllFiles.length > 0) {
+          const user = this.globusService.getUserInfo(this.userAccessToken);
+
+          const client = this.globusService.getClientToken(this.basicClientToken);
+
+          const array = [user, client]; // forkJoin;
+          this.submit(array);
+        }
       }
-    }
-    if (directoriesArray.length > 0) {
-      this.findAllSubFiles(directoriesArray, 0, labelsArray );
     } else {
-      if (this.listOfAllFiles.length > 0) {
-        const user = this.globusService.getUserInfo(this.userAccessToken);
-
-        const client = this.globusService.getClientToken(this.basicClientToken);
-
-        const array = [user, client]; // forkJoin;
-        this.submit(array);
-      }
+      this.snackBar.open('Dataset directory is not provided', '', {
+        duration: 3000
+      });
     }
   }
 

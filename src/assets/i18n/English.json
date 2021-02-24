@@ -1,0 +1,36 @@
+{
+  "INTERFACE": {
+    "LANG": "Language",
+    "TITLE": "Globus",
+    "PERSONAL": "Active Personal Endpoints",
+    "RECENT": "Active Recently Viewed Endpoints",
+    "SEARCH": "Search For Active Endpoints"
+  },
+  "TEMPLATE": {
+    "DIRECTORY": "Directory",
+    "SEARCH": "Search for Directory",
+    "ERRORACTIVATION": "endpoint is either not activated or you do not have permissions to see the endpoint.",
+    "UP": "Up one folder",
+    "SUBDIR": "Subdirectories and files",
+    "SELECTALL": "Select All",
+    "REMOVEALL": "Remove All",
+    "SELECTEDFILES": "Selected files and folders",
+    "SUBMIT": "Submit Transfer"
+  },
+  "PERSONAL": {
+    "ENDPOINTS": "Personal connect endpoints",
+    "ERROR": "You do not have personal connect endpoint running.\n Please either start you personal connect\n or use 'Active Recently Viewed Endpoints' tab,\n or search active endpoints in 'Search For Active Endpoints' tab.\n"
+  },
+  "RECENT" :{
+    "ENDPOINTS": "Recently viewed endpoints",
+    "ERROR": "You do not have recently viewed endpoints.\n Please either use personal connect in 'Active Personal Connect Endpoints'\n or search active endpoints in 'Search For Active Endpoints' tab."
+  },
+  "SEARCH": {
+    "ENDPOINTS": "Search endpoints",
+    "NAME": "Name",
+    "OWNER": "Owner",
+    "ORGANIZATION": "Organization",
+    "DEPARTMENT": "Department",
+    "DESCRIPTION": "Description"
+  }
+}
