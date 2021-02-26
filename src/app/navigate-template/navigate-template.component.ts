@@ -425,7 +425,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     // "Content-Type", "application/json;
     // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
 
-    const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
+    // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
+    const url = this.siteUrl + '/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
     const formData: any = new FormData();
 
     console.log(this.listOfDirectoryLabels);
