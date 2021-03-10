@@ -1,0 +1,23 @@
+<div class="center">
+    <mat-form-field  *ngIf="personalConnectExist()" appearance="fill" >
+        <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
+            {{'PERSONAL.ENDPOINTS' | translate}}
+        </mat-label>
+        <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
+            <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
+                {{endpoint.display_name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field >
+</div>
+<div class="center" *ngIf="!personalConnectExist() && load">
+    <h3 class="my-translated-paragraph">
+        {{'PERSONAL.ERROR' | translate}}
+    </h3>
+</div>
+
+<ng-container class="interface-container"*ngIf="personalConnectExist() && load ">
+    <app-navigate-template-download [transferData]="dataTransfer"
+                                    [selectedEndPoint]="selectedEndPoint">
+    </app-navigate-template-download>
+</ng-container>

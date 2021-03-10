@@ -1,4 +1,4 @@
-<ng-container class="interface-container" *ngIf="load">
+<ng-container class="interface-container" *ngIf="transferData.load">
   <mat-toolbar class="interface-header">
     <mat-toolbar-row>
       <h1 class="header-text title">{{'INTERFACE.TITLE' | translate}}</h1>
@@ -10,43 +10,4 @@
       </mat-form-field>
     </mat-toolbar-row>
   </mat-toolbar>
-  <mat-tab-group >
-    <mat-tab label="{{'INTERFACE.PERSONAL' | translate}}" [attr.aria-label]="'INTERFACE.PERSONAL' | translate">
-      <ng-template matTabContent>
-        <app-personal-connect [userAccessTokenData]="userAccessTokenData"
-                              [basicClientToken]="basicClientToken"
-                              [datasetDirectory]="datasetDirectory"
-                              [globusEndpoint]="globusEndpoint"
-                              [datasetPid]="datasetPid"
-                              [key]="key"
-                              [siteUrl]="siteUrl">
-
-        </app-personal-connect>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="{{'INTERFACE.RECENT' | translate}}" [attr.aria-label]="'INTERFACE.RECENT' | translate">
-      <ng-template matTabContent>
-        <app-recently-viewed-component [userAccessTokenData]="userAccessTokenData"
-                              [basicClientToken]="basicClientToken"
-                              [datasetDirectory]="datasetDirectory"
-                              [globusEndpoint]="globusEndpoint"
-                              [datasetPid]="datasetPid"
-                              [key]="key">
-
-        </app-recently-viewed-component>
-      </ng-template>
-    </mat-tab>
-    <mat-tab label="{{'INTERFACE.SEARCH' | translate}}" [attr.aria-label]="'INTERFACE.SEARCH' | translate">
-      <ng-template matTabContent>
-        <app-search-endpoint [userAccessTokenData]="userAccessTokenData"
-                                       [basicClientToken]="basicClientToken"
-                                       [datasetDirectory]="datasetDirectory"
-                                       [globusEndpoint]="globusEndpoint"
-                                       [datasetPid]="datasetPid"
-                                       [key]="key">
-
-        </app-search-endpoint>
-      </ng-template>
-    </mat-tab>
-  </mat-tab-group>
 </ng-container>

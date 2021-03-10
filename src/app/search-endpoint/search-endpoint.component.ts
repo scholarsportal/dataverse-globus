@@ -5,15 +5,11 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import { NavigateDirectoriesComponent } from '../navigate-directories/navigate-directories.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {TransferData} from '../upload/upload.component';
 
 interface PassingDataType {
-   userAccessTokenData: any;
-   basicClientToken: string;
-   datasetDirectory: string;
-   globusEndpoint: string;
-   datasetPid: string;
-   key: string;
-   data: any;
+  dataTransfer: TransferData;
+  data: any;
 }
 
 @Component({
@@ -23,11 +19,9 @@ interface PassingDataType {
 })
 export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges {
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
   public dialogRef: MatDialogRef<NavigateDirectoriesComponent>;
   value: string;
-  userOtherAccessToken: string;
-  userAccessToken: string;
+  @Input() dataTransfer: TransferData;
 
   dataSource: MatTableDataSource<any>;
   displayedColumns: any;
@@ -35,34 +29,10 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   constructor(private globusService: GlobusService,
               public dialog: MatDialog) { }
 
-  @Input() userAccessTokenData: any;
-  @Input() basicClientToken: string;
-  @Input() datasetDirectory: string;
-  @Input() globusEndpoint: string;
-  @Input() datasetPid: string;
-  @Input() key: string;
-
-   test = [{display_name: "name", owner_string: "owner", organization: "organization",
-    department:"department", descriptioin:'description' },
-     {display_name: "name", owner_string: "owner", organization: "organization",
-       department:"department", descriptioin:'description' },
-     {display_name: "name", owner_string: "owner", organization: "organization",
-       department:"department", descriptioin:'description' },
-     {display_name: "name", owner_string: "owner", organization: "organization",
-       department:"department", descriptioin:'description' },
-     {display_name: "name", owner_string: "owner", organization: "organization",
-       department:"department", descriptioin:'description' },
-     {display_name: "name", owner_string: "owner", organization: "organization",
-       department:"department", description:'description' },
-     {display_name: "name", owner_string: "owner", organization: "organization",
-       department:"department", description:'description' }];
-
   ngOnInit(): void {
     this.loaded = false;
     this.displayedColumns = ['display_name', 'owner_string', 'organization', 'department', 'description'];
-    this.dataSource = new MatTableDataSource(this.test);
-    this.dataSource.paginator = this.paginator;
-    console.log(this.paginator);
+    this.dataSource = new MatTableDataSource();
     this.loaded = false;
   }
 
@@ -70,14 +40,13 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
   }
 
   searchEndpoints(value) {
     this.loaded = false;
-    console.log(this.userAccessTokenData);
-    if (typeof this.userAccessTokenData !== 'undefined') {
-      this.getEndpoints(this.userAccessTokenData, value)
+
+    if (typeof this.dataTransfer.userAccessTokenData !== 'undefined') {
+      this.getEndpoints(this.dataTransfer.userAccessTokenData, value)
           .subscribe(
               data => {
                 console.log(data);
@@ -96,10 +65,10 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
         '&filter_non_functional=0&limit=100&offset=0';
     console.log(url);
     console.log(userAccessTokenData);
-    this.userOtherAccessToken = userAccessTokenData.other_tokens[0].access_token;
-    this.userAccessToken = userAccessTokenData.access_token;
+    // this.userOtherAccessToken = userAccessTokenData.other_tokens[0].access_token;
+    // this.userAccessToken = userAccessTokenData.access_token;
     return this.globusService
-        .getGlobus(url, 'Bearer ' + this.userOtherAccessToken);
+        .getGlobus(url, 'Bearer ' + this.dataTransfer.userAccessTokenData.other_tokens[0].access_token);
   }
 
   getDisplayedColumns() {
@@ -116,40 +85,16 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
 
   ifExists() {
     if (typeof this.dataSource !== 'undefined' && this.loaded) {
-      console.log(this.paginator);
       return true;
     } else {
       return false;
     }
   }
 
-  getPageSizeOptions(): number[] {
-    if (typeof this.dataSource !== 'undefined') {
-      if (this.dataSource.paginator.length > 100) {
-        return [25, 50, 100, this.dataSource.paginator.length];
-      } else if (this.dataSource.paginator.length > 50 && this.dataSource.paginator.length < 100) {
-        return [25, 50, this.dataSource.paginator.length];
-      } else if (this.dataSource.paginator.length > 25 && this.dataSource.paginator.length < 50) {
-        return [25, this.dataSource.paginator.length];
-      } else if (this.dataSource.paginator.length >= 0 && this.dataSource.paginator.length < 25) {
-        return [this.dataSource.paginator.length];
-      } else {
-        return [25, 50, 100];
-      }
-    } else {
-      return [25];
-    }
-
-  }
 
   openDialog(data): void {
     const passingData: PassingDataType = {
-      userAccessTokenData: this.userAccessTokenData,
-      basicClientToken: this.basicClientToken,
-      datasetDirectory: this.datasetDirectory,
-      globusEndpoint: this.globusEndpoint,
-      datasetPid: this.datasetPid,
-      key: this.key,
+      dataTransfer: this.dataTransfer,
       data
     };
 

@@ -16,16 +16,9 @@
     </h3>
 </div>
 
-<ng-container class="interface-container">
-        <app-navigate-template [userAccessTokenData]="userAccessTokenData"
-                               [basicClientToken]="basicClientToken"
-                               [datasetDirectory]="datasetDirectory"
-                               [globusEndpoint]="globusEndpoint"
-                               [datasetPid]="datasetPid"
-                               [key]="key"
-                               [siteUrl]="siteUrl"
+<ng-container class="interface-container"*ngIf="personalConnectExist() && load ">
+        <app-navigate-template [transferData]="dataTransfer"
                                [selectedEndPoint]="selectedEndPoint">
-
         </app-navigate-template>
 </ng-container>
 

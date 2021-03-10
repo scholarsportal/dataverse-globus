@@ -6,9 +6,11 @@ import { Injectable } from '@angular/core';
 export class ConfigService {
   baseUrl: string;
   id: number;
-  redirectURL: string;
+  redirectUploadURL: string;
+  redirectDownloadURL: string;
   basicGlobusToken: string;
   globusClientId: string;
   globusEndpoint: string;
+  bucket: string;
   constructor() { }
 }

@@ -1,24 +1,14 @@
-import {Component, Input, NgModule, OnChanges, OnInit, ElementRef, ViewChild, AfterViewInit, Renderer2, Output} from '@angular/core';
-import {GlobusService} from '../globus.service';
-import {catchError, filter, flatMap} from 'rxjs/operators';
-import {v4 as uuid } from 'uuid';
-import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {TransferData} from '../upload/upload.component';
-
-
-interface SelFilesType {
-  fileNameObject: any;
-  directory: string;
-}
-
+import {GlobusService} from '../globus.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-personal-connect',
-  templateUrl: './personal-connect.component.html',
-  styleUrls: ['./personal-connect.component.css']
+  selector: 'app-personal-connect-download',
+  templateUrl: './personal-connect-download.component.html',
+  styleUrls: ['./personal-connect-download.component.css']
 })
-export class PersonalConnectComponent implements OnChanges, OnInit {
+export class PersonalConnectDownloadComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
               public snackBar: MatSnackBar) { }
@@ -27,6 +17,8 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   load: boolean;
   selectedEndPoint: any;
   personalConnectEndpoints: Array<object>;
+
+
 
   ngOnInit(): void {
     this.load = false;
@@ -85,6 +77,5 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   setSelectedEndpoint(event) {
     this.selectedEndPoint = event.value;
   }
-
 
 }

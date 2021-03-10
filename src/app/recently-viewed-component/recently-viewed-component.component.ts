@@ -2,6 +2,7 @@ import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {GlobusService} from '../globus.service';
 import {catchError, flatMap} from 'rxjs/operators';
 import {forkJoin, of, throwError} from 'rxjs';
+import {TransferData} from '../upload/upload.component';
 
 interface SelFilesType {
   fileNameObject: any;
@@ -15,35 +16,22 @@ interface SelFilesType {
 })
 export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
 
+  @Input() dataTransfer: TransferData;
+  load: boolean;
   selectedEndPoint: any;
   recentlyViewedEndpoints: Array<object>;
-  selectedDirectory: any;
   recentlyViewedDirectories: any;
 
-  userOtherAccessToken: string;
-  userAccessToken: string;
-  clientToken: string;
-  load: boolean;
   constructor(private globusService: GlobusService) { }
 
-  @Input() userAccessTokenData: any;
-  @Input() basicClientToken: string;
-  @Input() datasetDirectory: string;
-  @Input() globusEndpoint: string;
-  @Input() datasetPid: string;
-  @Input() key: string;
-  @Input() siteUrl: string;
 
   ngOnInit(): void {
     this.load = false;
-    console.log(this.userAccessTokenData);
-    this.selectedDirectory = null;
   }
 
   ngOnChanges() {
-    console.log(this.userAccessTokenData);
-    if (typeof this.userAccessTokenData !== 'undefined') {
-      this.getRecentlyViewedEndpoints(this.userAccessTokenData)
+    if (typeof this.dataTransfer.userAccessTokenData !== 'undefined') {
+      this.getRecentlyViewedEndpoints(this.dataTransfer.userAccessTokenData)
           .subscribe(
               data => this.processPersonalConnect(data),
               error => {console.log(error); this.load = true; },
@@ -58,16 +46,16 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
   getRecentlyViewedEndpoints(userAccessTokenData) {
     const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=recently-used';
     console.log(userAccessTokenData);
-    this.userOtherAccessToken = userAccessTokenData.other_tokens[0].access_token;
-    this.userAccessToken = userAccessTokenData.access_token;
+    // this.userOtherAccessToken = userAccessTokenData.other_tokens[0].access_token;
+    // this.userAccessToken = userAccessTokenData.access_token;
     return this.globusService
-        .getGlobus(url, 'Bearer ' + this.userOtherAccessToken);
+        .getGlobus(url, 'Bearer ' + this.dataTransfer.userAccessTokenData.other_tokens[0].access_token);
   }
 
 
 
   processPersonalConnect(data) {
-    console.log("Process personal connect");
+
     this.recentlyViewedEndpoints = new Array<object>();
     console.log(data);
     for (const obj of data.DATA) {
@@ -78,11 +66,6 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
       console.log('Globus Personal Connect is not connected');
     } else {
       this.selectedEndPoint = this.recentlyViewedEndpoints[0];
-      if (this.selectedEndPoint.default_directory == null) {
-        this.selectedDirectory = '~/';
-      } else {
-        this.selectedDirectory = this.selectedEndPoint.default_directory;
-      }
     }
 
   }

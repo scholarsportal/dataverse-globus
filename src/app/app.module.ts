@@ -36,6 +36,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { NavigateTemplateComponent } from './navigate-template/navigate-template.component';
 import {TranslateLoader, TranslateModule, TranslateParser, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { DownloadComponent } from './download/download.component';
+import { UploadComponent } from './upload/upload.component';
+import {RouterModule} from '@angular/router';
+import { PersonalConnectDownloadComponent } from './personal-connect-download/personal-connect-download.component';
+import { NavigateTemplateDownloadComponent } from './navigate-template-download/navigate-template-download.component';
+import {MatTreeModule} from '@angular/material/tree';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http);
@@ -54,10 +60,12 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
             config.baseUrl = x.baseUrl;
             console.log(config.baseUrl);
             config.id = x.id;
-            config.redirectURL = x.redirectURL;
+            config.redirectUploadURL = x.redirectUploadURL;
+            config.redirectDownloadURL = x.redirectDownloadURL;
             config.basicGlobusToken = x.basicGlobusToken;
             config.globusClientId = x.globusClientId;
             config.globusEndpoint = x.globusEndpoint;
+            config.bucket = x.bucket;
             resolve(true);
           }),
           catchError((x: { status: number }, caught: Observable<void>): ObservableInput<{}> => {
@@ -86,10 +94,18 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     SearchEndpointComponent,
     NavigateDirectoriesComponent,
     NavigateTemplateComponent,
+    DownloadComponent,
+    UploadComponent,
+    PersonalConnectDownloadComponent,
+    NavigateTemplateDownloadComponent,
   ],
     imports: [
         BrowserModule,
         HttpClientModule,
+        RouterModule.forRoot([
+            {path: 'download', component: DownloadComponent},
+            {path: 'upload', component: UploadComponent},
+        ]),
         NoopAnimationsModule,
         MatSelectModule,
         MatomoModule,
@@ -115,6 +131,8 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
                 deps: [HttpClient]
             }
         }),
+        RouterModule,
+        MatTreeModule,
     ],
     entryComponents: [NavigateDirectoriesComponent],
   providers: [GlobusService, {

@@ -17,16 +17,9 @@
     </h3>
 </div>
 
-<ng-container >
-    <app-navigate-template [userAccessTokenData]="userAccessTokenData"
-                           [basicClientToken]="basicClientToken"
-                           [datasetDirectory]="datasetDirectory"
-                           [globusEndpoint]="globusEndpoint"
-                           [datasetPid]="datasetPid"
-                           [key]="key"
-                           [siteUrl]="siteUrl"
+<ng-container *ngIf="recentlyViewedExist() && load">
+    <app-navigate-template [transferData]="dataTransfer"
                            [selectedEndPoint]="selectedEndPoint">
-
     </app-navigate-template>
 </ng-container>
 

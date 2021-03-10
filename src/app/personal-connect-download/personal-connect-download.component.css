@@ -1,0 +1,10 @@
+.center {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+    padding-top: 20px;
+}
+
+.my-translated-paragraph{
+    white-space: pre-wrap;
+}

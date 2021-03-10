@@ -4,8 +4,10 @@ import {forkJoin, of, throwError} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {GlobusService} from '../globus.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {TransferData} from '../upload/upload.component';
+import {ConfigService} from '../config.service';
 
-interface SelFilesType {
+export interface SelFilesType {
   fileNameObject: any;
   directory: string;
 }
@@ -18,15 +20,10 @@ interface SelFilesType {
 export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
+              private configService: ConfigService,
               public snackBar: MatSnackBar) { }
 
-  @Input() userAccessTokenData: any;
-  @Input() basicClientToken: string;
-  @Input() datasetDirectory: string;
-  @Input() globusEndpoint: string;
-  @Input() datasetPid: string;
-  @Input() key: string;
-  @Input() siteUrl: string;
+  @Input() transferData: TransferData;
   @Input() selectedEndPoint: any;
 
   checkFlag: boolean;
@@ -34,8 +31,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   selectedOptions: any;
   selectedFiles: Array<SelFilesType>;
   selectedDirectory: any;
-  userOtherAccessToken: string;
-  userAccessToken: string;
   isSingleClick: boolean;
   listOfAllFiles: Array<string>;
   listOfFileNames: Array<string>;
@@ -54,20 +49,20 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   startComponent() {
-    console.log(this.userAccessTokenData);
     this.load = false;
+    console.log(this.transferData.datasetDirectory);
+    console.log(this.selectedEndPoint);
     this.accessEndpointFlag = false;
     this.selectedFiles = new Array<SelFilesType>();
     this.checkFlag = false;
     this.isSingleClick = true;
-    console.log(this.userAccessTokenData);
     this.listOfAllFiles = new Array<string>();
     this.listOfFileNames = new Array<string>();
     this.listOfDirectoryLabels = new Array<string>();
     this.listOfAllStorageIdentifiers = new Array<string>();
-    if (typeof this.userAccessTokenData !== 'undefined' && typeof this.selectedEndPoint !== 'undefined') {
-      this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
-      this.userAccessToken = this.userAccessTokenData.access_token;
+    if (typeof this.transferData.userAccessTokenData !== 'undefined' && typeof this.selectedEndPoint !== 'undefined') {
+     // this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
+     // this.userAccessToken = this.userAccessTokenData.access_token;
       this.findDirectories()
           .subscribe(
               data => this.processDirectories(data),
@@ -85,7 +80,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   findDirectories() {
-    console.log(this.userOtherAccessToken);
     if (this.selectedEndPoint.default_directory == null) {
       this.selectedDirectory = '~/';
     } else {
@@ -93,14 +87,16 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     }
     const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPoint.id + '/ls';
     return this.globusService
-        .getGlobus(url, 'Bearer ' + this.userOtherAccessToken);
+        .getGlobus(url, 'Bearer ' + this.transferData.userAccessTokenData.other_tokens[0].access_token);
 
   }
 
   searchDirectory(directory) {
     this.checkFlag = false;
     this.selectedDirectory = directory;
-    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPoint.id, this.userOtherAccessToken)
+    this.globusService.getDirectory(this.selectedDirectory,
+        this.selectedEndPoint.id,
+        this.transferData.userAccessTokenData.other_tokens[0].access_token)
         .subscribe(
             data => {
               console.log(data);
@@ -161,7 +157,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   UpOneFolder() {
 
-    this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPoint.id, this.userOtherAccessToken)
+    this.globusService.getDirectory(this.selectedDirectory,
+        this.selectedEndPoint.id,
+        this.transferData.userAccessTokenData.other_tokens[0].access_token)
         .pipe(flatMap(data => this.upFolderProcess(data)))
         .subscribe(
             data => {
@@ -183,7 +181,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
       const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
       const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
-      return this.globusService.getDirectory(path, this.selectedEndPoint.id, this.userOtherAccessToken);
+      return this.globusService.getDirectory(path,
+          this.selectedEndPoint.id,
+          this.transferData.userAccessTokenData.other_tokens[0].access_token);
     } else {
       return of(null);
     }
@@ -240,7 +240,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     if (item.type === 'dir') {
       this.selectedDirectory = this.selectedDirectory + item.name;
 
-      this.globusService.getDirectory(this.selectedDirectory, this.selectedEndPoint.id, this.userOtherAccessToken)
+      this.globusService.getDirectory(this.selectedDirectory,
+          this.selectedEndPoint.id,
+          this.transferData.userAccessTokenData.other_tokens[0].access_token)
           .subscribe(
               data => {
                 console.log(data);
@@ -290,8 +292,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   onSubmitTransfer() {
-    console.log(this.datasetPid);
-    if (this.datasetPid.localeCompare('null') !== 0) {
+    console.log(this.transferData.datasetPid);
+    if (this.transferData.datasetPid.localeCompare('null') !== 0) {
       this.snackBar.open('Preparing transfer', '', {
         duration: 3000
       });
@@ -313,9 +315,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
         this.findAllSubFiles(directoriesArray, 0, labelsArray);
       } else {
         if (this.listOfAllFiles.length > 0) {
-          const user = this.globusService.getUserInfo(this.userAccessToken);
+          const user = this.globusService.getUserInfo(this.transferData.userAccessTokenData.access_token);
 
-          const client = this.globusService.getClientToken(this.basicClientToken);
+          const client = this.globusService.getClientToken(this.transferData.basicClientToken);
 
           const array = [user, client]; // forkJoin;
           this.submit(array);
@@ -329,8 +331,10 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   findAllSubFiles(directory, i, labelsArray) {
-    this.globusService.getDirectory(directory[i], this.selectedEndPoint.id, this.userOtherAccessToken)
-        .pipe(flatMap(d => this.globusService.getInnerDirectories(d, this.selectedEndPoint.id, this.userOtherAccessToken)))
+    this.globusService.getDirectory(directory[i],
+        this.selectedEndPoint.id, this.transferData.userAccessTokenData.other_tokens[0].access_token)
+        .pipe(flatMap(d => this.globusService.getInnerDirectories(d, this.selectedEndPoint.id,
+            this.transferData.userAccessTokenData.other_tokens[0].access_token)))
         .subscribe(
             dir => {
               this.saveDirectories(dir, i, labelsArray);
@@ -344,9 +348,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
                 this.findAllSubFiles(directory, i, labelsArray);
                 // this.submit(array);
               } else {
-                const user = this.globusService.getUserInfo(this.userAccessToken);
+                const user = this.globusService.getUserInfo(this.transferData.userAccessTokenData.access_token);
 
-                const client = this.globusService.getClientToken(this.basicClientToken);
+                const client = this.globusService.getClientToken(this.transferData.basicClientToken);
 
                 const array = [user, client]; // forkJoin;
                 this.submit(array);
@@ -370,7 +374,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   submit(array) {
     forkJoin(array)
-        .pipe(flatMap(obj => this.globusService.getPermission(obj[1], obj[0], this.datasetDirectory, this.globusEndpoint)),
+        .pipe(flatMap(obj => this.globusService.getPermission(obj[1], obj[0],
+            this.transferData.datasetDirectory,
+            this.transferData.globusEndpoint)),
             catchError(err => {
               console.log(err);
               if (err.status === 409) {
@@ -379,15 +385,15 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
               } else {
                 return throwError(err); } }
             ))
-        .pipe(data => this.globusService.submitTransfer(this.userOtherAccessToken))
+        .pipe(data => this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token))
         .pipe( flatMap(data => this.globusService.submitTransferItems(
             this.listOfAllFiles,
-            this.datasetDirectory,
+            this.transferData.datasetDirectory,
             this.listOfAllStorageIdentifiers,
             data['value'],
             this.selectedEndPoint.id,
-            this.globusEndpoint,
-            this.userOtherAccessToken)))
+            this.transferData.globusEndpoint,
+            this.transferData.userAccessTokenData.other_tokens[0].access_token)))
         .subscribe(
             data => {
               console.log(data);
@@ -426,7 +432,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
 
     // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
-    const url = this.siteUrl + '/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
+    const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.transferData.datasetPid;
     const formData: any = new FormData();
 
     console.log(this.listOfDirectoryLabels);
@@ -441,9 +447,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":' + '\"s3://' + this.listOfAllStorageIdentifiers[i] + '\",' +
-          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\",' +
-          '\"contentType\": \"plain/text\" }';
+          '\"storageIdentifier\":' + '\"s3://' + this.configService.bucket + ':' + this.listOfAllStorageIdentifiers[i] + '\",' +
+          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"' + ' }';
       body = body + file;
     }
     body = body + ']}';
@@ -461,8 +466,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     const bodyString = JSON.stringify(body);
 */
     formData.append('jsonData', body);
-    console.log(this.key);
-    this.globusService.postDataverse(url, formData, this.key)
+    console.log(this.transferData.key);
+    this.globusService.postDataverse(url, formData, this.transferData.key)
         .subscribe(
             data => {
               console.log(data);
@@ -475,7 +480,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
             },
             () => {
               console.log('Submitted to dataverse');
-              const urlDataset = this.siteUrl + '/' + 'dataset.xhtml?persistentId=' + this.datasetPid;
+              const urlDataset = this.transferData.siteUrl + '/' + 'dataset.xhtml?persistentId=' + this.transferData.datasetPid;
               this.snackBar.open('Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.', '', {
                 duration: 5000
               });
