@@ -42,6 +42,8 @@ import {RouterModule} from '@angular/router';
 import { PersonalConnectDownloadComponent } from './personal-connect-download/personal-connect-download.component';
 import { NavigateTemplateDownloadComponent } from './navigate-template-download/navigate-template-download.component';
 import {MatTreeModule} from '@angular/material/tree';
+import {MatCardModule} from '@angular/material/card';
+import { SelectDirectoryComponent } from './select-directory/select-directory.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http);
@@ -98,6 +100,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     UploadComponent,
     PersonalConnectDownloadComponent,
     NavigateTemplateDownloadComponent,
+    SelectDirectoryComponent,
   ],
     imports: [
         BrowserModule,
@@ -133,6 +136,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         }),
         RouterModule,
         MatTreeModule,
+        MatCardModule,
     ],
     entryComponents: [NavigateDirectoriesComponent],
   providers: [GlobusService, {

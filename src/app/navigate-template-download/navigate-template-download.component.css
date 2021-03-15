@@ -21,7 +21,11 @@
     padding-right: 10px;
 }
 
-.mat-selection-list {
+.class-icon-folder {
+    color: mediumblue;
+}
+
+.mat-tree {
     height: 75%;
     width: 100%;
     overflow: auto;
@@ -30,4 +34,10 @@
 .mat-grid-list {
     height:450px;
     width:100%;
+}
+
+.mat-selection-list {
+    height: 75%;
+    width: 100%;
+    overflow: auto;
 }

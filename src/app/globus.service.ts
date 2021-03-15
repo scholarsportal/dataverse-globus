@@ -96,6 +96,7 @@ export class GlobusService {
   }
 
   getPermission(clientToken, userIdentity, datasetDirectory, globusEndpoint) {
+    console.log("getting permissions!!!");
     console.log(userIdentity);
     console.log(clientToken);
     const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + globusEndpoint + '/access';
@@ -184,6 +185,34 @@ export class GlobusService {
     const bodyString = JSON.stringify(body);
     console.log(bodyString);
     return this.postGlobus(url, bodyString, 'Bearer ' + userOtherAccessToken);
+  }
+
+  submitTransferToUser(selectedFiles, datasetDirectory, listOfAllStorageIdentifiers, submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
+    /*console.log("Starting submit transfer Item");
+    console.log(submissionId);
+    const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
+    const taskItemsArray = new Array();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const taskItem = {
+        DATA_TYPE: 'transfer_item',
+        source_path: datasetDirectory,
+        destination_path: datasetDirectory + listOfAllStorageIdentifiers[i],
+        recursive: false
+      };
+      taskItemsArray.push(taskItem);
+    }
+    const body = {
+      DATA_TYPE: 'transfer',
+      DATA: taskItemsArray,
+      submission_id: submissionId,
+      notify_on_succeeded: true,
+      notify_on_failed: true,
+      source_endpoint: selectedEndPointId,
+      destination_endpoint: globusEndpoint
+    };
+    const bodyString = JSON.stringify(body);
+    console.log(bodyString);
+    return this.postGlobus(url, bodyString, 'Bearer ' + userOtherAccessToken);*/
   }
 
   saveDirectories(dir, listOfAllFiles, listOfFileNames, listOfAllStorageIdentifiers) {

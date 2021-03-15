@@ -373,6 +373,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   submit(array) {
+
+    console.log("Start submitting!!!");
     forkJoin(array)
         .pipe(flatMap(obj => this.globusService.getPermission(obj[1], obj[0],
             this.transferData.datasetDirectory,
@@ -385,7 +387,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
               } else {
                 return throwError(err); } }
             ))
-        .pipe(data => this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token))
+        .pipe(flatMap(data => this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)))
         .pipe( flatMap(data => this.globusService.submitTransferItems(
             this.listOfAllFiles,
             this.transferData.datasetDirectory,
@@ -447,7 +449,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":' + '\"s3://' + this.configService.bucket + ':' + this.listOfAllStorageIdentifiers[i] + '\",' +
+          '\"storageIdentifier\":' + '\"s3://' + this.listOfAllStorageIdentifiers[i] + '\",' +
           '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"' + ' }';
       body = body + file;
     }

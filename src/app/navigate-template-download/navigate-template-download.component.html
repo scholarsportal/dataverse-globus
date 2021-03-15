@@ -1,80 +1,106 @@
-<!--<div *ngIf="selectedDirectoryExist() && accessEndpointFlag">
+<!-- <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
 
-    <mat-list #directory>
-        <h2 matSubheader style="min-width: 250px">{{'TEMPLATE.SUBDIR' | translate}}</h2>
-        <mat-list-item color="primary" *ngFor="let item of personalDirectories"
-                       (dblclick)="openDirectory($event, item, directory)">
-                <mat-icon class="class-icon" matSuffix *ngIf="isFolder(item)">folder</mat-icon>
-                {{item.name}}
-        </mat-list-item>
-    </mat-list>
-    <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
-        <mat-label [attr.aria-label]="'TEMPLATE.DIRECTORY' | translate">{{'TEMPLATE.DIRECTORY' | translate}}</mat-label>
-        <input type="search" matInput placeholder="'TEMPLATE.DIRECTORY' | translate" value="{{selectedDirectory}}" (keydown.enter)="searchDirectory($event.target.value)" >
-        <mat-icon matSuffix>search</mat-icon>
-        <mat-hint>{{'TEMPLATE.SEARCH' | translate}}</mat-hint>
-    </mat-form-field>
+  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
 
-</div> -->
+   <button mat-icon-button disabled></button>
+   <mat-checkbox class="mat-checkbox" labelPosition="before"
+                 [checked]="checkFlag"
+                 (change)="onSelection($event, node)">
+    {{node.name}}
+   </mat-checkbox>
+  </mat-tree-node>
 
-<div class="center"  >
-    <mat-grid-list cols="2" gutterSize="100px" rowHeight="fit" >
-        <mat-grid-tile
-                [colspan]="1"
-                [rowspan]="1"
-                [style.background]="">
-            <mat-grid-tile-header>
-                <mat-checkbox class="mat-checkbox"
-                              [attr.aria-label]="'TEMPLATE.SELECTALL' | translate" #check
-                              [checked]="checkFlag"
-                              (change)="selectAll($event, directory)">
-                    {{'TEMPLATE.SELECTALL' | translate}}
-                </mat-checkbox>
-                <button mat-stroked-button (click)="UpOneFolder()" >
-                    <mat-icon class="class-icon" matSuffix
-                              [attr.aria-label]="'TEMPLATE.UP' | translate">subdirectory_arrow_left
-                    </mat-icon>
-                    {{'TEMPLATE.UP' | translate}}
-                </button>
-            </mat-grid-tile-header>
-            <mat-selection-list #directory
-                                [(ngModel)]="selectedOptions"
-                                (selectionChange)="onSelection($event, directory.selectedOptions)">
-                <h2 matSubheader style="min-width: 250px">{{'TEMPLATE.SUBDIR' | translate}}</h2>
-                <mat-list-option  *ngFor="let item of personalDirectories" [value]="item">
-                    <mat-list-item color="primary"
-                                   (click)="checkBox($event, item)"
-                                   (dblclick)="openDirectory($event, item, directory, check)">
-                        <mat-icon class="class-icon" matSuffix *ngIf="isFolder(item)">folder</mat-icon>
-                        {{item.name}}
-                    </mat-list-item>
-                </mat-list-option>
-            </mat-selection-list>
-        </mat-grid-tile>
-        <mat-grid-tile
-                [colspan]="1"
-                [rowspan]="1"
-                [style.background]="">
-            <mat-grid-tile-header>
-                <button mat-stroked-button (click)="removeAllFromSelected(directory)">
-                    <mat-icon class="class-icon"  matSuffix
-                              [attr.aria-label]="'TEMPLATE.REMOVEALL' | translate">
-                        remove_circle
-                    </mat-icon>
-                    {{'TEMPLATE.REMOVEALL' | translate }}
-                </button>
-            </mat-grid-tile-header>
-            <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
-                <h2 matSubheader>{{'TEMPLATE.SELECTEDFILES' | translate}}</h2>
-                <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
-                    <mat-list-item>
-                        <mat-icon class="class-icon" matSuffix *ngIf="isFolder(file.fileNameObject)">folder</mat-icon>
-                        {{file.fileNameObject.name}}
-                    </mat-list-item>
-                </mat-list-option>
-            </mat-selection-list>
-        </mat-grid-tile>
-    </mat-grid-list>
+  <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
+   <button mat-icon-button matTreeNodeToggle
+           [attr.aria-label]="'Toggle ' + node.name">
+    <mat-icon class="class-icon-folder">
+
+     {{treeControl.isExpanded(node) ? 'folder_open' : 'folder'}}
+    </mat-icon>
+   </button>
+   <div *ngIf="!treeControl.isExpanded(node)">
+   <mat-checkbox class="mat-checkbox" labelPosition="before"
+                 [checked]="checkFlag"
+                 (change)="onSelection($event, node)">
+    {{node.name}}
+   </mat-checkbox>
+   </div>
+   <div *ngIf="treeControl.isExpanded(node)">
+     {{node.name}}
+   </div>
+  </mat-tree-node>
+ </mat-tree> -->
+<div class="center">
+ <button mat-stroked-button (click)="selectDirectory()" >
+  Directory:  {{selectedDirectory}}
+  <mat-icon class="class-icon"  matSuffix >search</mat-icon>
+ </button>
 </div>
-<!--<app-upload-file *ngIf="personalConnectExist()"></app-upload-file> -->
+<div class="center" *ngIf="loaded">
+
+ <mat-grid-list cols="2" gutterSize="100px" rowHeight="fit" >
+  <mat-grid-tile
+          [colspan]="1"
+          [rowspan]="1"
+          [style.background]="">
+   <mat-grid-tile-header>
+    <mat-checkbox class="mat-checkbox"
+                  [attr.aria-label]="'TEMPLATE.SELECTALL' | translate" #check
+                  [checked]="checkFlag"
+                  (change)="selectAll($event, directory)">
+     {{'TEMPLATE.SELECTALL' | translate}}
+    </mat-checkbox>
+    <button mat-stroked-button (click)="UpOneFolder()" >
+     <mat-icon class="class-icon" matSuffix
+               [attr.aria-label]="'TEMPLATE.UP' | translate">subdirectory_arrow_left
+     </mat-icon>
+     {{'TEMPLATE.UP' | translate}}
+    </button>
+   </mat-grid-tile-header>
+   <mat-selection-list #directory
+                       [(ngModel)]="selectedOptions"
+                       (selectionChange)="onSelection($event, directory.selectedOptions)">
+    <h2 matSubheader style="min-width: 250px">{{'TEMPLATE.SUBDIR' | translate}}</h2>
+    <mat-list-option  *ngFor="let item of personalDirectories" [value]="item">
+     <mat-list-item color="primary"
+                    (click)="checkBox($event, item)"
+                    (dblclick)="openDirectory($event, item, directory, check)">
+      <mat-icon class="class-icon" matSuffix *ngIf="isFolder(item)">folder</mat-icon>
+      {{item.name}}
+     </mat-list-item>
+    </mat-list-option>
+   </mat-selection-list>
+  </mat-grid-tile>
+  <mat-grid-tile
+          [colspan]="1"
+          [rowspan]="1"
+          [style.background]="">
+   <mat-grid-tile-header>
+    <button mat-stroked-button (click)="removeAllFromSelected(directory)">
+     <mat-icon class="class-icon"  matSuffix
+               [attr.aria-label]="'TEMPLATE.REMOVEALL' | translate">
+      remove_circle
+     </mat-icon>
+     {{'TEMPLATE.REMOVEALL' | translate }}
+    </button>
+   </mat-grid-tile-header>
+   <mat-selection-list #varCol (selectionChange)="onRemoving($event, directory)">
+    <h2 matSubheader>{{'TEMPLATE.SELECTEDFILES' | translate}}</h2>
+    <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
+     <mat-list-item>
+      <mat-icon class="class-icon" matSuffix *ngIf="isFolder(file)">folder</mat-icon>
+      {{file.name}}
+     </mat-list-item>
+    </mat-list-option>
+   </mat-selection-list>
+  </mat-grid-tile>
+ </mat-grid-list>
+</div>
+
+<div class="center">
+ <button mat-stroked-button (click)="onSubmitTransfer()" [disabled]="!preparedForTransfer()">
+  <mat-icon class="class-icon"  matSuffix [attr.aria-label]="'TEMPLATE.SUBMIT' | translate">cloud_upload</mat-icon>
+  {{'TEMPLATE.SUBMIT' | translate}}
+ </button>
+</div>
 

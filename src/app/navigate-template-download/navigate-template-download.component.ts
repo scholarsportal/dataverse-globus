@@ -5,6 +5,24 @@ import {SelFilesType} from '../navigate-template/navigate-template.component';
 import {catchError, flatMap} from 'rxjs/operators';
 import {forkJoin, of, throwError} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {FlatTreeControl} from '@angular/cdk/tree';
+import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
+import {Stack} from '../stack';
+import {NavigateDirectoriesComponent} from '../navigate-directories/navigate-directories.component';
+import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+
+interface DirectoryNode {
+  name: string;
+  storageIdentifier: string;
+  children?: DirectoryNode[];
+}
+
+interface ExampleFlatNode {
+  expandable: boolean;
+  name: string;
+  level: number;
+}
 
 @Component({
   selector: 'app-navigate-template-download',
@@ -14,24 +32,30 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
-              public snackBar: MatSnackBar) { }
+              public dialog: MatDialog,
+              public snackBar: MatSnackBar) {
+  }
 
   @Input() transferData: TransferData;
   @Input() selectedEndPoint: any;
 
+  public dialogRef: MatDialogRef<SelectDirectoryComponent>;
+  selectedDirectory: string;
+  files: Array<string>;
+  paths: Array<object>;
+  levels: Stack<object>;
+
+  loaded: boolean;
+  tree: any;
+
   checkFlag: boolean;
   personalDirectories: any;
   selectedOptions: any;
-  selectedFiles: Array<SelFilesType>;
-  selectedDirectory: any;
+  selectedFiles: Array<object>;
   isSingleClick: boolean;
-  listOfAllFiles: Array<string>;
-  listOfFileNames: Array<string>;
-  listOfAllStorageIdentifiers: Array<string>;
-  listOfDirectoryLabels: Array<string>;
-  taskId: string;
-  accessEndpointFlag: boolean;
-  load: boolean;
+  storageIdentifiers: Array<string>;
+
+
 
   ngOnInit(): void {
     this.startComponent();
@@ -42,71 +66,100 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   }
 
   startComponent() {
-    this.load = false;
-    console.log(this.selectedEndPoint);
-    this.accessEndpointFlag = false;
-    this.selectedFiles = new Array<SelFilesType>();
-    this.checkFlag = false;
-    this.isSingleClick = true;
-    this.listOfAllFiles = new Array<string>();
-    this.listOfFileNames = new Array<string>();
-    this.listOfDirectoryLabels = new Array<string>();
-    this.listOfAllStorageIdentifiers = new Array<string>();
+    console.log(this.transferData);
+    this.selectedFiles = new Array<object>();
+    this.loaded = false;
+    if (this.selectedEndPoint.default_directory == null) {
+      this.selectedDirectory = '~/';
+    } else {
+      this.selectedDirectory = this.selectedEndPoint.default_directory;
+    }
     if (typeof this.transferData.userAccessTokenData !== 'undefined' && typeof this.transferData.globusEndpoint !== 'undefined') {
-      // this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
-      // this.userAccessToken = this.userAccessTokenData.access_token;
       this.findDirectories()
           .subscribe(
               data => this.processDirectories(data),
               error => {
                 console.log(error);
-                this.load = true;
+                //this.load = true;
               },
               () => {
-                console.log(this.checkFlag);
-                this.accessEndpointFlag = true;
-                this.load = true;
+                this.loaded = true;
               }
           );
     }
   }
 
   findDirectories() {
-    if (this.selectedEndPoint.default_directory == null) {
-      this.selectedDirectory = '~/';
-    } else {
-      this.selectedDirectory = this.selectedEndPoint.default_directory;
-    }
-    const url = this.transferData.siteUrl + '/api/datasets/' +
-        this.transferData.datasetId + '/versions/' +
+    const url = 'http://localhost:8080/api/datasets/' + this.transferData.datasetId + '/versions/' +
         this.transferData.datasetVersion + '/files';
     return this.globusService
         .getDataverse(url, this.transferData.key);
+  }
+
+  processDirectories(data) {
+    console.log(data.data);
+    this.files = new Array<string>();
+    this.paths = new Array<object>();
+    this.storageIdentifiers = new Array<string> ();
+    for (const obj of data.data) {
+      if (typeof obj.directoryLabel !== 'undefined') {
+        const fullFile = obj.directoryLabel + '/' + obj.label;
+        this.files.push(fullFile);
+        this.paths.push(fullFile.split('/'));
+      } else {
+        this.files.push(obj.label);
+        this.paths.push(obj.label.split('/'));
+      }
+      console.log(obj.dataFile.storageIdentifier);
+      console.log(obj.dataFile.storageIdentifier.split(':')[2]);
+      this.storageIdentifiers.push(obj.dataFile.storageIdentifier.split(':')[2]);
+    }
+    console.log(this.files);
+    console.log(this.paths);
+    this.personalDirectories = this.arrangeIntoTree(this.paths);
+    this.tree = this.personalDirectories;
+    console.log(JSON.stringify(this.personalDirectories, null, 4));
+    this.levels = new Stack<object>();
+    this.selectedOptions = new Array<object>();
 
   }
 
-  searchDirectory(directory) {
-    this.checkFlag = false;
-    this.selectedDirectory = directory;
-    this.globusService.getDirectory(this.selectedDirectory,
-        this.selectedEndPoint.id,
-        this.transferData.userAccessTokenData.other_tokens[0].access_token)
-        .subscribe(
-            data => {
-              console.log(data);
-              this.processDirectories(data);
-            },
-            error => {
-              console.log(error);
-            },
-            () => {
-            }
-        );
+  arrangeIntoTree(paths) {
+    const tree = [];
+
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+      let currentLevel = tree;
+      const storageId = this.storageIdentifiers[i];
+      for (let j = 0; j < path.length; j++) {
+        const part = path[j];
+
+        const existingPath = this.findWhere(currentLevel, 'name', part);
+
+        if (existingPath) {
+          currentLevel = existingPath.children;
+        } else {
+          const newPart = {
+            name: part,
+            storageIdentifier: storageId,
+            children: [],
+          };
+
+          currentLevel.push(newPart);
+          currentLevel = newPart.children;
+        }
+      }
+    }
+    return tree;
   }
 
-  preparedForTransfer() {
-    if (this.selectedFiles.length > 0) {
-      return true;
+  findWhere(array, key, value) {
+    let t = 0; // t is used as a counter
+    while (t < array.length && array[t][key] !== value) {
+      t++;
+    }
+    if (t < array.length) {
+      return array[t];
     } else {
       return false;
     }
@@ -118,105 +171,52 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
       for (const obj of this.personalDirectories) {
         this.selectedOptions.push(obj);
 
-        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        console.log(file);
+       // const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
+        console.log(obj);
         console.log(this.selectedFiles);
         const indx = this.selectedFiles.findIndex(x =>
-            x.fileNameObject === file.fileNameObject &&
-            x.directory === file.directory
-        );
+            x['name'] === obj.name        );
         console.log(indx);
         if ( indx === -1) {
-          this.selectedFiles.push(file);
+          this.selectedFiles.push(obj);
         }
-        // const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        // this.selectedFiles.push(file);
       }
       this.checkFlag = true;
       directory.writeValue(this.personalDirectories);
     } else {
       this.checkFlag = false;
-      for (const obj of this.personalDirectories) {
-
-        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        const indx = this.selectedFiles.indexOf(file);
+     /* for (const obj of this.personalDirectories) {
+        const indx = this.selectedFiles.indexOf(obj);
         if (indx !== -1) {
           this.selectedFiles.splice(indx, 1);
         }
-      }
+      }*/
       this.selectedOptions = new Array<object>();
       directory.writeValue(this.selectedOptions);
     }
   }
 
-  UpOneFolder() {
-
-    this.globusService.getDirectory(this.selectedDirectory,
-        this.selectedEndPoint.id,
-        this.transferData.userAccessTokenData.other_tokens[0].access_token)
-        .pipe(flatMap(data => this.upFolderProcess(data)))
-        .subscribe(
-            data => {
-              if (data !== null) {
-                this.processDirectories(data);
-              }
-            },
-            error => {
-              console.log(error);
-            },
-            () => {
-              this.checkFlag = false;
-            }
-        );
-  }
-
-  upFolderProcess(data) {
-    const absolutePath = data.absolute_path;
-    if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
-      const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
-      const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
-      return this.globusService.getDirectory(path,
-          this.selectedEndPoint.id,
-          this.transferData.userAccessTokenData.other_tokens[0].access_token);
-    } else {
-      return of(null);
-    }
-  }
-
-  processDirectories(data) {
-    console.log(data.data);
-    this.selectedOptions = new Array<object>();
-    this.personalDirectories = new Array<object>();
-    this.selectedDirectory = data.path;
-    for (const obj of data.data) {
-      // if (obj.type === 'dir') {
-      this.personalDirectories.push(obj);
-      // }
-    }
-  }
-
-  onSelection($event,  selectedFiles) {
+  onSelection($event, selectedFiles) {
     this.isSingleClick = true;
+    console.log($event.option._value);
     setTimeout(() => {
       if (this.isSingleClick ){
 
-        const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
+        // const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
         if ($event.option._selected) {
-          console.log(file);
           console.log(this.selectedFiles);
           const indx = this.selectedFiles.findIndex(x =>
-              x.fileNameObject === file.fileNameObject &&
-              x.directory === file.directory
+              x['name'] === $event.option._value.name
           );
           console.log(indx);
           if ( indx === -1) {
-            this.selectedFiles.push(file);
+            this.selectedFiles.push($event.option._value);
           }
         } else {
-          const indx = this.selectedFiles.indexOf(file);
+          /*const indx = this.selectedFiles.indexOf($event.option._value);
           if ( indx !== -1) {
             this.selectedFiles.splice(indx, 1);
-          }
+          }*/
           this.checkFlag = false;
         }
       }
@@ -229,43 +229,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
     }
   }
 
-  openDirectory($event, item, directory, check) {
-    this.isSingleClick = false;
-    this.selectedOptions = new Array<object>();
-    if (item.type === 'dir') {
-      this.selectedDirectory = this.selectedDirectory + item.name;
-
-      this.globusService.getDirectory(this.selectedDirectory,
-          this.selectedEndPoint.id,
-          this.transferData.userAccessTokenData.other_tokens[0].access_token)
-          .subscribe(
-              data => {
-                console.log(data);
-                this.processDirectories(data);
-              },
-              error => {
-                console.log(error);
-              },
-              () => {
-                this.selectedOptions = new Array<object>();
-                directory.writeValue(this.selectedOptions);
-                check.checked = false;
-              }
-          );
-    }
-  }
-
-  isFolder(item) {
-    if (item.type === 'dir') {
-      return true;
-    } else {
-      return false;
-    }
-
-  }
-
   removeAllFromSelected(directory) {
-    this.selectedFiles = new Array<SelFilesType>();
+    this.selectedFiles = new Array<object>();
     directory.writeValue(null);
     this.selectedOptions = new Array();
     this.checkFlag = false;
@@ -276,7 +241,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
       const indx = this.selectedFiles.indexOf($event.option._value);
       if ( indx !== -1) {
         this.selectedFiles.splice(indx, 1);
-        const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
+        const indx2 = this.selectedOptions.indexOf($event.option._value.name);
         if (indx2 !== -1) {
           this.selectedOptions.splice(indx2, 1);
           selectedList.writeValue(this.selectedOptions);
@@ -286,12 +251,88 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
     }
   }
 
-  selectedDirectoryExist() {
-    if (typeof this.selectedDirectory !== 'undefined' && this.selectedDirectory !== null) {
+  isFolder(file) {
+    if (file.children.length > 0) {
       return true;
     } else {
       return false;
     }
   }
+
+  UpOneFolder() {
+    const up = this.levels.pop();
+    console.log(up);
+    if (typeof up !== 'undefined') {
+      this.personalDirectories = up;
+      this.checkFlag = false;
+    }
+  }
+
+  openDirectory($event, item, directory, check) {
+    this.isSingleClick = false;
+    this.selectedOptions = new Array<object>();
+    console.log(directory);
+    this.selectedOptions = new Array<object>();
+    if (item.children.length > 0) {
+      this.levels.push(this.personalDirectories);
+      // this.selectedDirectory = this.selectedDirectory + item.name;
+      this.selectedOptions = new Array<object>();
+      this.personalDirectories = item.children;
+      directory.writeValue(this.selectedOptions);
+      check.checked = false;
+    }
+  }
+
+  onSubmitTransfer() {
+
+  /*  this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)
+    .pipe( flatMap(data => this.globusService.submitTransferToUser(
+        this.listOfAllFiles,
+        this.transferData.datasetDirectory,
+        this.listOfAllStorageIdentifiers,
+        data['value'],
+        this.selectedEndPoint.id,
+        this.transferData.globusEndpoint,
+        this.transferData.userAccessTokenData.other_tokens[0].access_token)))
+        .subscribe(
+            data => {
+              console.log(data);
+              this.taskId = data['task_id'];
+            },
+            error => {
+              console.log(error);
+              this.snackBar.open('There was an error in transfer submittion. BIIG ', '', {
+                duration: 3000
+              });
+            },
+            () => {
+              console.log('Transfer submitted');
+
+            }
+        );*/
+  }
+
+  preparedForTransfer() {
+    if (this.selectedFiles.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  selectDirectory() {
+   /* const passingData: PassingDataType = {
+      dataTransfer: this.dataTransfer,
+      data
+    };*/
+
+    this.dialogRef = this.dialog.open(SelectDirectoryComponent, {
+      data: this.tree,
+      //panelClass: 'field_width',
+      width: '800px'
+    });
+  }
+
+
 
 }

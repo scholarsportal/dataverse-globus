@@ -1,0 +1,19 @@
+<ng-container >
+    <div mat-dialog-content >
+        <h1 class="center">Select Directory</h1>
+        <mat-selection-list #directories [multiple]="false">
+            <mat-list-option *ngFor="let item of dir" [value]="item">
+                {{item.name}}
+            </mat-list-option>
+        </mat-selection-list>
+
+        <p>
+            Option selected: {{directories.selectedOptions.selected[0]?.value.name}}
+        </p>
+
+    </div>
+        <mat-dialog-actions align="center">
+            <button mat-button mat-dialog-close>Cancel</button>
+            <button mat-button [mat-dialog-close]="true" cdkFocusInitial>OK</button>
+        </mat-dialog-actions>
+</ng-container>
