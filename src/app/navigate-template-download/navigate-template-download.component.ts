@@ -11,17 +11,12 @@ import {Stack} from '../stack';
 import {NavigateDirectoriesComponent} from '../navigate-directories/navigate-directories.component';
 import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {PassingDataType} from '../search-endpoint/search-endpoint.component';
 
-interface DirectoryNode {
-  name: string;
-  storageIdentifier: string;
-  children?: DirectoryNode[];
-}
-
-interface ExampleFlatNode {
-  expandable: boolean;
-  name: string;
-  level: number;
+export interface PassingDataSelectType {
+  dataTransfer: TransferData;
+  selectedEndpoint: any;
+  selectedDirectory: string;
 }
 
 @Component({
@@ -321,13 +316,14 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   }
 
   selectDirectory() {
-   /* const passingData: PassingDataType = {
-      dataTransfer: this.dataTransfer,
-      data
-    };*/
+    const passingData: PassingDataSelectType = {
+      dataTransfer: this.transferData,
+      selectedEndpoint: this.selectedEndPoint,
+      selectedDirectory: this.selectedDirectory
+    };
 
     this.dialogRef = this.dialog.open(SelectDirectoryComponent, {
-      data: this.tree,
+      data: passingData,
       //panelClass: 'field_width',
       width: '800px'
     });

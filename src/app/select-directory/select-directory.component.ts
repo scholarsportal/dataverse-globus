@@ -8,17 +8,13 @@ import {MAT_DIALOG_DATA} from '@angular/material/dialog';
 })
 export class SelectDirectoryComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public passingData: any) { }
   dir: Array<object>;
 
   ngOnInit(): void {
-    console.log(this.data);
+    console.log(this.passingData);
     this.dir = new Array<object>();
-    for (const obj of this.data) {
-      if (obj.children.length > 0) {
-        this.dir.push(obj);
-      }
-    }
+
   }
 
   submit() {

@@ -7,7 +7,7 @@ import { NavigateDirectoriesComponent } from '../navigate-directories/navigate-d
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {TransferData} from '../upload/upload.component';
 
-interface PassingDataType {
+export interface PassingDataType {
   dataTransfer: TransferData;
   data: any;
 }
