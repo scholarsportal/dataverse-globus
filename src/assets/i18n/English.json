@@ -1,7 +1,7 @@
 {
   "INTERFACE": {
     "LANG": "Language",
-    "TITLE": "Globus",
+    "TITLE": "Dataverse Globus Transfer Tool",
     "PERSONAL": "Active Personal Endpoints",
     "RECENT": "Active Recently Viewed Endpoints",
     "SEARCH": "Search For Active Endpoints"
@@ -9,7 +9,7 @@
   "TEMPLATE": {
     "DIRECTORY": "Directory",
     "SEARCH": "Search for Directory",
-    "ERRORACTIVATION": "endpoint is either not activated or you do not have permissions to see the endpoint.",
+    "ERRORACTIVATION": "endpoint is either not activated or you do not have permissions to access it.",
     "UP": "Up one folder",
     "SUBDIR": "Subdirectories and files",
     "SELECTALL": "Select All",
@@ -18,15 +18,15 @@
     "SUBMIT": "Submit Transfer"
   },
   "PERSONAL": {
-    "ENDPOINTS": "Personal connect endpoints",
-    "ERROR": "You do not have personal connect endpoint running.\n Please either start you personal connect\n or use 'Active Recently Viewed Endpoints' tab,\n or search active endpoints in 'Search For Active Endpoints' tab.\n"
+    "ENDPOINTS": "Connect Personal endpoints",
+    "ERROR": "You do not have Globus Connect Personal running.\n Please either start your Connect Personal application\n, select 'Active Recently Viewed Endpoints',\n or search for active endpoints.\n"
   },
   "RECENT" :{
     "ENDPOINTS": "Recently viewed endpoints",
-    "ERROR": "You do not have recently viewed endpoints.\n Please either use personal connect in 'Active Personal Connect Endpoints'\n or search active endpoints in 'Search For Active Endpoints' tab."
+    "ERROR": "You do not have any recently viewed endpoints.\n Please either use Connect Personal in 'Active Connect Personal Endpoints'\n or search for active endpoints in 'Search For Active Endpoints'."
   },
   "SEARCH": {
-    "ENDPOINTS": "Search endpoints",
+    "ENDPOINTS": "Search all endpoints",
     "NAME": "Name",
     "OWNER": "Owner",
     "ORGANIZATION": "Organization",

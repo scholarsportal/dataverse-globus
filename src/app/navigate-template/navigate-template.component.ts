@@ -403,7 +403,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
             },
             error => {
               console.log(error);
-              this.snackBar.open('There was an error in transfer submittion. BIIG ', '', {
+              this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
                 duration: 3000
               });
             },
@@ -476,7 +476,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
             },
             error => {
               console.log(error);
-              this.snackBar.open('There was an error in transfer submittion. ', '', {
+              this.snackBar.open('There was an error in transfer submission. ', '', {
                 duration: 3000
               });
             },
