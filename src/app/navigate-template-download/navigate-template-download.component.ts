@@ -85,7 +85,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   }
 
   findDirectories() {
-    const url = 'http://localhost:8080/api/datasets/' + this.transferData.datasetId + '/versions/' +
+    const url = this.transferData.siteUrl + '/api/datasets/' + this.transferData.datasetId + '/versions/' +
         this.transferData.datasetVersion + '/files';
     return this.globusService
         .getDataverse(url, this.transferData.key);
