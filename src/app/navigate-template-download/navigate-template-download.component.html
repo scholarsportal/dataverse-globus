@@ -41,7 +41,7 @@
     <mat-label [attr.aria-label]="'TEMPLATE.DIRECTORY' | translate">{{'TEMPLATE.DIRECTORY' | translate}}</mat-label>
     <input  type="search" matInput placeholder="'TEMPLATE.DIRECTORY' | translate" value="{{selectedDirectory}}" (keydown.enter)="setDirectory($event.target.value)">
     <mat-icon matSuffix>subdirectory_arrow_left</mat-icon>
-    <mat-hint>Directory to Download to {{selectedDirectory}}</mat-hint>
+    <mat-hint [attr.aria-label]="'DIRECTORY.DOWNLOAD' | translate">{{'DIRECTORY.DOWNLOAD' | translate}}{{selectedDirectory}}</mat-hint>
    </mat-form-field>
    <button class="button-search" mat-button (click)="selectDirectory()" >
     <mat-icon class="class-icon"  matSuffix >search</mat-icon>

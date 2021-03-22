@@ -32,5 +32,12 @@
     "ORGANIZATION": "Organization FR",
     "DEPARTMENT": "Department FR",
     "DESCRIPTION": "Description FR"
+  },
+  "DIRECTORY": {
+    "SELECT": "Select Directory FR",
+    "SELECTED": "Selected Directory FR",
+    "CANCEL": "Cancel FR",
+    "OK": "OK FR",
+    "DOWNLOAD": "Directory to Download to FR "
   }
 }

@@ -1,6 +1,6 @@
 <ng-container >
     <div mat-dialog-content >
-        <h1 class="center">Select Directory</h1>
+        <h1 class="center">{{'DIRECTORY.SELECT' | translate}}</h1>
         <mat-grid-list class="mat-grid-list-class" cols="1" rowHeight="fit">
             <mat-grid-tile>
                 <mat-grid-tile-header>
@@ -28,12 +28,12 @@
         <mat-grid-list class="mat-grid-list-class2" cols="1" rows="2" rowHeight="fit">
             <mat-grid-tile>
             <p>
-                Option selected: {{directories.selectedOptions.selected[0]?.value.name}}
+                {{'DIRECTORY.SELECTED' | translate}}: {{directories.selectedOptions.selected[0]?.value.name}}
             </p>
             </mat-grid-tile>
             <mat-grid-tile>
-            <button mat-button mat-dialog-close>Cancel</button>
-            <button mat-button [mat-dialog-close]="true" cdkFocusInitial (click)="submit(directories.selectedOptions.selected[0]?.value.name)">OK</button>
+            <button mat-button mat-dialog-close>{{'DIRECTORY.CANCEL' | translate}}</button>
+            <button mat-button [mat-dialog-close]="true" cdkFocusInitial (click)="submit(directories.selectedOptions.selected[0]?.value.name)">{{'DIRECTORY.OK' | translate}}</button>
             </mat-grid-tile>
         </mat-grid-list>
     </div>

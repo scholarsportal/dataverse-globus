@@ -32,5 +32,12 @@
     "ORGANIZATION": "Organization",
     "DEPARTMENT": "Department",
     "DESCRIPTION": "Description"
+  },
+  "DIRECTORY": {
+    "SELECT": "Select Directory",
+    "SELECTED": "Selected Directory",
+    "CANCEL": "Cancel",
+    "OK": "OK",
+    "DOWNLOAD": "Directory to Download to "
   }
 }
