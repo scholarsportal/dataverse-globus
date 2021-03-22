@@ -1,4 +1,4 @@
- <div class="center" *ngIf="selectedDirectoryExist() && accessEndpointFlag">
+ <!--<div class="center" *ngIf="selectedDirectoryExist() && accessEndpointFlag">
 
         <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
             <mat-label [attr.aria-label]="'TEMPLATE.DIRECTORY' | translate">{{'TEMPLATE.DIRECTORY' | translate}}</mat-label>
@@ -11,12 +11,22 @@
  <div class="center" *ngIf="!accessEndpointFlag && this.load">
      <br>
      <h3 class="center">"{{this.selectedEndPoint.display_name}}" {{'TEMPLATE.ERRORACTIVATION' | translate}}</h3>
- </div>
+ </div>-->
  <div class="center" *ngIf="selectedDirectoryExist() && accessEndpointFlag" >
-     <mat-grid-list cols="2" gutterSize="100px" rowHeight="fit" >
+     <mat-grid-list cols="2" rows="6" gutterSize="20px" rowHeight="fit" >
+         <mat-grid-tile>
+             <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
+                 <mat-label [attr.aria-label]="'TEMPLATE.DIRECTORY' | translate">{{'TEMPLATE.DIRECTORY' | translate}}</mat-label>
+                 <input type="search" matInput placeholder="'TEMPLATE.DIRECTORY' | translate" value="{{selectedDirectory}}" (keydown.enter)="searchDirectory($event.target.value)" >
+                 <mat-icon matSuffix>search</mat-icon>
+                 <mat-hint>{{'TEMPLATE.SEARCH' | translate}}</mat-hint>
+             </mat-form-field>
+         </mat-grid-tile>
+         <mat-grid-tile>
+         </mat-grid-tile>
          <mat-grid-tile
                  [colspan]="1"
-                 [rowspan]="1"
+                 [rowspan]="5"
                  [style.background]="">
              <mat-grid-tile-header>
                  <mat-checkbox class="mat-checkbox"
@@ -48,7 +58,7 @@
          </mat-grid-tile>
          <mat-grid-tile
                  [colspan]="1"
-                 [rowspan]="1"
+                 [rowspan]="5"
                  [style.background]="">
              <mat-grid-tile-header>
                  <button mat-stroked-button (click)="removeAllFromSelected(directory)">

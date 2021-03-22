@@ -30,18 +30,27 @@
    </div>
   </mat-tree-node>
  </mat-tree> -->
-<div class="center">
- <button mat-stroked-button (click)="selectDirectory()" >
-  Directory:  {{selectedDirectory}}
-  <mat-icon class="class-icon"  matSuffix >search</mat-icon>
- </button>
-</div>
-<div class="center" *ngIf="loaded">
 
- <mat-grid-list cols="2" gutterSize="100px" rowHeight="fit" >
+<div class="center-grid" *ngIf="loaded">
+
+ <mat-grid-list   cols="2" rows="6"  gutterSize="20px" rowHeight="fit" >
+  <mat-grid-tile>
+  </mat-grid-tile>
+  <mat-grid-tile>
+   <mat-form-field *ngIf="selectedDirectory!==null" appearance="fill">
+    <mat-label [attr.aria-label]="'TEMPLATE.DIRECTORY' | translate">{{'TEMPLATE.DIRECTORY' | translate}}</mat-label>
+    <input  type="search" matInput placeholder="'TEMPLATE.DIRECTORY' | translate" value="{{selectedDirectory}}" (keydown.enter)="setDirectory($event.target.value)">
+    <mat-icon matSuffix>subdirectory_arrow_left</mat-icon>
+    <mat-hint>Directory to Download to {{selectedDirectory}}</mat-hint>
+   </mat-form-field>
+   <button class="button-search" mat-button (click)="selectDirectory()" >
+    <mat-icon class="class-icon"  matSuffix >search</mat-icon>
+   </button>
+  </mat-grid-tile>
+
   <mat-grid-tile
           [colspan]="1"
-          [rowspan]="1"
+          [rowspan]="5"
           [style.background]="">
    <mat-grid-tile-header>
     <mat-checkbox class="mat-checkbox"
@@ -73,7 +82,7 @@
   </mat-grid-tile>
   <mat-grid-tile
           [colspan]="1"
-          [rowspan]="1"
+          [rowspan]="5"
           [style.background]="">
    <mat-grid-tile-header>
     <button mat-stroked-button (click)="removeAllFromSelected(directory)">
@@ -97,7 +106,7 @@
  </mat-grid-list>
 </div>
 
-<div class="center">
+<div class="center" *ngIf="loaded">
  <button mat-stroked-button (click)="onSubmitTransfer()" [disabled]="!preparedForTransfer()">
   <mat-icon class="class-icon"  matSuffix [attr.aria-label]="'TEMPLATE.SUBMIT' | translate">cloud_upload</mat-icon>
   {{'TEMPLATE.SUBMIT' | translate}}

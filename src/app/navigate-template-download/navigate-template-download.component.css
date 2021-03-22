@@ -5,6 +5,7 @@
     padding-right: 20px;
     padding-left:20px;
     padding-bottom: 20px;
+    padding-top: 10px;
 }
 .center-grid {
     display: flex;
@@ -12,8 +13,8 @@
     margin: auto;
     padding-right: 20px;
     padding-left:20px;
-    padding-bottom: 20px;
-    height:600px;
+    padding-top: 10px;
+
 }
 
 .class-icon {
@@ -25,19 +26,41 @@
     color: mediumblue;
 }
 
-.mat-tree {
+/*.mat-tree {
     height: 75%;
     width: 100%;
     overflow: auto;
-}
-
-.mat-grid-list {
-    height:450px;
-    width:100%;
-}
+}*/
 
 .mat-selection-list {
     height: 75%;
     width: 100%;
     overflow: auto;
 }
+
+.mat-form-field {
+    height: 100%;
+    width: 100%;
+}
+
+.mat-grid-list {
+    height:500px;
+    width:100%;
+
+}
+
+
+
+.button-search {
+    width: 10%;
+    height:80%;
+    overflow: auto;
+    margin-left: 5px;
+    margin-bottom: 30px;
+}
+
+
+
+
+
+

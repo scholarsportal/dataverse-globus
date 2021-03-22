@@ -177,8 +177,8 @@ export class GlobusService {
       DATA_TYPE: 'transfer',
       DATA: taskItemsArray,
       submission_id: submissionId,
-      notify_on_succeeded: true,
-      notify_on_failed: true,
+      notify_on_succeeded: false,
+      notify_on_failed: false,
       source_endpoint: selectedEndPointId,
       destination_endpoint: globusEndpoint
     };
@@ -187,16 +187,17 @@ export class GlobusService {
     return this.postGlobus(url, bodyString, 'Bearer ' + userOtherAccessToken);
   }
 
-  submitTransferToUser(selectedFiles, datasetDirectory, listOfAllStorageIdentifiers, submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
-    /*console.log("Starting submit transfer Item");
+  submitTransferToUser(listOfAllFiles, listOfAllPaths, submissionId, datasetDirectory, selectedDirectory, globusEndpoint, selectedEndpoint, userOtherAccessToken) {
+    console.log("Starting submit transfer Item");
     console.log(submissionId);
     const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
     const taskItemsArray = new Array();
-    for (let i = 0; i < selectedFiles.length; i++) {
+    for (let i = 0; i < listOfAllFiles.length; i++) {
+      console.log(listOfAllFiles[i]);
       const taskItem = {
         DATA_TYPE: 'transfer_item',
-        source_path: datasetDirectory,
-        destination_path: datasetDirectory + listOfAllStorageIdentifiers[i],
+        source_path: datasetDirectory + listOfAllFiles[i].storageIdentifier,
+        destination_path: selectedDirectory + listOfAllPaths[i] + listOfAllFiles[i].name,
         recursive: false
       };
       taskItemsArray.push(taskItem);
@@ -207,12 +208,12 @@ export class GlobusService {
       submission_id: submissionId,
       notify_on_succeeded: true,
       notify_on_failed: true,
-      source_endpoint: selectedEndPointId,
-      destination_endpoint: globusEndpoint
+      source_endpoint: globusEndpoint,
+      destination_endpoint: selectedEndpoint.id
     };
     const bodyString = JSON.stringify(body);
     console.log(bodyString);
-    return this.postGlobus(url, bodyString, 'Bearer ' + userOtherAccessToken);*/
+    return this.postGlobus(url, bodyString, 'Bearer ' + userOtherAccessToken);
   }
 
   saveDirectories(dir, listOfAllFiles, listOfFileNames, listOfAllStorageIdentifiers) {

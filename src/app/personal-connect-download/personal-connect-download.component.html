@@ -1,4 +1,7 @@
-<div class="center">
+<mat-grid-list cols="2" row="1" rowHeight="fit" gutterSize="20px">
+    <mat-grid-tile>
+    </mat-grid-tile>
+    <mat-grid-tile>
     <mat-form-field  *ngIf="personalConnectExist()" appearance="fill" >
         <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
             {{'PERSONAL.ENDPOINTS' | translate}}
@@ -9,7 +12,8 @@
             </mat-option>
         </mat-select>
     </mat-form-field >
-</div>
+    </mat-grid-tile>
+</mat-grid-list>
 <div class="center" *ngIf="!personalConnectExist() && load">
     <h3 class="my-translated-paragraph">
         {{'PERSONAL.ERROR' | translate}}

@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
 import {GlobusService} from '../globus.service';
 import {TransferData} from '../upload/upload.component';
 import {SelFilesType} from '../navigate-template/navigate-template.component';
@@ -15,7 +15,7 @@ import {PassingDataType} from '../search-endpoint/search-endpoint.component';
 
 export interface PassingDataSelectType {
   dataTransfer: TransferData;
-  selectedEndpoint: any;
+  selectedEndPoint: any;
   selectedDirectory: string;
 }
 
@@ -49,6 +49,9 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   selectedFiles: Array<object>;
   isSingleClick: boolean;
   storageIdentifiers: Array<string>;
+  listOfAllFiles: Array<object>;
+  listOfAllPaths: Array<string>;
+  taskId: string;
 
 
 
@@ -87,6 +90,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   findDirectories() {
     const url = this.transferData.siteUrl + '/api/datasets/' + this.transferData.datasetId + '/versions/' +
         this.transferData.datasetVersion + '/files';
+    console.log(url);
     return this.globusService
         .getDataverse(url, this.transferData.key);
   }
@@ -277,19 +281,27 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
       check.checked = false;
     }
   }
-
+  findChildren(array, path) {
+    console.log(array);
+    for (const obj of array ) {
+      if (obj.children.length === 0) {
+        console.log(obj);
+        this.listOfAllFiles.push(obj);
+        this.listOfAllPaths.push(path);
+      } else {
+        this.findChildren(obj.children, path + obj.name + '/');
+      }
+    }
+  }
   onSubmitTransfer() {
+    this.listOfAllFiles = new Array<object>();
+    this.listOfAllPaths = new Array<string>();
+    this.findChildren(this.selectedFiles, '');
 
-  /*  this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)
+    this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)
     .pipe( flatMap(data => this.globusService.submitTransferToUser(
-        this.listOfAllFiles,
-        this.transferData.datasetDirectory,
-        this.listOfAllStorageIdentifiers,
-        data['value'],
-        this.selectedEndPoint.id,
-        this.transferData.globusEndpoint,
-        this.transferData.userAccessTokenData.other_tokens[0].access_token)))
-        .subscribe(
+        this.listOfAllFiles, this.listOfAllPaths, data['value'], this.transferData.datasetDirectory,
+        this.selectedDirectory, this.transferData.globusEndpoint, this.selectedEndPoint, this.transferData.userAccessTokenData.other_tokens[0].access_token)))        .subscribe(
             data => {
               console.log(data);
               this.taskId = data['task_id'];
@@ -304,7 +316,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
               console.log('Transfer submitted');
 
             }
-        );*/
+        );
   }
 
   preparedForTransfer() {
@@ -318,15 +330,26 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   selectDirectory() {
     const passingData: PassingDataSelectType = {
       dataTransfer: this.transferData,
-      selectedEndpoint: this.selectedEndPoint,
+      selectedEndPoint: this.selectedEndPoint,
       selectedDirectory: this.selectedDirectory
     };
 
     this.dialogRef = this.dialog.open(SelectDirectoryComponent, {
       data: passingData,
       //panelClass: 'field_width',
-      width: '800px'
+      width: '400px'
     });
+
+    const sub = this.dialogRef.componentInstance.updateSelectedDirectoryEvent.subscribe((x) => {
+      this.selectedDirectory = x;
+      console.log(x);
+    });
+    // this.dialogRef.afterClosed().subscribe(() => {
+      // unsubscribe onAdd
+    // });
+  }
+  setDirectory(directory) {
+    this.selectedDirectory = directory;
   }
 
 
