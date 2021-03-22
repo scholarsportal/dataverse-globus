@@ -67,7 +67,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
       }
     }
     if (this.personalConnectEndpoints.length === 0) {
-      console.log('Globus Personal Connect is not connected');
+      console.log('Globus Connect Personal is not connected');
     } else {
       this.selectedEndPoint = this.personalConnectEndpoints[0];
     }
@@ -85,6 +85,5 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   setSelectedEndpoint(event) {
     this.selectedEndPoint = event.value;
   }
-
 
 }
