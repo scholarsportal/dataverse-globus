@@ -63,7 +63,7 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
 
     }
     if (this.recentlyViewedEndpoints.length === 0) {
-      console.log('Globus Personal Connect is not connected');
+      console.log('Globus Connect Personal is not connected');
     } else {
       this.selectedEndPoint = this.recentlyViewedEndpoints[0];
     }

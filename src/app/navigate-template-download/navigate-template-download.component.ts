@@ -296,7 +296,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
             },
             error => {
               console.log(error);
-              this.snackBar.open('There was an error in transfer submittion. BIIG ', '', {
+              this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
                 duration: 3000
               });
             },
