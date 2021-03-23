@@ -1,0 +1,22 @@
+.center {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+    padding-top: 20px;
+}
+
+.my-translated-paragraph{
+    white-space: pre-wrap;
+}
+
+.mat-form-field {
+    height: 80%;
+    width: 100%;
+    padding-right: 12%;
+}
+
+.mat-grid-list {
+    height:60px;
+    width:100%;
+
+}

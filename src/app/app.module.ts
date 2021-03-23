@@ -44,6 +44,7 @@ import { NavigateTemplateDownloadComponent } from './navigate-template-download/
 import {MatTreeModule} from '@angular/material/tree';
 import {MatCardModule} from '@angular/material/card';
 import { SelectDirectoryComponent } from './select-directory/select-directory.component';
+import { RecentlyViewedDownloadComponent } from './recently-viewed-download/recently-viewed-download.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http);
@@ -101,6 +102,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     PersonalConnectDownloadComponent,
     NavigateTemplateDownloadComponent,
     SelectDirectoryComponent,
+    RecentlyViewedDownloadComponent,
   ],
     imports: [
         BrowserModule,

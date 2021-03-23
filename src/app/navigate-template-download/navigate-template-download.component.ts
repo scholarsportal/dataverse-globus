@@ -71,9 +71,11 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
       this.selectedDirectory = '~/';
     } else {
       this.selectedDirectory = this.selectedEndPoint.default_directory;
+      console.log(this.selectedEndPoint);
     }
     if (typeof this.transferData.userAccessTokenData !== 'undefined' && typeof this.transferData.globusEndpoint !== 'undefined') {
-      this.findDirectories()
+      this.findDirectoryDefault()
+          .pipe(flatMap(data => this.findDirectories(data)))
           .subscribe(
               data => this.processDirectories(data),
               error => {
@@ -87,7 +89,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
     }
   }
 
-  findDirectories() {
+  findDirectories(data) {
+    this.selectedDirectory = data['path'];
     const url = this.transferData.siteUrl + '/api/datasets/' + this.transferData.datasetId + '/versions/' +
         this.transferData.datasetVersion + '/files';
     console.log(url);
@@ -95,6 +98,17 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
         .getDataverse(url, this.transferData.key);
   }
 
+  findDirectoryDefault() {
+    if (this.selectedEndPoint.default_directory == null) {
+      this.selectedDirectory = '~/';
+    } else {
+      this.selectedDirectory = this.selectedEndPoint.default_directory;
+    }
+    const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPoint.id + '/ls';
+    return this.globusService
+        .getGlobus(url, 'Bearer ' + this.transferData.userAccessTokenData.other_tokens[0].access_token);
+
+  }
   processDirectories(data) {
     console.log(data.data);
     this.files = new Array<string>();
