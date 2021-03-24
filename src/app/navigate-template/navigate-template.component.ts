@@ -39,6 +39,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   taskId: string;
   accessEndpointFlag: boolean;
   load: boolean;
+  ruleId: string;
+  clientToken: any;
 
   ngOnInit(): void {
     this.startComponent();
@@ -50,6 +52,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   startComponent() {
     this.load = false;
+    this.ruleId = null;
+    this.clientToken = null;
     console.log(this.transferData.datasetDirectory);
     console.log(this.selectedEndPoint);
     this.accessEndpointFlag = false;
@@ -376,9 +380,12 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
     console.log("Start submitting!!!");
     forkJoin(array)
-        .pipe(flatMap(obj => this.globusService.getPermission(obj[1], obj[0],
-            this.transferData.datasetDirectory,
-            this.transferData.globusEndpoint)),
+        .pipe(flatMap(obj => {
+          this.clientToken = obj[1];
+          return this.globusService.getPermission(obj[1], obj[0],
+                  this.transferData.datasetDirectory,
+                  this.transferData.globusEndpoint, 'rw');
+            }),
             catchError(err => {
               console.log(err);
               if (err.status === 409) {
@@ -387,8 +394,12 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
               } else {
                 return throwError(err); } }
             ))
-        .pipe(flatMap(data => this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)))
-        .pipe( flatMap(data => this.globusService.submitTransferItems(
+        .pipe(flatMap(data => {
+            this.ruleId = data.access_id;
+            return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
+            }
+            ))
+            .pipe( flatMap(data => this.globusService.submitTransferItems(
             this.listOfAllFiles,
             this.transferData.datasetDirectory,
             this.listOfAllStorageIdentifiers,
@@ -477,18 +488,37 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
             },
             error => {
               console.log(error);
+              // this.removeRule();
               this.snackBar.open('There was an error in transfer submission. ', '', {
                 duration: 3000
               });
             },
             () => {
               console.log('Submitted to dataverse');
+              // this.removeRule();
               const urlDataset = this.transferData.siteUrl + '/' + 'dataset.xhtml?persistentId=' + this.transferData.datasetPid;
               this.snackBar.open('Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.', '', {
                 duration: 5000
               });
             }
         );
+  }
+
+  removeRule() {
+    console.log(this.ruleId);
+    if (this.ruleId !== null && this.clientToken !== null && typeof this.ruleId !== 'undefined') {
+      this.globusService.deleteRule(this.ruleId, this.transferData.globusEndpoint, this.clientToken)
+          .subscribe(
+              data => {
+              },
+              error => {
+                console.log(error);
+              },
+              () => {
+                console.log('Rule deleted');
+              }
+          );
+    }
   }
 
   selectedDirectoryExist() {

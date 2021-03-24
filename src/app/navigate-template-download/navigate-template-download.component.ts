@@ -52,6 +52,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   listOfAllFiles: Array<object>;
   listOfAllPaths: Array<string>;
   taskId: string;
+  ruleId: string;
+  clientToken: any;
 
 
 
@@ -65,6 +67,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
   startComponent() {
     console.log(this.transferData);
+    this.ruleId = null;
+    this.clientToken = null;
     this.selectedFiles = new Array<object>();
     this.loaded = false;
     if (this.selectedEndPoint.default_directory == null) {
@@ -312,25 +316,78 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
     this.listOfAllPaths = new Array<string>();
     this.findChildren(this.selectedFiles, '');
 
-    this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)
-    .pipe( flatMap(data => this.globusService.submitTransferToUser(
-        this.listOfAllFiles, this.listOfAllPaths, data['value'], this.transferData.datasetDirectory,
-        this.selectedDirectory, this.transferData.globusEndpoint, this.selectedEndPoint, this.transferData.userAccessTokenData.other_tokens[0].access_token)))        .subscribe(
-            data => {
-              console.log(data);
-              this.taskId = data['task_id'];
-            },
-            error => {
-              console.log(error);
-              this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
-                duration: 3000
-              });
-            },
-            () => {
-              console.log('Transfer submitted');
+    if (this.listOfAllFiles.length > 0) {
+      const user = this.globusService.getUserInfo(this.transferData.userAccessTokenData.access_token);
 
-            }
-        );
+      const client = this.globusService.getClientToken(this.transferData.basicClientToken);
+
+      const array = [user, client]; // forkJoin;
+
+      forkJoin(array)
+          .pipe(flatMap(obj => {
+            this.clientToken = obj[1];
+            console.log(this.clientToken);
+            return this.globusService.getPermission(obj[1], obj[0],
+                    this.transferData.datasetDirectory,
+                    this.transferData.globusEndpoint, 'r');
+              }),
+              catchError(err => {
+                    console.log(err);
+                    if (err.status === 409) {
+                      console.log('Rule exists');
+                      return of(err);
+                    } else {
+                      return throwError(err);
+                    }
+                  }
+              ))
+          .pipe(flatMap(data => {
+            console.log("Rules");
+            console.log(data);
+            this.ruleId = data.access_id;
+            return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
+          } ))
+          .pipe(flatMap(data => this.globusService.submitTransferToUser(
+              this.listOfAllFiles, this.listOfAllPaths, data['value'], this.transferData.datasetDirectory,
+              this.selectedDirectory, this.transferData.globusEndpoint, this.selectedEndPoint, this.transferData.userAccessTokenData.other_tokens[0].access_token)))
+          .subscribe(
+              data => {
+                console.log(data);
+                this.taskId = data['task_id'];
+              },
+              error => {
+                console.log(error);
+                // this.removeRule();
+                this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+                  duration: 3000
+                });
+              },
+              () => {
+                console.log('Transfer submitted');
+                // this.removeRule();
+                this.snackBar.open('The transfer was submitted', '', {
+                  duration: 3000
+                });
+              }
+          );
+    }
+  }
+
+  removeRule() {
+    console.log(this.ruleId);
+    if (this.ruleId !== null && this.clientToken !== null && typeof this.ruleId !== 'undefined') {
+      this.globusService.deleteRule(this.ruleId, this.transferData.globusEndpoint, this.clientToken)
+          .subscribe(
+              data => {
+              },
+              error => {
+                console.log(error);
+              },
+              () => {
+                console.log('Rule deleted');
+              }
+          );
+    }
   }
 
   preparedForTransfer() {

@@ -38,6 +38,15 @@ export class GlobusService {
     // return this.http.post(url,body, httpOptions);
   }
 
+  deleteGlobus(url: string, key: string) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        Authorization: key
+      })
+    };
+    return this.http.delete(url,  httpOptions);
+  }
+
   postGlobus(url: string, body: string, key: string) {
     console.log("Start posting Globus");
     const httpOptions = {
@@ -95,7 +104,7 @@ export class GlobusService {
     return this.getGlobus(url, 'Bearer ' + userAccessToken);
   }
 
-  getPermission(clientToken, userIdentity, datasetDirectory, globusEndpoint) {
+  getPermission(clientToken, userIdentity, datasetDirectory, globusEndpoint, userPerm) {
     console.log("getting permissions!!!");
     console.log(userIdentity);
     console.log(clientToken);
@@ -107,7 +116,7 @@ export class GlobusService {
       principal_type: 'identity',
       principal: userIdentity.sub,
       path: datasetDirectory,
-      permissions: 'rw'
+      permissions: userPerm
     };
     const stringPermissions = JSON.stringify(permissions);
     console.log(stringPermissions);
@@ -226,6 +235,12 @@ export class GlobusService {
         listOfAllStorageIdentifiers.push(this.generateStorageIdentifier());
       }
     }
+  }
+
+  deleteRule(accessId, endpointId, clientToken) {
+    const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + endpointId + '/access/' + accessId;
+    const key = 'Bearer ' + clientToken.other_tokens[0].access_token;
+    return this.deleteGlobus(url, key);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
