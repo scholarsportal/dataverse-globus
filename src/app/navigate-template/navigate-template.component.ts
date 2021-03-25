@@ -462,7 +462,11 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
           '\"storageIdentifier\":' + '\"s3://' + this.configService.bucket + ':' +
           this.listOfAllStorageIdentifiers[i] + '\",' +
-          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"' + ' }';
+          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
+      if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
+        file = file + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
+      }
+      file = file +  ' } ';
       body = body + file;
     }
     body = body + ']}';

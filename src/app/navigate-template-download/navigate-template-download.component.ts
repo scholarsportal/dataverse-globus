@@ -12,6 +12,7 @@ import {NavigateDirectoriesComponent} from '../navigate-directories/navigate-dir
 import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {PassingDataType} from '../search-endpoint/search-endpoint.component';
+import {ConfigService} from '../config.service';
 
 export interface PassingDataSelectType {
   dataTransfer: TransferData;

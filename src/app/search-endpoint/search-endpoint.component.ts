@@ -10,6 +10,7 @@ import {TransferData} from '../upload/upload.component';
 export interface PassingDataType {
   dataTransfer: TransferData;
   data: any;
+  action: boolean;
 }
 
 @Component({
@@ -22,6 +23,7 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   public dialogRef: MatDialogRef<NavigateDirectoriesComponent>;
   value: string;
   @Input() dataTransfer: TransferData;
+  @Input() action: boolean; // upload true, download false
 
   dataSource: MatTableDataSource<any>;
   displayedColumns: any;
@@ -95,14 +97,16 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   openDialog(data): void {
     const passingData: PassingDataType = {
       dataTransfer: this.dataTransfer,
-      data
+      data,
+      action: this.action
     };
-
+    console.log("opening dialog");
     this.dialogRef = this.dialog.open(NavigateDirectoriesComponent, {
-      data: passingData,
-      //panelClass: 'field_width',
-      width: '800px'
-    });
+        data: passingData,
+        //panelClass: 'field_width',
+        width: '800px'
+      });
+
   }
 
 }

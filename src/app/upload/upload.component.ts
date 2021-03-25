@@ -24,12 +24,14 @@ export class UploadComponent implements OnInit {
   constructor(private config: ConfigService) { }
   redirectURL: string;
   dataTransfer: TransferData;
+  action: boolean; // true for upload
 
 
   ngOnInit(): void {
     this.redirectURL = this.config.redirectUploadURL;
     this.dataTransfer = {} as TransferData;
     this.dataTransfer.load = false;
+    this.action = true;
   }
 
   ifLoaded(dataTransfer: TransferData) {

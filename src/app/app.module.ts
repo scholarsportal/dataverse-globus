@@ -102,7 +102,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     PersonalConnectDownloadComponent,
     NavigateTemplateDownloadComponent,
     SelectDirectoryComponent,
-    RecentlyViewedDownloadComponent,
+    RecentlyViewedDownloadComponent
   ],
     imports: [
         BrowserModule,

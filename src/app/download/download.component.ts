@@ -12,11 +12,13 @@ export class DownloadComponent implements OnInit {
   constructor(private config: ConfigService) { }
   redirectURL: string;
   dataTransfer: TransferData;
+  action: boolean; // false for download
 
   ngOnInit(): void {
     this.redirectURL = this.config.redirectDownloadURL;
     this.dataTransfer = {} as TransferData;
     this.dataTransfer.load = false;
+    this.action = false;
   }
 
   ifLoaded(dataTransfer: TransferData) {

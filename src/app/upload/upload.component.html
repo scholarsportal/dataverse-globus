@@ -17,7 +17,8 @@
         </mat-tab>
         <mat-tab label="{{'INTERFACE.SEARCH' | translate}}" [attr.aria-label]="'INTERFACE.SEARCH' | translate">
             <ng-template matTabContent>
-                <app-search-endpoint [dataTransfer]="dataTransfer">
+                <app-search-endpoint [dataTransfer]="dataTransfer"
+                                     [action]="action">
                 </app-search-endpoint>
             </ng-template>
         </mat-tab>
