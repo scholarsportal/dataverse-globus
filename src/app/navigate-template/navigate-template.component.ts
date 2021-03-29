@@ -450,7 +450,11 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
     console.log(this.listOfDirectoryLabels);
     console.log(this.listOfAllStorageIdentifiers);
-    let body = '{ \"taskIdentifier\": \"' + this.taskId + '\", \"files\": [';
+    let body = '{ \"taskIdentifier\": \"' + this.taskId + '\"'; // + " , \"files\": [';
+    if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
+      body = body + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
+    }
+    body = body + ', \"files\": [';
     let file = '';
     for (let i = 0; i < this.listOfAllStorageIdentifiers.length; i++) {
       if (i > 0) {
@@ -463,9 +467,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
           '\"storageIdentifier\":' + '\"s3://' + this.configService.bucket + ':' +
           this.listOfAllStorageIdentifiers[i] + '\",' +
           '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
-      if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
-        file = file + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
-      }
       file = file +  ' } ';
       body = body + file;
     }
