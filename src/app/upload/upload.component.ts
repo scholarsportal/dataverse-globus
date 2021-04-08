@@ -12,6 +12,8 @@ export interface TransferData {
   datasetId: string;
   key: string;
   siteUrl: string;
+  fileId: string;
+  fileMetadataId: string;
 }
 
 @Component({

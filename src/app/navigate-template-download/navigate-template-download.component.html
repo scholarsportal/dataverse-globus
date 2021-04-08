@@ -31,7 +31,13 @@
   </mat-tree-node>
  </mat-tree> -->
 
-<div class="center-grid" *ngIf="loaded">
+
+<div class="center" *ngIf="!accessEndpointFlag && this.loaded">
+ <br>
+ <h3 class="center">"{{this.selectedEndPoint.display_name}}" {{'TEMPLATE.ERRORACTIVATION' | translate}}</h3>
+</div>
+
+<div class="center-grid" *ngIf="loaded && accessEndpointFlag && type!==2">
 
  <mat-grid-list   cols="2" rows="6"  gutterSize="20px" rowHeight="fit" >
   <mat-grid-tile>
@@ -106,7 +112,19 @@
  </mat-grid-list>
 </div>
 
-<div class="center" *ngIf="loaded">
+<div  *ngIf="type === 2" >
+ <mat-form-field class="div-class"  *ngIf="selectedDirectory!==null" appearance="fill">
+  <mat-label [attr.aria-label]="'TEMPLATE.DIRECTORY' | translate">{{'TEMPLATE.DIRECTORY' | translate}}</mat-label>
+  <input  type="search" matInput placeholder="'TEMPLATE.DIRECTORY' | translate" value="{{selectedDirectory}}" (keydown.enter)="setDirectory($event.target.value)">
+  <mat-icon matSuffix>subdirectory_arrow_left</mat-icon>
+  <mat-hint [attr.aria-label]="'DIRECTORY.DOWNLOAD' | translate">{{'DIRECTORY.DOWNLOAD' | translate}}{{selectedDirectory}}</mat-hint>
+ </mat-form-field>
+ <button mat-button  (click)="selectDirectory()" >
+  <mat-icon class="class-icon-search"  matSuffix >search</mat-icon>
+ </button>
+</div>
+
+<div class="center" *ngIf="loaded && accessEndpointFlag">
  <button mat-stroked-button (click)="onSubmitTransfer()" [disabled]="!preparedForTransfer()">
   <mat-icon class="class-icon"  matSuffix [attr.aria-label]="'TEMPLATE.SUBMIT' | translate">cloud_upload</mat-icon>
   {{'TEMPLATE.SUBMIT' | translate}}

@@ -453,6 +453,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     let body = '{ \"taskIdentifier\": \"' + this.taskId + '\"'; // + " , \"files\": [';
     if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
       body = body + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
+    } else {
+      body = body + ',\"ruleId\":' + '\"' + '\"';
     }
     body = body + ', \"files\": [';
     let file = '';

@@ -1,27 +1,21 @@
-<mat-grid-list cols="2" row="1" rowHeight="fit" gutterSize="20px">
-    <mat-grid-tile>
-    </mat-grid-tile>
-    <mat-grid-tile>
-    <mat-form-field  *ngIf="personalConnectExist()" appearance="fill" >
-        <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
-            {{'PERSONAL.ENDPOINTS' | translate}}
-        </mat-label>
-        <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
-            <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
-                {{endpoint.display_name}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field >
-    </mat-grid-tile>
-</mat-grid-list>
+<app-endpoint-template (newItemEvent)="setSelectedEndpoint($event)"
+                       (loadedEvent)="ifLoaded($event)"
+                       [type]="type"
+                       [transferData] = "dataTransfer"
+                       [typeOfTab]="0">
+</app-endpoint-template>
+
 <div class="center" *ngIf="!personalConnectExist() && load">
     <h3 class="my-translated-paragraph">
         {{'PERSONAL.ERROR' | translate}}
     </h3>
 </div>
 
-<ng-container class="interface-container"*ngIf="personalConnectExist() && load ">
-    <app-navigate-template-download [transferData]="dataTransfer"
-                                    [selectedEndPoint]="selectedEndPoint">
+<ng-container class="interface-container" *ngIf="personalConnectExist()">
+    <app-navigate-template-download       [transferData]="dataTransfer"
+                                          [selectedEndPoint]="selectedEndPoint"
+                                          [type]="type"
+                                    >
     </app-navigate-template-download>
+
 </ng-container>

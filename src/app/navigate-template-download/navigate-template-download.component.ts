@@ -34,6 +34,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
   @Input() transferData: TransferData;
   @Input() selectedEndPoint: any;
+  @Input() type: number;
 
   public dialogRef: MatDialogRef<SelectDirectoryComponent>;
   selectedDirectory: string;
@@ -55,6 +56,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   taskId: string;
   ruleId: string;
   clientToken: any;
+  accessEndpointFlag: boolean;
+
 
 
 
@@ -67,11 +70,13 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
   }
 
   startComponent() {
+    console.log(this.type);
     console.log(this.transferData);
     this.ruleId = null;
     this.clientToken = null;
     this.selectedFiles = new Array<object>();
     this.loaded = false;
+    this.accessEndpointFlag = false;
     if (this.selectedEndPoint.default_directory == null) {
       this.selectedDirectory = '~/';
     } else {
@@ -85,10 +90,12 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
               data => this.processDirectories(data),
               error => {
                 console.log(error);
-                //this.load = true;
+                this.loaded = true;
               },
               () => {
                 this.loaded = true;
+                this.accessEndpointFlag = true;
+                console.log("complete");
               }
           );
     }
@@ -96,11 +103,16 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
   findDirectories(data) {
     this.selectedDirectory = data['path'];
+    console.log(this.transferData.siteUrl);
+    if (this.type !== 2) {
     const url = this.transferData.siteUrl + '/api/datasets/' + this.transferData.datasetId + '/versions/' +
         this.transferData.datasetVersion + '/files';
     console.log(url);
     return this.globusService
         .getDataverse(url, this.transferData.key);
+    } else {
+      return of();
+    }
   }
 
   findDirectoryDefault() {
@@ -115,31 +127,32 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
   }
   processDirectories(data) {
-    console.log(data.data);
-    this.files = new Array<string>();
-    this.paths = new Array<object>();
-    this.storageIdentifiers = new Array<string> ();
-    for (const obj of data.data) {
-      if (typeof obj.directoryLabel !== 'undefined') {
-        const fullFile = obj.directoryLabel + '/' + obj.label;
-        this.files.push(fullFile);
-        this.paths.push(fullFile.split('/'));
-      } else {
-        this.files.push(obj.label);
-        this.paths.push(obj.label.split('/'));
+    if (this.type !== 2) {
+      console.log(data.data);
+      this.files = new Array<string>();
+      this.paths = new Array<object>();
+      this.storageIdentifiers = new Array<string>();
+      for (const obj of data.data) {
+        if (typeof obj.directoryLabel !== 'undefined') {
+          const fullFile = obj.directoryLabel + '/' + obj.label;
+          this.files.push(fullFile);
+          this.paths.push(fullFile.split('/'));
+        } else {
+          this.files.push(obj.label);
+          this.paths.push(obj.label.split('/'));
+        }
+        console.log(obj.dataFile.storageIdentifier);
+        console.log(obj.dataFile.storageIdentifier.split(':')[2]);
+        this.storageIdentifiers.push(obj.dataFile.storageIdentifier.split(':')[2]);
       }
-      console.log(obj.dataFile.storageIdentifier);
-      console.log(obj.dataFile.storageIdentifier.split(':')[2]);
-      this.storageIdentifiers.push(obj.dataFile.storageIdentifier.split(':')[2]);
+      console.log(this.files);
+      console.log(this.paths);
+      this.personalDirectories = this.arrangeIntoTree(this.paths);
+      this.tree = this.personalDirectories;
+      console.log(JSON.stringify(this.personalDirectories, null, 4));
+      this.levels = new Stack<object>();
+      this.selectedOptions = new Array<object>();
     }
-    console.log(this.files);
-    console.log(this.paths);
-    this.personalDirectories = this.arrangeIntoTree(this.paths);
-    this.tree = this.personalDirectories;
-    console.log(JSON.stringify(this.personalDirectories, null, 4));
-    this.levels = new Stack<object>();
-    this.selectedOptions = new Array<object>();
-
   }
 
   arrangeIntoTree(paths) {
@@ -365,6 +378,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
               },
               () => {
                 console.log('Transfer submitted');
+                this.writeToDataverse();
                 // this.removeRule();
                 this.snackBar.open('The transfer was submitted', '', {
                   duration: 3000
@@ -372,6 +386,40 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
               }
           );
     }
+  }
+
+  writeToDataverse() {
+    const url = this.transferData.siteUrl + '/api/datasets/:persistentId/deleteglobusRule?persistentId=' + this.transferData.datasetPid;
+    const formData: any = new FormData();
+
+    let body = '{ \"taskIdentifier\": \"' + this.taskId + '\"';
+    if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
+      body = body + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
+    } else {
+      body = body + ',\"ruleId\":' + '\"' + '\"';
+    }
+    body = body + '}';
+    console.log(body);
+
+    formData.append('jsonData', body);
+    console.log(this.transferData.key);
+    this.globusService.postDataverse(url, formData, this.transferData.key)
+        .subscribe(
+            data => {
+              console.log(data);
+            },
+            error => {
+              console.log(error);
+              // this.removeRule();
+              this.snackBar.open('There was an error in transfer submission. ', '', {
+                duration: 3000
+              });
+            },
+            () => {
+              console.log('Submitted to dataverse');
+              // this.removeRule();
+            }
+        );
   }
 
   removeRule() {

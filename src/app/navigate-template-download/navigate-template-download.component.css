@@ -53,10 +53,21 @@
 
 .button-search {
     width: 10%;
-    height:80%;
+    height:100%;
     overflow: auto;
-    margin-left: 5px;
     margin-bottom: 30px;
+}
+
+.div-class {
+    width:20%;
+    padding-left:40%;
+    padding-top:10px;
+    padding-bottom: 40px;
+}
+
+.class-icon-search {
+    color: mediumblue;
+    padding-right: 10px;
 }
 
 

@@ -7,11 +7,11 @@
             <mat-hint>{{'TEMPLATE.SEARCH' | translate}}</mat-hint>
         </mat-form-field>
 
- </div>
+ </div>-->
  <div class="center" *ngIf="!accessEndpointFlag && this.load">
      <br>
      <h3 class="center">"{{this.selectedEndPoint.display_name}}" {{'TEMPLATE.ERRORACTIVATION' | translate}}</h3>
- </div>-->
+ </div>
  <div class="center" *ngIf="selectedDirectoryExist() && accessEndpointFlag" >
      <mat-grid-list cols="2" rows="6" gutterSize="20px" rowHeight="fit" >
          <mat-grid-tile>

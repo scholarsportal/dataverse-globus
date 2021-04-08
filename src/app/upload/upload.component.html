@@ -5,7 +5,9 @@
     <mat-tab-group >
         <mat-tab label="{{'INTERFACE.PERSONAL' | translate}}" [attr.aria-label]="'INTERFACE.PERSONAL' | translate">
             <ng-template matTabContent>
-                <app-personal-connect [dataTransfer]="dataTransfer">
+                <app-personal-connect
+                        [type]="0"
+                        [dataTransfer]="dataTransfer">
                 </app-personal-connect>
             </ng-template>
         </mat-tab>

@@ -30,16 +30,7 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges() {
-    if (typeof this.dataTransfer.userAccessTokenData !== 'undefined') {
-      this.getRecentlyViewedEndpoints(this.dataTransfer.userAccessTokenData)
-          .subscribe(
-              data => this.processPersonalConnect(data),
-              error => {console.log(error); this.load = true; },
-              () => {
-                this.load = true;
-              }
-          );
-    }
+    this.load = false;
   }
 
 
@@ -79,6 +70,13 @@ export class RecentlyViewedComponentComponent implements OnChanges, OnInit {
   }
 
   setSelectedEndpoint(event) {
-    this.selectedEndPoint = event.value;
+    this.selectedEndPoint = event;
   }
+
+  ifLoaded(event) {
+    this.recentlyViewedEndpoints = event;
+    this.load = true;
+  }
+
+
 }

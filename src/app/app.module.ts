@@ -45,6 +45,8 @@ import {MatTreeModule} from '@angular/material/tree';
 import {MatCardModule} from '@angular/material/card';
 import { SelectDirectoryComponent } from './select-directory/select-directory.component';
 import { RecentlyViewedDownloadComponent } from './recently-viewed-download/recently-viewed-download.component';
+import { DownloadFileComponent } from './download-file/download-file.component';
+import { EndpointTemplateComponent } from './endpoint-template/endpoint-template.component';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http);
@@ -65,6 +67,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
             config.id = x.id;
             config.redirectUploadURL = x.redirectUploadURL;
             config.redirectDownloadURL = x.redirectDownloadURL;
+            config.redirectDownloadFileURL = x.redirectDownloadFileURL;
             config.basicGlobusToken = x.basicGlobusToken;
             config.globusClientId = x.globusClientId;
             config.globusEndpoint = x.globusEndpoint;
@@ -102,7 +105,9 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
     PersonalConnectDownloadComponent,
     NavigateTemplateDownloadComponent,
     SelectDirectoryComponent,
-    RecentlyViewedDownloadComponent
+    RecentlyViewedDownloadComponent,
+    DownloadFileComponent,
+    EndpointTemplateComponent
   ],
     imports: [
         BrowserModule,
@@ -110,6 +115,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         RouterModule.forRoot([
             {path: 'download', component: DownloadComponent},
             {path: 'upload', component: UploadComponent},
+            {path: 'download-file', component: DownloadFileComponent}
         ]),
         NoopAnimationsModule,
         MatSelectModule,

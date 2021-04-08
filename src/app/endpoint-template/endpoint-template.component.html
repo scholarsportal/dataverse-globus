@@ -1,0 +1,51 @@
+<mat-grid-list class="mat-grid-list-total" *ngIf="type === 1" cols="2" row="1" rowHeight="fit" gutterSize="20px">
+    <mat-grid-tile >
+    </mat-grid-tile>
+    <mat-grid-tile>
+        <mat-form-field class="mat-form-field-right" *ngIf="personalConnectExist()" appearance="fill" >
+            <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
+                {{'PERSONAL.ENDPOINTS' | translate}}
+            </mat-label>
+            <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
+                <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
+                    {{endpoint.display_name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field >
+    </mat-grid-tile>
+</mat-grid-list>
+
+<mat-grid-list class="mat-grid-list-total" *ngIf="type === 0" cols="2" row="1" rowHeight="fit" gutterSize="20px">
+    <mat-grid-tile>
+        <mat-form-field class="mat-form-field-left" *ngIf="personalConnectExist()" appearance="fill" >
+            <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
+                {{'PERSONAL.ENDPOINTS' | translate}}
+            </mat-label>
+            <mat-select [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
+                <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
+                    {{endpoint.display_name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field >
+    </mat-grid-tile>
+    <mat-grid-tile >
+    </mat-grid-tile>
+</mat-grid-list>
+
+<div  class="div-class"*ngIf="type === 2" >
+<mat-form-field *ngIf="personalConnectExist()" appearance="fill" >
+    <mat-label [attr.aria-label]="'PERSONAL.ENDPOINTS' | translate">
+        {{'PERSONAL.ENDPOINTS' | translate}}
+    </mat-label>
+    <mat-select  [(value)]="selectedEndPoint" (selectionChange)="setSelectedEndpoint($event)" >
+        <mat-option *ngFor="let endpoint of personalConnectEndpoints" [value]="endpoint">
+            {{endpoint.display_name}}
+        </mat-option>
+    </mat-select>
+</mat-form-field >
+    </div>
+
+
+
+
+

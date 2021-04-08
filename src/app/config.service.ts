@@ -8,6 +8,7 @@ export class ConfigService {
   id: number;
   redirectUploadURL: string;
   redirectDownloadURL: string;
+  redirectDownloadFileURL: string;
   basicGlobusToken: string;
   globusClientId: string;
   globusEndpoint: string;

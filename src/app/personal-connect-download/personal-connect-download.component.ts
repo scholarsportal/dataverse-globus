@@ -14,56 +14,19 @@ export class PersonalConnectDownloadComponent implements OnInit, OnChanges {
               public snackBar: MatSnackBar) { }
 
   @Input() dataTransfer: TransferData;
+  @Input() type: number // 0 - left, 1 - right, 2 - center
   load: boolean;
   selectedEndPoint: any;
   personalConnectEndpoints: Array<object>;
-
-
+  selectedDirectory: string;
 
   ngOnInit(): void {
     this.load = false;
+    console.log(this.type);
   }
 
   ngOnChanges() {
     this.load = false;
-    if (typeof this.dataTransfer.userAccessTokenData !== 'undefined') {
-      this.getPersonalConnect(this.dataTransfer.userAccessTokenData)
-          .subscribe(
-              data => this.processPersonalConnect(data),
-              error => {
-                console.log(error),
-                    this.load = true;
-              },
-              () => {
-                this.load = true;
-              }
-          );
-    }
-  }
-
-  getPersonalConnect(userAccessTokenData) {
-    const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=my-gcp-endpoints';
-
-    const userOtherAccessToken = this.dataTransfer.userAccessTokenData.other_tokens[0].access_token;
-    // this.userAccessToken = userAccessTokenData.access_token;
-    return this.globusService
-        .getGlobus(url, 'Bearer ' + userOtherAccessToken);
-  }
-
-  processPersonalConnect(data) {
-    this.personalConnectEndpoints = new Array<object>();
-    for (const obj of data.DATA) {
-      if (obj.gcp_connected) {
-        this.personalConnectEndpoints.push(obj);
-        console.log(obj);
-      }
-    }
-    if (this.personalConnectEndpoints.length === 0) {
-      console.log('Globus Connect Personal is not connected');
-    } else {
-      this.selectedEndPoint = this.personalConnectEndpoints[0];
-    }
-
   }
 
   personalConnectExist() {
@@ -75,7 +38,16 @@ export class PersonalConnectDownloadComponent implements OnInit, OnChanges {
   }
 
   setSelectedEndpoint(event) {
-    this.selectedEndPoint = event.value;
+    this.selectedEndPoint = event;
+  }
+
+  setSelectedDirectory(event) {
+    this.selectedDirectory = event;
+  }
+
+  ifLoaded(event) {
+    this.personalConnectEndpoints = event;
+    this.load = true;
   }
 
 }

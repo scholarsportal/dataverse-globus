@@ -1,0 +1,57 @@
+
+.mat-form-field-right {
+    height: 80%;
+    width: 100%;
+    padding-right: 12%;
+}
+
+.mat-form-field-left {
+    height: 80%;
+    width: 100%;
+    padding-left: 20px;
+}
+
+.mat-grid-list-total {
+    height:60px;
+    width:100%;
+
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.class-icon-search {
+    color: mediumblue;
+    padding-right: 10px;
+}
+
+.button-search {
+    height:200%;
+    overflow: auto;
+    margin-left: 5px;
+    margin-bottom: 15px;
+}
+
+.class-icon-folder {
+    color: mediumblue;
+}
+
+/*.mat-tree {
+    height: 75%;
+    width: 100%;
+    overflow: auto;
+}*/
+
+
+.div-class {
+    padding-left:40%;
+    padding-top:10px;
+}
+
+
+
+
+
