@@ -1,0 +1,26 @@
+{
+  "displayName": "Globus download tool new",
+  "description": "Download through Globus",
+  "scope": "dataset",
+  "type": "explore",
+  "toolUrl": "http://localhost:8080/download",
+  "toolParameters": {
+    "queryParameters": [
+      {
+        "datasetPid": "{datasetPid}"
+      },
+      {
+        "siteUrl": "{siteUrl}"
+      },
+      {
+        "apiToken": "{apiToken}"
+      },
+      {
+	"datasetId": "{datasetId}"      
+      },
+      {
+	"datasetVersion": "{datasetVersion}"      
+      }
+    ]
+  }
+}

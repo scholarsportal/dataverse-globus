@@ -1,0 +1,26 @@
+{
+  "displayName": "Globus upload tool",
+  "description": "Upload through Globus",
+  "scope": "dataset",
+  "type": "explore",
+  "toolUrl": "http://localhost/upload",
+  "toolParameters": {
+    "queryParameters": [
+      {
+        "datasetPid": "{datasetPid}"
+      },
+      {
+        "siteUrl": "{siteUrl}"
+      },
+      {
+        "apiToken": "{apiToken}"
+      },
+      {
+	"datasetId": "{datasetId}"      
+      },
+      {
+	"datasetVersion": "{datasetVersion}"      
+      }
+    ]
+  }
+}
