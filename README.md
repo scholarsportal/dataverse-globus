@@ -18,10 +18,13 @@ For development Redirect URI in globus registration should be http://localhost/*
 
 In ``src/assets/config.json`` the following fields should be filled:
 
-   basicGlobusToken  - Token of globus application which is  base64 encoded client ID and client credential (secret), separated by a single colon.
-   globusClientId    - ClientId of registered globus application   
-   globusEndpoint    - Globus endpoint
-   bucket            - name of bucket in S3 storage
+   *basicGlobusToken*  - Token of globus application which is  base64 encoded client ID and client credential (secret), separated by a single colon.
+   
+   *globusClientId*    - ClientId of registered globus application 
+   
+   *globusEndpoint*    - Globus endpoint (S3 storage)
+   
+   *bucket*            - name of bucket in S3 storage
 
 To run dataverse-globus application one needs to install angular 9.
 
