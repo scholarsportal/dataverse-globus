@@ -1,8 +1,11 @@
-{
-    "baseUrl": "",
-    "id": "",
-    "redirectURL": "",
-    "basicGlobusToken": "",
-    "globusClientId": "",
-    "globusEndpoint": ""
+{ 
+	"baseUrl": "", 
+	"id": "", 
+	"redirectUploadURL": "http://localhost/upload/", 
+	"redirectDownloadURL": "http://localhost/download/",
+        "redirectDownloadFileURL": "http://localhost/download-file/",	
+	"basicGlobusToken": "", 
+	"globusClientId": "", 
+	"globusEndpoint": "", 
+	"bucket": "" 
 }
