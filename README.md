@@ -16,7 +16,7 @@ where toolUrl should be the url of globus application. To run it on local machin
 Globus application should be registered in https://auth.globus.org/v2/web/developers It will get clientId.
 For development Redirect URI in globus registration should be http://localhost/*. Globus does not allow http, only htpps, except http://localhost and without port.
 
-``src/assets/config.json`` following fields should be filled:
+In ``src/assets/config.json`` the following fields should be filled:
 
    basicGlobusToken  - Token of globus application which is  base64 encoded client ID and client credential (secret), separated by a single colon.
    globusClientId    - ClientId of registered globus application   
