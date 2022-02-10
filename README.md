@@ -25,6 +25,8 @@ In ``src/assets/config.json`` the following fields should be filled:
    *globusEndpoint*    - Globus endpoint (S3 storage)
    
    *bucket*            - name of bucket in S3 storage
+   
+   *apiToken*   - API token of Dataverse superuser. It is used for dataverse api for deleting Globus rules.
 
 To run dataverse-globus application one needs to install angular 9.
 
