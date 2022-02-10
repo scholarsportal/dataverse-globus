@@ -13,5 +13,6 @@ export class ConfigService {
   globusClientId: string;
   globusEndpoint: string;
   bucket: string;
+  apiToken: string;
   constructor() { }
 }

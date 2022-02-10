@@ -7,5 +7,6 @@
 	"basicGlobusToken": "", 
 	"globusClientId": "", 
 	"globusEndpoint": "", 
-	"bucket": "" 
+	"bucket": "",
+        "apiToken": ""	
 }

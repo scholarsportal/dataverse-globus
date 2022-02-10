@@ -61,11 +61,14 @@ export class GlobusService {
   }
 
   postDataverse(url: string, body: FormData, key: string) {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'X-Dataverse-key': key
-      })
-    };
+    let httpOptions = {};
+    if (key !== null) {
+      httpOptions = {
+        headers: new HttpHeaders({
+          'X-Dataverse-key': key
+        })
+      };
+    }
     return this.http.post(url, body, httpOptions);
   }
   getDataverse(url: string, key: string ) {
