@@ -29,7 +29,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
               public dialog: MatDialog,
-              public snackBar: MatSnackBar) {
+              public snackBar: MatSnackBar,
+              private configService: ConfigService) {
   }
 
   @Input() transferData: TransferData;
@@ -402,8 +403,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
     console.log(body);
 
     formData.append('jsonData', body);
-    console.log(this.transferData.key);
-    this.globusService.postDataverse(url, formData, this.transferData.key)
+    console.log();
+    this.globusService.postDataverse(url, formData, this.configService.apiToken)
         .subscribe(
             data => {
               console.log(data);
