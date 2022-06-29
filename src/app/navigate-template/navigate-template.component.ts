@@ -466,7 +466,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":' + this.transferData.storePrefix
+          '\"storageIdentifier\":\""' + this.transferData.storePrefix + 
           this.listOfAllStorageIdentifiers[i] + '\",' +
           '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
       file = file +  ' } ';
