@@ -12,7 +12,7 @@ export class ConfigService {
   basicGlobusToken: string;
   globusClientId: string;
   globusEndpoint: string;
-  bucket: string;
+  includeBucketInPath: boolean;
   apiToken: string;
   constructor() { }
 }

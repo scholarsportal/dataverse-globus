@@ -7,6 +7,6 @@
 	"basicGlobusToken": "", 
 	"globusClientId": "", 
 	"globusEndpoint": "", 
-	"bucket": "",
+	"includeBucketInPath": false,
         "apiToken": ""	
 }
