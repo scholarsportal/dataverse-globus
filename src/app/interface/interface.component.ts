@@ -181,7 +181,7 @@ export class InterfaceComponent implements OnInit {
         this.dvLocale = parameters[6];
         console.log(this.dvLocale);
         
-        this.transferData.datasetDirectory = this.config.includeBucketInPath ? this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://') + 3, this.transferData.storePrefix.length -4) : '/';
+        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' + this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://') + 3, this.transferData.storePrefix.length -1) + '/') : '/';
         this.transferData.datasetDirectory = this.transferData.datasetDirectory + this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
         this.transferData.key = parameters[1];
     }
