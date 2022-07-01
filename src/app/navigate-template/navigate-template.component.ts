@@ -43,7 +43,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   clientToken: any;
 
   ngOnInit(): void {
-    this.startComponent();
+    //Duplicates ngOnChange
+    ///this.startComponent();
   }
 
   ngOnChanges() {

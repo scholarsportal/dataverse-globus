@@ -63,7 +63,8 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
 
   ngOnInit(): void {
-    this.startComponent();
+    // Not needed - ngOnChanges is called prior to ngOnInit
+    // this.startComponent();
   }
 
   ngOnChanges() {
