@@ -1,5 +1,5 @@
 {
-  "displayName": "Globus download tool new",
+  "displayName": "Globus download tool",
   "description": "Download through Globus",
   "scope": "dataset",
   "type": "explore",
