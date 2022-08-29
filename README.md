@@ -28,13 +28,18 @@ In ``src/assets/config.json`` the following fields should be filled:
    
    *apiToken*   - API token of Dataverse superuser. It is used for dataverse api for deleting Globus rules.
 
-To run dataverse-globus application one needs to install angular 9.
+To run dataverse-globus application one needs to install angular 9 using node (version 16+) and npm (version 7+).
 
 dataverse-globus was created using Angular CLI version 9.
 In order to generate node_modules run `npm install` from a root of project directory .
+Then run `npm install @angular/cli@9` to install `ng` and the rest of Angular CLI.
+The executable `ng` must be in your `$PATH`. To add it, run `export PATH=$PATH:node_modules/.bin`.
+
 For development purposes to run locally one can run dataverse-globus using
 
 `sudo ng serve --port 80`
+
+(It's normal for the home page of http://localhost to be blank.)
 
 this is because globus registration only allows for http://localhost/* for http.
 
