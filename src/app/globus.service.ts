@@ -236,7 +236,12 @@ export class GlobusService {
     for (const obj of dir["DATA"]) {
       if (obj.type === 'file') {
         console.log(obj);
-        listOfAllFiles.push(dir["absolute_path"] + obj.name);
+        if (dir["absolute_path"] == null || dir["absolute_path"] === 'null') {
+          listOfAllFiles.push(dir["path"] + obj.name);
+        } else {
+          listOfAllFiles.push(dir["absolute_path"] + obj.name);
+        }
+
         listOfFileNames.push(obj.name);
         listOfAllStorageIdentifiers.push(this.generateStorageIdentifier());
       }

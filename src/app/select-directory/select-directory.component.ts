@@ -94,8 +94,12 @@ export class SelectDirectoryComponent implements OnInit {
   }
 
   upFolderProcess(data) {
-    const absolutePath = data.absolute_path;
-    if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
+      let absolutePath = data.absolute_path;
+      if (data.absolute_path == null || data.absolute_path === 'null') {
+          absolutePath = data.path;
+      }
+
+      if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
       const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
       const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
       return this.globusService.getDirectory(path,

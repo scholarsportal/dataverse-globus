@@ -8,5 +8,6 @@
 	"globusClientId": "", 
 	"globusEndpoint": "", 
 	"includeBucketInPath": false,
-        "apiToken": ""	
+        "apiToken": ""
+
 }

@@ -182,7 +182,10 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   upFolderProcess(data) {
-    const absolutePath = data.absolute_path;
+    let absolutePath = data.absolute_path;
+    if (data.absolute_path == null || data.absolute_path === 'null') {
+      absolutePath = data["path"];
+    }
     if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
       const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
       const path = temp.substr(0, temp.lastIndexOf('/')) + '/';
@@ -368,7 +371,11 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     const label = dir.path.substr(labelsArray[i].length);
     for (const obj of dir.DATA) {
       if (obj.type === 'file') {
-        this.listOfAllFiles.push(dir.absolute_path + obj.name);
+        if (dir.absolute_path == null || dir.absolute_path === 'null') {
+          this.listOfAllFiles.push(dir.path + obj.name);
+        } else {
+          this.listOfAllFiles.push(dir.absolute_path + obj.name);
+        }
         this.listOfFileNames.push(obj.name);
         this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
 
