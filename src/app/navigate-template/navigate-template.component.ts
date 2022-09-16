@@ -43,7 +43,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   clientToken: any;
 
   ngOnInit(): void {
-    this.startComponent();
+    //Duplicates ngOnChange
+    ///this.startComponent();
   }
 
   ngOnChanges() {
@@ -466,7 +467,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":' + '\"s3://' + this.configService.bucket + ':' +
+          '\"storageIdentifier\":\"' + this.transferData.storePrefix + 
           this.listOfAllStorageIdentifiers[i] + '\",' +
           '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
       file = file +  ' } ';

@@ -141,6 +141,7 @@ export class InterfaceComponent implements OnInit {
         this.dvLocale = this.globusService.getParameterByName('dvLocale');
         this.transferData.fileId = this.globusService.getParameterByName('fileId');
         this.transferData.fileMetadataId = this.globusService.getParameterByName('fileMetadataId');
+        this.transferData.storePrefix = this.globusService.getParameterByName('storePrefix');
         console.log(this.transferData.datasetVersion);
     }
     encodeStateDataset() {
@@ -149,6 +150,7 @@ export class InterfaceComponent implements OnInit {
             + this.transferData.siteUrl + '_'
             + this.transferData.datasetId + '_'
             + this.transferData.datasetVersion + '_'
+            + this.transferData.storePrefix + '_'
             + this.dvLocale); // encode
         return state;
     }
@@ -158,6 +160,7 @@ export class InterfaceComponent implements OnInit {
             + this.transferData.fileId + '_'
             + this.transferData.fileMetadataId + '_'
             + this.transferData.datasetVersion + '_'
+            + this.transferData.storePrefix + '_'
             + this.dvLocale); // encode
         return state;
     }
@@ -172,11 +175,14 @@ export class InterfaceComponent implements OnInit {
         console.log(this.transferData.siteUrl);
         this.transferData.datasetId = parameters[3];
         this.transferData.datasetVersion = parameters[4];
+        this.transferData.storePrefix = parameters[5];
         console.log(this.transferData.datasetId);
         console.log(this.transferData.datasetVersion);
-        this.dvLocale = parameters[5];
+        this.dvLocale = parameters[6];
         console.log(this.dvLocale);
-        this.transferData.datasetDirectory = '/' + this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
+        
+        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' + this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://') + 3, this.transferData.storePrefix.length -1) + '/') : '/';
+        this.transferData.datasetDirectory = this.transferData.datasetDirectory + this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
         this.transferData.key = parameters[1];
     }
 
@@ -194,7 +200,8 @@ export class InterfaceComponent implements OnInit {
         console.log(this.transferData.fileMetadataId);
         this.transferData.datasetVersion = parameters[4];
         console.log(this.transferData.datasetVersion);
-        this.dvLocale = parameters[5];
+        this.transferData.storePrefix = parameters[5];
+        this.dvLocale = parameters[6];
         console.log(this.dvLocale);
         this.transferData.key = parameters[0];
     }

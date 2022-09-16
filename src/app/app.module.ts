@@ -71,7 +71,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
             config.basicGlobusToken = x.basicGlobusToken;
             config.globusClientId = x.globusClientId;
             config.globusEndpoint = x.globusEndpoint;
-            config.bucket = x.bucket;
+            config.includeBucketInPath = x.includeBucketInPath;
             config.apiToken = x.apiToken;
             resolve(true);
           }),
