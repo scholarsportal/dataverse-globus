@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatomoInjector } from 'ngx-matomo';
+// import { MatomoInjector } from 'ngx-matomo';
 import { ConfigService } from './config.service';
 
 
@@ -10,10 +10,10 @@ import { ConfigService } from './config.service';
 })
 export class AppComponent {
   constructor(
-    private config: ConfigService,
-    private matomoInjector: MatomoInjector
+    private config: ConfigService
+//    private matomoInjector: MatomoInjector
   ) {
-    this.matomoInjector.init(this.config.baseUrl, this.config.id);
+//    this.matomoInjector.init(this.config.baseUrl, this.config.id);
   }
   title = 'globus';
 }

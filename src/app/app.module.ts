@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import {APP_INITIALIZER, NgModule} from '@angular/core';
 import {MatSelectModule} from '@angular/material/select';
 
-import { MatomoModule } from 'ngx-matomo';
+//import { MatomoModule } from 'ngx-matomo';
 import { ConfigService } from './config.service';
 import { of, Observable, ObservableInput } from '../../node_modules/rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -120,7 +120,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         ]),
         NoopAnimationsModule,
         MatSelectModule,
-        MatomoModule,
+        //MatomoModule,
         MatButtonModule,
         MatTabsModule,
         MatFormFieldModule,
