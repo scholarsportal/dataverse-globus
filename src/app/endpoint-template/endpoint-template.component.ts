@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angula
 import {TransferData} from '../upload/upload.component';
 import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
 import {PassingDataSelectType} from '../navigate-template-download/navigate-template-download.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {GlobusService} from '../globus.service';
 
 @Component({

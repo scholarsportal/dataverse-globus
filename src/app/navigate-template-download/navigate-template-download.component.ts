@@ -4,13 +4,13 @@ import {TransferData} from '../upload/upload.component';
 import {SelFilesType} from '../navigate-template/navigate-template.component';
 import {catchError, flatMap} from 'rxjs/operators';
 import {forkJoin, of, throwError} from 'rxjs';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {Stack} from '../stack';
 import {NavigateDirectoriesComponent} from '../navigate-directories/navigate-directories.component';
 import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {PassingDataType} from '../search-endpoint/search-endpoint.component';
 import {ConfigService} from '../config.service';
 

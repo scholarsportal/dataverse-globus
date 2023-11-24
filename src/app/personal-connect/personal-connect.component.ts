@@ -3,7 +3,7 @@ import {GlobusService} from '../globus.service';
 import {catchError, filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import {TransferData} from '../upload/upload.component';
 
 

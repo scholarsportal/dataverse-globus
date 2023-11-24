@@ -1,13 +1,13 @@
-{ 
-	"baseUrl": "", 
-	"id": "", 
-	"redirectUploadURL": "http://localhost/upload/", 
-	"redirectDownloadURL": "http://localhost/download/",
-        "redirectDownloadFileURL": "http://localhost/download-file/",	
-	"basicGlobusToken": "", 
-	"globusClientId": "", 
-	"globusEndpoint": "", 
-	"includeBucketInPath": false,
-        "apiToken": ""
-
+{
+  "baseUrl": "",
+  "id": "",
+  "redirectUploadURL": "http://localhost/upload/",
+  "redirectDownloadURL": "http://localhost/download/",
+  "redirectDownloadFileURL": "http://localhost/download-file/",
+  "basicGlobusToken": "ODA0ODBhNzEtODA5ZC00ZTJhLWExNmQtY2JkMzA1NTk0ZDdhOmxiNWQ0eVBWVnVVZ1B4S0tpem5leEdnUThDcmtrT1lTQmx0WC9DNURvTDA9",
+  "globusClientId": "80480a71-809d-4e2a-a16d-cbd305594d7a",
+  "globusEndpoint": "652c755e-0f08-4f82-94c4-dd674da233a6",
+  "includeBucketInPath": true,
+  "apiToken": "06ea974e-4bb6-4731-817c-f3e896a313d4"
 }
+
