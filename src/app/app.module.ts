@@ -114,10 +114,10 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         BrowserModule,
         HttpClientModule,
         RouterModule.forRoot([
-            {path: 'download', component: DownloadComponent},
-            {path: 'upload', component: UploadComponent},
-            {path: 'download-file', component: DownloadFileComponent}
-        ]),
+    { path: 'download', component: DownloadComponent },
+    { path: 'upload', component: UploadComponent },
+    { path: 'download-file', component: DownloadFileComponent }
+], { relativeLinkResolution: 'legacy' }),
         NoopAnimationsModule,
         MatSelectModule,
         //MatomoModule,
