@@ -68,18 +68,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "globus:build"
+            "buildTarget": "globus:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "globus:build:production"
+              "buildTarget": "globus:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "globus:build"
+            "buildTarget": "globus:build"
           }
         },
         "test": {
