@@ -117,7 +117,7 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
             { path: 'download', component: DownloadComponent },
             { path: 'upload', component: UploadComponent },
             { path: 'download-file', component: DownloadFileComponent }
-        ], { relativeLinkResolution: 'legacy' }),
+        ], {}),
         NoopAnimationsModule,
         MatSelectModule,
         //MatomoModule,
