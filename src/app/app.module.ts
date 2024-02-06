@@ -91,33 +91,33 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    InterfaceComponent,
-    GlobusDirective,
-    UploadFileComponent,
-    PersonalConnectComponent,
-    RecentlyViewedComponentComponent,
-    SearchEndpointComponent,
-    NavigateDirectoriesComponent,
-    NavigateTemplateComponent,
-    DownloadComponent,
-    UploadComponent,
-    PersonalConnectDownloadComponent,
-    NavigateTemplateDownloadComponent,
-    SelectDirectoryComponent,
-    RecentlyViewedDownloadComponent,
-    DownloadFileComponent,
-    EndpointTemplateComponent
-  ],
+    declarations: [
+        AppComponent,
+        InterfaceComponent,
+        GlobusDirective,
+        UploadFileComponent,
+        PersonalConnectComponent,
+        RecentlyViewedComponentComponent,
+        SearchEndpointComponent,
+        NavigateDirectoriesComponent,
+        NavigateTemplateComponent,
+        DownloadComponent,
+        UploadComponent,
+        PersonalConnectDownloadComponent,
+        NavigateTemplateDownloadComponent,
+        SelectDirectoryComponent,
+        RecentlyViewedDownloadComponent,
+        DownloadFileComponent,
+        EndpointTemplateComponent
+    ],
     imports: [
         BrowserModule,
         HttpClientModule,
         RouterModule.forRoot([
-    { path: 'download', component: DownloadComponent },
-    { path: 'upload', component: UploadComponent },
-    { path: 'download-file', component: DownloadFileComponent }
-], { relativeLinkResolution: 'legacy' }),
+            { path: 'download', component: DownloadComponent },
+            { path: 'upload', component: UploadComponent },
+            { path: 'download-file', component: DownloadFileComponent }
+        ], { relativeLinkResolution: 'legacy' }),
         NoopAnimationsModule,
         MatSelectModule,
         //MatomoModule,
@@ -147,18 +147,17 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         MatTreeModule,
         MatCardModule,
     ],
-    entryComponents: [NavigateDirectoriesComponent],
-  providers: [GlobusService, {
-    provide: APP_INITIALIZER,
-    useFactory: load,
-    deps: [
-      HttpClient,
-      ConfigService,
-        TranslateService,
-        TranslateParser
-    ],
-    multi: true
-  }],
-  bootstrap: [AppComponent]
+    providers: [GlobusService, {
+            provide: APP_INITIALIZER,
+            useFactory: load,
+            deps: [
+                HttpClient,
+                ConfigService,
+                TranslateService,
+                TranslateParser
+            ],
+            multi: true
+        }],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
