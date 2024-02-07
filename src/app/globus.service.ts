@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import {Observable, forkJoin, of, merge, from, throwError} from 'rxjs';
-import {catchError, filter, flatMap} from 'rxjs/operators';
+import { of, merge, from} from 'rxjs';
+import { filter, flatMap} from 'rxjs/operators';
 import {v4 as uuid } from 'uuid';
 import {Permissions} from './interface/interface.component';
 
@@ -21,7 +21,7 @@ export class GlobusService {
         Authorization: key
       })
     };
-    console.log("start");
+    console.log('start');
     return this.http.get(url, httpOptions);
   }
 
@@ -48,7 +48,7 @@ export class GlobusService {
   }
 
   postGlobus(url: string, body: string, key: string) {
-    console.log("Start posting Globus");
+    console.log('Start posting Globus');
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export class GlobusService {
   }
 
   getPermission(clientToken, userIdentity, datasetDirectory, globusEndpoint, userPerm) {
-    console.log("getting permissions!!!");
+    console.log('getting permissions!!!');
     console.log(userIdentity);
     console.log(clientToken);
     const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + globusEndpoint + '/access';
@@ -130,7 +130,7 @@ export class GlobusService {
   }
 
   submitTransfer(userOtherAccessToken) {
-    console.log("submitting transfer");
+    console.log('submitting transfer');
     const url = 'https://transfer.api.globusonline.org/v0.10/submission_id';
     return this.getGlobus(url, 'Bearer ' + userOtherAccessToken);
   }
@@ -138,7 +138,7 @@ export class GlobusService {
   getInnerDirectories(directory, selectedEndPointId, userOtherAccessToken) {
     if (directory.DATA.length > 0) {
       const path = directory.path;
-      console.log("Path");
+      console.log('Path');
       console.log(path);
       return merge(
           of(directory),
@@ -152,7 +152,7 @@ export class GlobusService {
   }
 
   getDirectory(path, selectedEndPointId, userOtherAccessToken) {
-    console.log("start getDirectory");
+    console.log('start getDirectory');
     const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + selectedEndPointId +
         '/ls?path=' + path;
     return this
@@ -175,7 +175,7 @@ export class GlobusService {
   }
 
   submitTransferItems(listOfAllFiles, datasetDirectory, listOfAllStorageIdentifiers, submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
-    console.log("Starting submit transfer Item");
+    console.log('Starting submit transfer Item');
     console.log(submissionId);
     const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
     const taskItemsArray = new Array();
@@ -203,7 +203,7 @@ export class GlobusService {
   }
 
   submitTransferToUser(listOfAllFiles, listOfAllPaths, submissionId, datasetDirectory, selectedDirectory, globusEndpoint, selectedEndpoint, userOtherAccessToken) {
-    console.log("Starting submit transfer Item");
+    console.log('Starting submit transfer Item');
     console.log(submissionId);
     const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
     const taskItemsArray = new Array();

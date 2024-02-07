@@ -1,11 +1,19 @@
-import {AfterViewInit, Component, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
-import {flatMap} from 'rxjs/operators';
+import {AfterViewInit, Component, Input, OnChanges, OnInit} from '@angular/core';
 import {GlobusService} from '../globus.service';
 import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
-import {MatLegacyPaginator as MatPaginator} from '@angular/material/legacy-paginator';
+
 import { NavigateDirectoriesComponent } from '../navigate-directories/navigate-directories.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {TransferData} from '../upload/upload.component';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTableModule} from '@angular/material/table';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {MatInputModule} from '@angular/material/input';
 
 export interface PassingDataType {
   dataTransfer: TransferData;
@@ -15,6 +23,19 @@ export interface PassingDataType {
 
 @Component({
   selector: 'app-search-endpoint',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatIconModule,
+    MatTableModule,
+    MatInputModule
+  ],
   templateUrl: './search-endpoint.component.html',
   styleUrls: ['./search-endpoint.component.css']
 })
@@ -86,11 +107,7 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   ifExists() {
-    if (typeof this.dataSource !== 'undefined' && this.loaded) {
-      return true;
-    } else {
-      return false;
-    }
+    return !!(typeof this.dataSource !== 'undefined' && this.loaded);
   }
 
 
@@ -100,10 +117,10 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
       data,
       action: this.action
     };
-    console.log("opening dialog");
+    console.log('opening dialog');
     this.dialogRef = this.dialog.open(NavigateDirectoriesComponent, {
         data: passingData,
-        //panelClass: 'field_width',
+        // panelClass: 'field_width',
         width: '800px'
       });
 

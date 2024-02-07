@@ -1,11 +1,19 @@
-import {Component, Inject, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {catchError, flatMap} from 'rxjs/operators';
 import {forkJoin, of, throwError} from 'rxjs';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {GlobusService} from '../globus.service';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {TransferData} from '../upload/upload.component';
-import {ConfigService} from '../config.service';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatListModule} from '@angular/material/list';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 export interface SelFilesType {
   fileNameObject: any;
@@ -14,13 +22,27 @@ export interface SelFilesType {
 
 @Component({
   selector: 'app-navigate-template',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatGridListModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatListModule,
+    FormsModule
+  ],
   templateUrl: './navigate-template.component.html',
   styleUrls: ['./navigate-template.component.css']
 })
 export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
-              private configService: ConfigService,
               public snackBar: MatSnackBar) { }
 
   @Input() transferData: TransferData;
@@ -43,8 +65,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   clientToken: any;
 
   ngOnInit(): void {
-    //Duplicates ngOnChange
-    ///this.startComponent();
   }
 
   ngOnChanges() {
@@ -116,11 +136,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   preparedForTransfer() {
-    if (this.selectedFiles.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return this.selectedFiles.length > 0;
   }
 
   selectAll($event, directory) {
@@ -269,18 +285,14 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   isFolder(item) {
-    if (item.type === 'dir') {
-      return true;
-    } else {
-      return false;
-    }
+    return item.type === 'dir';
 
   }
 
   removeAllFromSelected(directory) {
     this.selectedFiles = new Array<SelFilesType>();
     directory.writeValue(null);
-    this.selectedOptions = new Array();
+    this.selectedOptions = [];
     this.checkFlag = false;
   }
 
@@ -305,8 +317,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       this.snackBar.open('Preparing transfer', '', {
         duration: 3000
       });
-      const directoriesArray = new Array();
-      const labelsArray = new Array();
+      const directoriesArray = [];
+      const labelsArray = [];
 
       for (const obj of this.selectedFiles) {
         if (obj.fileNameObject.type === 'dir') {
@@ -386,7 +398,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   submit(array) {
 
-    console.log("Start submitting!!!");
+    console.log('Start submitting!!!');
     forkJoin(array)
         .pipe(flatMap(obj => {
           this.clientToken = obj[1];
@@ -474,7 +486,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":\"' + this.transferData.storePrefix + 
+          '\"storageIdentifier\":\"' + this.transferData.storePrefix +
           this.listOfAllStorageIdentifiers[i] + '\",' +
           '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
       file = file +  ' } ';

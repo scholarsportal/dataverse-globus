@@ -1,18 +1,23 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {GlobusService} from '../globus.service';
 import {TransferData} from '../upload/upload.component';
-import {SelFilesType} from '../navigate-template/navigate-template.component';
 import {catchError, flatMap} from 'rxjs/operators';
 import {forkJoin, of, throwError} from 'rxjs';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {Stack} from '../stack';
-import {NavigateDirectoriesComponent} from '../navigate-directories/navigate-directories.component';
 import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
-import {PassingDataType} from '../search-endpoint/search-endpoint.component';
 import {ConfigService} from '../config.service';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatListModule} from '@angular/material/list';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 export interface PassingDataSelectType {
   dataTransfer: TransferData;
@@ -22,6 +27,21 @@ export interface PassingDataSelectType {
 
 @Component({
   selector: 'app-navigate-template-download',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatGridListModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatListModule,
+    FormsModule
+  ],
   templateUrl: './navigate-template-download.component.html',
   styleUrls: ['./navigate-template-download.component.css']
 })
@@ -97,7 +117,7 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
               () => {
                 this.loaded = true;
                 this.accessEndpointFlag = true;
-                console.log("complete");
+                console.log('complete');
               }
           );
     }
@@ -358,14 +378,15 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
                   }
               ))
           .pipe(flatMap(data => {
-            console.log("Rules");
+            console.log('Rules');
             console.log(data);
             this.ruleId = data.access_id;
             return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
           } ))
           .pipe(flatMap(data => this.globusService.submitTransferToUser(
               this.listOfAllFiles, this.listOfAllPaths, data['value'], this.transferData.datasetDirectory,
-              this.selectedDirectory, this.transferData.globusEndpoint, this.selectedEndPoint, this.transferData.userAccessTokenData.other_tokens[0].access_token)))
+              this.selectedDirectory, this.transferData.globusEndpoint, this.selectedEndPoint,
+              this.transferData.userAccessTokenData.other_tokens[0].access_token)))
           .subscribe(
               data => {
                 console.log(data);
@@ -458,7 +479,6 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
 
     this.dialogRef = this.dialog.open(SelectDirectoryComponent, {
       data: passingData,
-      //panelClass: 'field_width',
       width: '400px'
     });
 
@@ -466,9 +486,6 @@ export class NavigateTemplateDownloadComponent implements OnInit, OnChanges {
       this.selectedDirectory = x;
       console.log(x);
     });
-    // this.dialogRef.afterClosed().subscribe(() => {
-      // unsubscribe onAdd
-    // });
   }
   setDirectory(directory) {
     this.selectedDirectory = directory;

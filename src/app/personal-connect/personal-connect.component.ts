@@ -1,10 +1,14 @@
-import {Component, Input, NgModule, OnChanges, OnInit, ElementRef, ViewChild, AfterViewInit, Renderer2, Output} from '@angular/core';
-import {GlobusService} from '../globus.service';
-import {catchError, filter, flatMap} from 'rxjs/operators';
-import {v4 as uuid } from 'uuid';
-import {forkJoin, from, merge, of, pipe, throwError} from 'rxjs';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import {Component, Input,  OnChanges, OnInit} from '@angular/core';
 import {TransferData} from '../upload/upload.component';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {NavigateTemplateComponent} from '../navigate-template/navigate-template.component';
+import {EndpointTemplateComponent} from '../endpoint-template/endpoint-template.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 interface SelFilesType {
@@ -15,16 +19,27 @@ interface SelFilesType {
 
 @Component({
   selector: 'app-personal-connect',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    NavigateTemplateComponent,
+    EndpointTemplateComponent
+  ],
   templateUrl: './personal-connect.component.html',
   styleUrls: ['./personal-connect.component.css']
 })
 export class PersonalConnectComponent implements OnChanges, OnInit {
 
-  constructor(private globusService: GlobusService,
-              public snackBar: MatSnackBar) { }
+  constructor() { }
 
   @Input() dataTransfer: TransferData;
-  @Input() type: number // 0 - left, 1 - right, 2 - center
+  @Input() type: number; // 0 - left, 1 - right, 2 - center
   load: boolean;
   selectedEndPoint: any;
   personalConnectEndpoints: Array<object>;
@@ -38,11 +53,7 @@ export class PersonalConnectComponent implements OnChanges, OnInit {
   }
 
   personalConnectExist() {
-    if (typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0;
   }
 
   setSelectedEndpoint(event) {

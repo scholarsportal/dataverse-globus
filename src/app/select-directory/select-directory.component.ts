@@ -1,11 +1,35 @@
 import {Component, EventEmitter, Inject, OnInit, Output} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA} from '@angular/material/legacy-dialog';
+
 import {GlobusService} from '../globus.service';
 import {flatMap} from 'rxjs/operators';
 import {of} from 'rxjs';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import {MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-select-directory',
+    standalone: true,
+    imports: [
+        TranslateModule,
+        MatToolbarModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        NgIf,
+        ReactiveFormsModule,
+        NgForOf,
+        MatGridListModule,
+        MatIconModule,
+        MatListModule,
+        MatDialogModule
+    ],
   templateUrl: './select-directory.component.html',
   styleUrls: ['./select-directory.component.css']
 })
@@ -24,12 +48,12 @@ export class SelectDirectoryComponent implements OnInit {
             data => this.processDirectories(data),
             error => {
               console.log(error);
-              //this.load = true;
+              // this.load = true;
             },
             () => {
-              //console.log(this.checkFlag);
-              //this.accessEndpointFlag = true;
-              //this.load = true;
+              // console.log(this.checkFlag);
+              // this.accessEndpointFlag = true;
+              // this.load = true;
             }
         );
   }

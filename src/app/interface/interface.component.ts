@@ -1,11 +1,15 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { GlobusService } from '../globus.service';
-import {v4 as uuid } from 'uuid';
-import {Observable, of, merge, from, forkJoin } from 'rxjs';
-import {flatMap, map, tap, filter, concatMap} from 'rxjs/operators';
-import {ConfigService} from '../config.service';
-import {TranslateService} from '@ngx-translate/core';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {TransferData} from '../upload/upload.component';
+import {Config} from '../app.component';
+import * as ConfigJson from '../../assets/config.json';
+
+import {NgForOf, NgIf} from '@angular/common';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
 
 export interface Permissions {
     DATA_TYPE: string;
@@ -16,9 +20,19 @@ export interface Permissions {
 }
 
 @Component({
-  selector: 'app-interface',
-  templateUrl: './interface.component.html',
-  styleUrls: ['./interface.component.css']
+    selector: 'app-interface',
+    standalone: true,
+    imports: [
+        TranslateModule,
+        MatToolbarModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        NgIf,
+        ReactiveFormsModule,
+        NgForOf
+    ],
+    templateUrl: './interface.component.html',
+    styleUrls: ['./interface.component.css']
 })
 export class InterfaceComponent implements OnInit {
 
@@ -26,17 +40,25 @@ export class InterfaceComponent implements OnInit {
     @Input() redirectURL: string;
     @Output() newItemEvent = new EventEmitter<TransferData>();
     transferData: TransferData;
+    languages: FormControl;
+    langArray: Array<any> = [];
+
+    config: Config = (ConfigJson as any).default;
 
   constructor(private globusService: GlobusService,
-              private config: ConfigService,
               private translatePar: TranslateService) {
 
       this.translate = translatePar;
-      this.translate.addLangs(['English', 'Français']);
-      this.translate.setDefaultLang('English');
+      this.translate.addLangs(['en', 'fr']);
+      this.translate.setDefaultLang('en');
+      this.langArray.push({value: 'en', viewValue: 'English'});
+      this.langArray.push({value: 'fr', viewValue: 'Français'});
 
       const browserLang = this.translate.getBrowserLang();
-      this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+      if (browserLang != null) {
+          this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
+      }
+      this.languages = new FormControl(this.translate.currentLang);
   }
   title: string;
   dvLocale: string;
@@ -54,15 +76,15 @@ export class InterfaceComponent implements OnInit {
         console.log(code);
         if (code === null || code === '') {
             console.log(this.transferData);
-           this.getParameters(code);
-           this.setLanguage();
-           console.log(this.transferData.fileId);
-           if (this.transferData.fileId === null) {
-               console.log("Dataset level");
+            this.getParameters(code);
+            this.setLanguage();
+            console.log(this.transferData.fileId);
+            if (this.transferData.fileId === null) {
+               console.log('Dataset level');
                const state = this.encodeStateDataset();
                this.getCode(state);
            } else {
-               console.log("file level");
+               console.log('file level');
                const state = this.encodeStateFile();
                this.getCode(state);
            }
@@ -76,7 +98,7 @@ export class InterfaceComponent implements OnInit {
                 this.decodeStateFile();
             } else {
                 this.decodeStateDataset();
-                console.log("The dataset " + this.transferData.datasetDirectory);
+                console.log('The dataset ' + this.transferData.datasetDirectory);
             }
             this.setLanguage();
             this.getUserAccessToken(code);
@@ -85,17 +107,20 @@ export class InterfaceComponent implements OnInit {
     setLanguage() {
         if (this.dvLocale != null) {
             if (this.dvLocale === 'en') {
-                this.translate.use('English');
+                this.translate.use('en');
             } else if (this.dvLocale === 'fr') {
-                this.translate.use('Français');
+                this.translate.use('fr');
             } else {
                 const browserLang = this.translate.getBrowserLang();
-                this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+                this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
             }
         } else {
             const browserLang = this.translate.getBrowserLang();
-            this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+            this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
         }
+    }
+    onLanguageChange(language: string) {
+        this.translate.use(language);
     }
 
     getUserAccessToken(code) {
@@ -124,12 +149,13 @@ export class InterfaceComponent implements OnInit {
 
     getCode(state) {
         const scope = encodeURI('openid+email+profile+urn:globus:auth:scope:transfer.api.globus.org:all');
-        const client_id = this.config.globusClientId;
-        let new_url =  'https://auth.globus.org/v2/oauth2/authorize?client_id=' + client_id + '&response_type=code&' +
+        const clientId = this.config.globusClientId;
+        console.log(clientId);
+        let newUrl =  'https://auth.globus.org/v2/oauth2/authorize?client_id=' + clientId + '&response_type=code&' +
             'scope=' + scope + '&state=' + state;
-        new_url = new_url + '&redirect_uri=' + this.redirectURL ;
+        newUrl = newUrl + '&redirect_uri=' + this.redirectURL ;
 
-        const myWindows = window.location.replace(new_url);
+        const myWindows = window.location.replace(newUrl);
     }
     getParameters(code) {
         this.transferData.datasetPid = this.globusService.getParameterByName('datasetPid');
@@ -180,9 +206,12 @@ export class InterfaceComponent implements OnInit {
         console.log(this.transferData.datasetVersion);
         this.dvLocale = parameters[6];
         console.log(this.dvLocale);
-        
-        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' + this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://') + 3, this.transferData.storePrefix.length -1) + '/') : '/';
-        this.transferData.datasetDirectory = this.transferData.datasetDirectory + this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
+
+        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' +
+            this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://')
+            + 3, this.transferData.storePrefix.length - 1) + '/') : '/';
+        this.transferData.datasetDirectory = this.transferData.datasetDirectory +
+            this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
         this.transferData.key = parameters[1];
     }
 

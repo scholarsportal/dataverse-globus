@@ -1,20 +1,37 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {TransferData} from '../upload/upload.component';
-import {GlobusService} from '../globus.service';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {EndpointTemplateComponent} from '../endpoint-template/endpoint-template.component';
+import {NavigateTemplateDownloadComponent} from '../navigate-template-download/navigate-template-download.component';
 
 @Component({
   selector: 'app-personal-connect-download',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    EndpointTemplateComponent,
+    NavigateTemplateDownloadComponent
+  ],
   templateUrl: './personal-connect-download.component.html',
   styleUrls: ['./personal-connect-download.component.css']
 })
 export class PersonalConnectDownloadComponent implements OnInit, OnChanges {
 
-  constructor(private globusService: GlobusService,
-              public snackBar: MatSnackBar) { }
+  constructor() { }
 
   @Input() dataTransfer: TransferData;
-  @Input() type: number // 0 - left, 1 - right, 2 - center
+  @Input() type: number; // 0 - left, 1 - right, 2 - center
   load: boolean;
   selectedEndPoint: any;
   personalConnectEndpoints: Array<object>;
@@ -30,11 +47,7 @@ export class PersonalConnectDownloadComponent implements OnInit, OnChanges {
   }
 
   personalConnectExist() {
-    if (typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0;
   }
 
   setSelectedEndpoint(event) {

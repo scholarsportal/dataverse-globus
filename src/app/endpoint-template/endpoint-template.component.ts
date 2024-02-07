@@ -1,12 +1,27 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
 import {TransferData} from '../upload/upload.component';
-import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
-import {PassingDataSelectType} from '../navigate-template-download/navigate-template-download.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {GlobusService} from '../globus.service';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatGridListModule} from '@angular/material/grid-list';
 
 @Component({
   selector: 'app-endpoint-template',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatGridListModule
+  ],
   templateUrl: './endpoint-template.component.html',
   styleUrls: ['./endpoint-template.component.css']
 })
@@ -22,26 +37,25 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
   @Output() loadedEvent = new EventEmitter<any>();
 
   selectedDirectory: string;
-  public dialogRef: MatDialogRef<SelectDirectoryComponent>;
   constructor(private globusService: GlobusService) { }
   load: boolean;
 
   ngOnInit(): void {
-    console.log("hello");
+    console.log('hello');
     this.load = false;
     console.log(this.personalConnectEndpoints);
   }
 
   ngOnChanges() {
     console.log(this.personalConnectEndpoints);
-    console.log("Changes");
+    console.log('Changes');
     if (typeof this.transferData.userAccessTokenData !== 'undefined') {
       this.getPersonalConnect(this.transferData.userAccessTokenData)
           .subscribe(
               data => this.processPersonalConnect(data),
               error => {
-                console.log(error),
-                    this.loadedEvent.emit(this.personalConnectEndpoints);
+                console.log(error);
+                this.loadedEvent.emit(this.personalConnectEndpoints);
               },
               () => {
                 this.loadedEvent.emit(this.personalConnectEndpoints);
@@ -91,11 +105,7 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
   }
 
   personalConnectExist() {
-    if (typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0;
   }
 
   setSelectedEndpoint(event) {
