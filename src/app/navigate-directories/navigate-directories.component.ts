@@ -9,6 +9,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {NavigateTemplateComponent} from '../navigate-template/navigate-template.component';
 import {NavigateTemplateDownloadComponent} from '../navigate-template-download/navigate-template-download.component';
 import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 
 @Component({
@@ -19,6 +20,7 @@ import {MAT_DIALOG_DATA} from '@angular/material/dialog';
     MatToolbarModule,
     MatFormFieldModule,
     MatSelectModule,
+      MatSnackBarModule,
     NgIf,
     ReactiveFormsModule,
     NgForOf,
@@ -42,6 +44,8 @@ export class NavigateDirectoriesComponent implements OnInit {
 
 
   ngOnInit(): void {
+    console.log("Data action");
+    console.log(this.data.action);
     console.log(this.data);
   //  this.selectedEndPont = this.data;
     this.selectedEndPoint = this.data.data;
