@@ -5,7 +5,7 @@ import {GlobusService} from '../globus.service';
 import {TransferData} from '../upload/upload.component';
 import {TranslateModule} from '@ngx-translate/core';
 import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatFormFieldControl, MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {NgForOf, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -14,6 +14,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatListModule} from '@angular/material/list';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatInputModule} from '@angular/material/input';
 
 export interface SelFilesType {
   fileNameObject: any;
@@ -35,7 +36,8 @@ export interface SelFilesType {
     MatIconModule,
     MatCheckboxModule,
     MatListModule,
-    FormsModule
+    FormsModule,
+    MatInputModule
   ],
   templateUrl: './navigate-template.component.html',
   styleUrls: ['./navigate-template.component.css']
@@ -43,7 +45,8 @@ export interface SelFilesType {
 export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
-              public snackBar: MatSnackBar) { }
+              public snackBar: MatSnackBar) {
+  }
 
   @Input() transferData: TransferData;
   @Input() selectedEndPoint: any;
