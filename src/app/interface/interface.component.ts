@@ -42,6 +42,7 @@ export class InterfaceComponent implements OnInit {
     transferData: TransferData;
     languages: FormControl;
     langArray: Array<any> = [];
+    signedUrlData: any;
 
     config: Config = (ConfigJson as any).default;
 
@@ -73,37 +74,51 @@ export class InterfaceComponent implements OnInit {
         this.transferData.basicClientToken = this.config.basicGlobusToken;
         this.transferData.globusEndpoint = this.config.globusEndpoint;
         const code = this.globusService.getParameterByName('code');
+        const callback = this.globusService.getParameterByName('callback');
+        console.log(callback);
         console.log(code);
-        if (code === null || code === '') {
-            console.log(this.transferData);
-            this.getParameters(code);
-            this.setLanguage();
-            console.log(this.transferData.fileId);
-            if (this.transferData.fileId === null) {
-               console.log('Dataset level');
-               const state = this.encodeStateDataset();
-               this.getCode(state);
-           } else {
-               console.log('file level');
-               const state = this.encodeStateFile();
-               this.getCode(state);
-           }
+        const dvLocale = this.globusService.getParameterByName('dvLocale');
+        if (typeof callback !== undefined && callback != null) {
+          const code = this.getCode(callback, dvLocale);
         } else {
-            console.log(code);
-            const n = this.redirectURL.substring(0, this.redirectURL.length - 1 ).lastIndexOf('/');
-            const typeOfGlobus = this.redirectURL.substring(n);
-            console.log(typeOfGlobus);
-            if (typeOfGlobus.localeCompare('/download-file/') === 0) {
-                console.log('This is file level');
-                this.decodeStateFile();
-            } else {
-                this.decodeStateDataset();
-                console.log('The dataset ' + this.transferData.datasetDirectory);
-            }
-            this.setLanguage();
+            console.log('else');
             this.getUserAccessToken(code);
+
         }
+
+
+
+      // if (code === null || code === '') {
+      //       console.log(this.transferData);
+      //       this.getParameters(code);
+      //       this.setLanguage();
+      //       console.log(this.transferData.fileId);
+      //       if (this.transferData.fileId === null) {
+      //          console.log('Dataset level');
+      //          const state = this.encodeStateDataset();
+      //          this.getCode(state);
+      //      } else {
+      //          console.log('file level');
+      //          const state = this.encodeStateFile();
+      //          this.getCode(state);
+      //      }
+      //   } else {
+      //       console.log(code);
+      //       const n = this.redirectURL.substring(0, this.redirectURL.length - 1 ).lastIndexOf('/');
+      //       const typeOfGlobus = this.redirectURL.substring(n);
+      //       console.log(typeOfGlobus);
+      //       if (typeOfGlobus.localeCompare('/download-file/') === 0) {
+      //           console.log('This is file level');
+      //           this.decodeStateFile();
+      //       } else {
+      //           this.decodeStateDataset();
+      //           console.log('The dataset ' + this.transferData.datasetDirectory);
+      //       }
+      //       this.setLanguage();
+      //       this.getUserAccessToken(code);
+      //   }
     }
+
     setLanguage() {
         if (this.dvLocale != null) {
             if (this.dvLocale === 'en') {
@@ -138,16 +153,47 @@ export class InterfaceComponent implements OnInit {
                 },
                 error => {
                     console.log(error);
-                    this.transferData.load = true;
-                    this.newItemEvent.emit(this.transferData);
                 },
                 () => {
-                    this.transferData.load = true;
-                    this.newItemEvent.emit(this.transferData);
+                    this.getDataverseInformation();
                 });
     }
 
-    getCode(state) {
+    getDataverseInformation() {
+        console.log( this.transferData.userAccessTokenData);
+        const state = this.globusService.getParameterByName('state');
+        console.log(state);
+        if (state !== undefined) {
+            const signedUrl = this.decodeCallback(state);
+            console.log(signedUrl);
+            if (signedUrl != null) {
+                console.log('before call');
+                this.globusService.getDataverse(signedUrl, this.config.apiToken).subscribe({
+                    next: (value: any) => {
+                        this.signedUrlData = value,
+                            console.log('Got value');
+                        console.log(this.signedUrlData);
+                    },
+                    error: (error: any) => {
+                        console.log(error);
+                    },
+                    complete: () => {
+                        console.log(this.signedUrlData);
+                        this.newItemEvent.emit(this.signedUrlData["data"]);
+                        this.getParameters(this.signedUrlData["data"]['queryParameters']);
+                        this.transferData.load = true;
+                        this.newItemEvent.emit(this.transferData);
+                    }
+                });
+            }
+        }
+    }
+
+
+    getCode(callback, dvLocale) {
+        const decodedCallback = this.decodeCallback(callback);
+        let state = decodedCallback + '&dvLocale=' + dvLocale;
+        state = btoa(state);
         const scope = encodeURI('openid+email+profile+urn:globus:auth:scope:transfer.api.globus.org:all');
         const clientId = this.config.globusClientId;
         console.log(clientId);
@@ -157,18 +203,31 @@ export class InterfaceComponent implements OnInit {
 
         const myWindows = window.location.replace(newUrl);
     }
-    getParameters(code) {
-        this.transferData.datasetPid = this.globusService.getParameterByName('datasetPid');
-        this.transferData.key = this.globusService.getParameterByName('apiToken');
-        this.transferData.siteUrl = this.globusService.getParameterByName('siteUrl');
+    decodeCallback(callback) {
+        const decodedCallback = atob(callback);
+        console.log(decodedCallback);
+        return decodedCallback;
+    }
+
+    getParameters(parameters) {
+        console.log(parameters);
+        this.transferData.datasetPid = parameters.datasetPid;
+        // this.transferData.key = this.globusService.getParameterByName('apiToken');
+        this.transferData.siteUrl = parameters.siteUrl;
         console.log(this.transferData.siteUrl);
-        this.transferData.datasetId = this.globusService.getParameterByName('datasetId');
-        this.transferData.datasetVersion = this.globusService.getParameterByName('datasetVersion');
-        this.dvLocale = this.globusService.getParameterByName('dvLocale');
-        this.transferData.fileId = this.globusService.getParameterByName('fileId');
-        this.transferData.fileMetadataId = this.globusService.getParameterByName('fileMetadataId');
-        this.transferData.storePrefix = this.globusService.getParameterByName('storePrefix');
-        console.log(this.transferData.datasetVersion);
+        this.transferData.datasetId = parameters.datasetId;
+        this.transferData.datasetVersion = parameters.datasetVersion;
+        // this.transferData.fileId = this.globusService.getParameterByName('fileId');
+        // this.transferData.fileMetadataId = this.globusService.getParameterByName('fileMetadataId');
+        // this.transferData.storePrefix = this.globusService.getParameterByName('storePrefix');
+        console.log(this.transferData);
+
+        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' +
+            this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://')
+                + 3, this.transferData.storePrefix.length - 1) + '/') : '/';
+        this.transferData.datasetDirectory = this.transferData.datasetDirectory +
+            this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
+        this.transferData.key = this.config.apiToken;
     }
     encodeStateDataset() {
         const state = btoa(this.transferData.datasetPid + '_'

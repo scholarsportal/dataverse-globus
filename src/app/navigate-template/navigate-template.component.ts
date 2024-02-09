@@ -15,6 +15,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatListModule} from '@angular/material/list';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatInputModule} from '@angular/material/input';
+import {CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 
 export interface SelFilesType {
   fileNameObject: any;
@@ -37,7 +38,9 @@ export interface SelFilesType {
     MatCheckboxModule,
     MatListModule,
     FormsModule,
-    MatInputModule
+    MatInputModule,
+    CdkVirtualScrollViewport,
+    CdkFixedSizeVirtualScroll
   ],
   templateUrl: './navigate-template.component.html',
   styleUrls: ['./navigate-template.component.css']
@@ -228,12 +231,14 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   onSelection($event,  selectedFiles) {
+    console.log(selectedFiles);
     this.isSingleClick = true;
     setTimeout(() => {
       if (this.isSingleClick ){
-
-        const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
-        if ($event.option._selected) {
+        console.log("It is single click");
+        const file: SelFilesType = {fileNameObject: $event.options._value, directory: this.selectedDirectory };
+        if ($event.options._selected) {
+          console.log("event selected");
           console.log(file);
           console.log(this.selectedFiles);
           const indx = this.selectedFiles.findIndex(x =>
@@ -257,6 +262,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   checkBox($event, item) {
     if (!$event.checked) {
+      console.log("Check flag");
       this.checkFlag = false;
     }
   }
