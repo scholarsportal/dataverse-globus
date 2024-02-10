@@ -12,7 +12,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatListModule} from '@angular/material/list';
+import {MatListModule, MatListOption} from '@angular/material/list';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatInputModule} from '@angular/material/input';
 import {CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
@@ -230,34 +230,41 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     }
   }
 
-  onSelection($event,  selectedFiles) {
-    console.log(selectedFiles);
+  onSelection(selectedFile: MatListOption[]) {
+    console.log(selectedFile);
+    const files = selectedFile.map(o => o.value);
     this.isSingleClick = true;
     setTimeout(() => {
-      if (this.isSingleClick ){
-        console.log("It is single click");
-        const file: SelFilesType = {fileNameObject: $event.options._value, directory: this.selectedDirectory };
-        if ($event.options._selected) {
-          console.log("event selected");
-          console.log(file);
-          console.log(this.selectedFiles);
-          const indx = this.selectedFiles.findIndex(x =>
-            x.fileNameObject === file.fileNameObject &&
-            x.directory === file.directory
-          );
-          console.log(indx);
-          if ( indx === -1) {
-            this.selectedFiles.push(file);
-          }
-        } else {
-          const indx = this.selectedFiles.indexOf(file);
-          if ( indx !== -1) {
-            this.selectedFiles.splice(indx, 1);
-          }
-          this.checkFlag = false;
-        }
+      if (this.isSingleClick ) {
+        console.log('It is single click');
+        this.selectedFiles = new Array<SelFilesType>();
+        files.forEach(file => {
+          this.selectedFiles.push({fileNameObject: file, directory: this.selectedDirectory});
+        });
+        console.log(this.selectedFiles);
+        //
+        //     if (selectedFile.) {
+        //       console.log("event selected");
+        //       console.log(file);
+        //       console.log(this.selectedFiles);
+        //       const indx = this.selectedFiles.findIndex(x =>
+        //         x.fileNameObject === file.fileNameObject &&
+        //         x.directory === file.directory
+        //       );
+        //       console.log(indx);
+        //       if ( indx === -1) {
+        //         this.selectedFiles.push(file);
+        //       }
+        //     } else {
+        //       const indx = this.selectedFiles.indexOf(file);
+        //       if ( indx !== -1) {
+        //         this.selectedFiles.splice(indx, 1);
+        //       }
+        //       this.checkFlag = false;
+        //     }
+        //   }
       }
-    }, 250);
+      }, 250);
   }
 
   checkBox($event, item) {
@@ -305,19 +312,63 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     this.checkFlag = false;
   }
 
-  onRemoving($event, selectedList) {
-    if ($event.option._selected) {
-      const indx = this.selectedFiles.indexOf($event.option._value);
+  onRemoving(selectedFile: MatListOption[]) {
+    console.log(selectedFile);
+    const files = selectedFile.map(o => o.value);
+    // this.isSingleClick = true;
+    // setTimeout(() => {
+    //   if (this.isSingleClick ) {
+    //     console.log('It is single click');
+    //
+    files.forEach(file => {
+      const indx = this.selectedFiles.indexOf(file);
+      console.log(indx);
       if ( indx !== -1) {
         this.selectedFiles.splice(indx, 1);
-        const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
-        if (indx2 !== -1) {
-          this.selectedOptions.splice(indx2, 1);
-          selectedList.writeValue(this.selectedOptions);
-          this.checkFlag = false;
-        }
+        this.checkFlag = false;
       }
-    }
+         });
+    //     console.log(this.selectedFiles);
+        //
+        //     if (selectedFile.) {
+        //       console.log("event selected");
+        //       console.log(file);
+        //       console.log(this.selectedFiles);
+        //       const indx = this.selectedFiles.findIndex(x =>
+        //         x.fileNameObject === file.fileNameObject &&
+        //         x.directory === file.directory
+        //       );
+        //       console.log(indx);
+        //       if ( indx === -1) {
+        //         this.selectedFiles.push(file);
+        //       }
+        //     } else {
+        //       const indx = this.selectedFiles.indexOf(file);
+        //       if ( indx !== -1) {
+        //         this.selectedFiles.splice(indx, 1);
+        //       }
+        //       this.checkFlag = false;
+        //     }
+        //   }
+    //   }
+    // }, 250);
+
+
+
+
+    //   $event, selectedList) {
+    // if ($event.option._selected) {
+    //   const indx = this.selectedFiles.indexOf($event.option._value);
+    //   if ( indx !== -1) {
+    //     this.selectedFiles.splice(indx, 1);
+    //     const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
+    //     if (indx2 !== -1) {
+    //       this.selectedOptions.splice(indx2, 1);
+    //       selectedList.writeValue(this.selectedOptions);
+    //       this.checkFlag = false;
+    //     }
+    //   }
+    // }
   }
 
   onSubmitTransfer() {
@@ -474,7 +525,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
 
     // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
-    const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.transferData.datasetPid;
+    const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addGlobusFiles?persistentId=' + this.transferData.datasetPid;
     const formData: any = new FormData();
 
     console.log(this.listOfDirectoryLabels);
@@ -495,7 +546,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":\"' + this.transferData.storePrefix +
+          '\"storageIdentifier\":\"' +  // this.transferData.storePrefix +
           this.listOfAllStorageIdentifiers[i] + '\",' +
           '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
       file = file +  ' } ';
