@@ -12,14 +12,14 @@
  </div>
 
 <div id="container"  *ngIf="selectedDirectoryExist() && accessEndpointFlag">
-    <div>
+    <div  class="first-row">
         <mat-checkbox class="mat-checkbox"
                       [attr.aria-label]="'TEMPLATE.SELECTALL' | translate" #check
                       [checked]="checkFlag"
                       (change)="selectAll($event, directory)">
             {{'TEMPLATE.SELECTALL' | translate}}
         </mat-checkbox>
-        <button mat-stroked-button (click)="UpOneFolder()" >
+        <button  mat-stroked-button (click)="UpOneFolder()" >
             <mat-icon class="class-icon" matSuffix
                       [attr.aria-label]="'TEMPLATE.UP' | translate">subdirectory_arrow_left
             </mat-icon>
@@ -43,7 +43,7 @@
 
          </cdk-virtual-scroll-viewport>
     </div>
-    <div>
+    <div class="first-row">
         <button mat-stroked-button (click)="removeAllFromSelected(directory)">
             <mat-icon class="class-icon"  matSuffix
                       [attr.aria-label]="'TEMPLATE.REMOVEALL' | translate">
@@ -55,7 +55,7 @@
         </div>
     <div>
         <cdk-virtual-scroll-viewport itemSize="50" [style.height.px]=5*100>
-            <mat-selection-list #varCol (selectionChange)="onRemoving(varCol.selectedOptions.selected)">
+            <mat-selection-list #varCol (selectionChange)="onRemoving(varCol.selectedOptions.selected, directory)">
                 <h2 matSubheader>{{'TEMPLATE.SELECTEDFILES' | translate}}</h2>
                 <mat-list-option [value]='file' *ngFor="let file of selectedFiles" >
                     <mat-list-item>

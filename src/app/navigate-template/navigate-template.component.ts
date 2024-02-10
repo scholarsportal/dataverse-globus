@@ -312,8 +312,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     this.checkFlag = false;
   }
 
-  onRemoving(selectedFile: MatListOption[]) {
+  onRemoving(selectedFile: MatListOption[], selectedList) {
     console.log(selectedFile);
+    console.log(selectedList);
     const files = selectedFile.map(o => o.value);
     // this.isSingleClick = true;
     // setTimeout(() => {
@@ -325,9 +326,14 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       console.log(indx);
       if ( indx !== -1) {
         this.selectedFiles.splice(indx, 1);
-        this.checkFlag = false;
+        const indx2 = selectedList._value.indexOf(file);
+        if (indx2 !== -1) {
+          console.log("Hello");
+          selectedList._value.splice(indx2);
+          this.checkFlag = false;
+        }
       }
-         });
+      });
     //     console.log(this.selectedFiles);
         //
         //     if (selectedFile.) {
