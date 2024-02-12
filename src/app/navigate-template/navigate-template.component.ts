@@ -531,7 +531,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
 
     // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
-    const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addGlobusFiles?persistentId=' + this.transferData.datasetPid;
+    //const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addGlobusFiles?persistentId=' + this.transferData.datasetPid;
     const formData: any = new FormData();
 
     console.log(this.listOfDirectoryLabels);
@@ -560,6 +560,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     }
     body = body + ']}';
     console.log(body);
+    formData.append('jsonData', body);
+    console.log(this.transferData.signedUrls);
     /* {
           description: '',
           directoryLabel: this.listOfDirectoryLabels[0],
@@ -571,8 +573,16 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
 
     const bodyString = JSON.stringify(body);
+
 */
-    formData.append('jsonData', body);
+    let url = '';
+    for (const urlObject  of this.transferData.signedUrls) {
+      console.log(urlObject);
+      if (urlObject['name'] === 'addGlobusFiles') {
+        url = urlObject['signedUrl'];
+      }
+    }
+    console.log(url);
     console.log(this.transferData.key);
     this.globusService.postDataverse(url, formData, this.transferData.key)
         .subscribe(

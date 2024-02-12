@@ -26,6 +26,7 @@ export interface TransferData {
   fileId: string;
   fileMetadataId: string;
   storePrefix: string;
+  signedUrls: any;
 }
 
 @Component({

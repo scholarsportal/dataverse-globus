@@ -182,6 +182,7 @@ export class InterfaceComponent implements OnInit {
                         this.newItemEvent.emit(this.signedUrlData["data"]);
                         this.getParameters(this.signedUrlData["data"]['queryParameters']);
                         this.transferData.load = true;
+                        this.transferData.signedUrls = this.signedUrlData['data']['signedUrls'];
                         this.newItemEvent.emit(this.transferData);
                     }
                 });
