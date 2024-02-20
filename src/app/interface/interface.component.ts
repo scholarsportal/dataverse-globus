@@ -143,6 +143,8 @@ export class InterfaceComponent implements OnInit {
         const url = 'https://auth.globus.org/v2/oauth2/token?code=' + code + '&redirect_uri=' + this.redirectURL + '&grant_type=authorization_code';
         console.log(url);
         const key = 'Basic ' + this.config.basicGlobusToken;
+        console.log(this.config.basicGlobusToken);
+
         return this.globusService.postGlobus(url,  '', key)
             /*----------------------*/
             .subscribe(
@@ -178,11 +180,12 @@ export class InterfaceComponent implements OnInit {
                         console.log(error);
                     },
                     complete: () => {
+                        console.log("This is complete");
                         console.log(this.signedUrlData);
                         this.newItemEvent.emit(this.signedUrlData["data"]);
                         this.getParameters(this.signedUrlData["data"]['queryParameters']);
-                        this.transferData.load = true;
                         this.transferData.signedUrls = this.signedUrlData['data']['signedUrls'];
+                        this.transferData.load = true;
                         this.newItemEvent.emit(this.transferData);
                     }
                 });
@@ -228,7 +231,8 @@ export class InterfaceComponent implements OnInit {
                 + 3, this.transferData.storePrefix.length - 1) + '/') : '/';
         this.transferData.datasetDirectory = this.transferData.datasetDirectory +
             this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
-        this.transferData.key = this.config.apiToken;
+        this.transferData.globusEndpoint = parameters.endpoint;
+        // this.transferData.key = this.config.apiToken;
     }
     encodeStateDataset() {
         const state = btoa(this.transferData.datasetPid + '_'

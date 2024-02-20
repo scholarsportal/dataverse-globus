@@ -49,6 +49,8 @@ export class GlobusService {
 
   postGlobus(url: string, body: string, key: string) {
     console.log('Start posting Globus');
+    console.log(url);
+    console.log(body);
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
@@ -73,6 +75,9 @@ export class GlobusService {
       };
     }
     return this.http.post(url, body, httpOptions);
+  }
+  postSimpleDataverse(url: string, body: string) {
+    return this.http.post(url, body);
   }
   getDataverse(url: string, key: string ) {
     let httpOptions = {};

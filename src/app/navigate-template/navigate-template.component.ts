@@ -435,6 +435,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
                 // this.submit(array);
               } else {
                 const user = this.globusService.getUserInfo(this.transferData.userAccessTokenData.access_token);
+                console.log(user);
 
                 const client = this.globusService.getClientToken(this.transferData.basicClientToken);
 
@@ -463,55 +464,86 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   submit(array) {
-
-    console.log('Start submitting!!!');
-    forkJoin(array)
-        .pipe(flatMap(obj => {
-          this.clientToken = obj[1];
-          return this.globusService.getPermission(obj[1], obj[0],
-                  this.transferData.datasetDirectory,
-                  this.transferData.globusEndpoint, 'rw');
-            }),
-            catchError(err => {
-              console.log(err);
-              if (err.status === 409) {
-                console.log('Rule exists');
-                return of(err);
-              } else {
-                return throwError(err); } }
-            ))
-        .pipe(flatMap(data => {
-            this.ruleId = data.access_id;
-            return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
-            }
-            ))
-            .pipe( flatMap(data => this.globusService.submitTransferItems(
-            this.listOfAllFiles,
-            this.transferData.datasetDirectory,
-            this.listOfAllStorageIdentifiers,
-            data['value'],
-            this.selectedEndPoint.id,
-            this.transferData.globusEndpoint,
-            this.transferData.userAccessTokenData.other_tokens[0].access_token)))
+    console.log("Submitting");
+    console.log(array);
+    console.log(this.transferData.globusEndpoint);
+    this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token)
+        .pipe( flatMap(data => this.globusService.submitTransferItems(
+              this.listOfAllFiles,
+              this.transferData.datasetDirectory,
+              this.listOfAllStorageIdentifiers,
+              data['value'],
+              this.selectedEndPoint.id,
+              this.transferData.globusEndpoint,
+              this.transferData.userAccessTokenData.other_tokens[0].access_token)))
         .subscribe(
-            data => {
-              console.log(data);
-              this.taskId = data['task_id'];
-            },
-            error => {
-              console.log(error);
-              this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
-                duration: 3000
+              data => {
+                console.log(data);
+                this.taskId = data['task_id'];
+              },
+              error => {
+                console.log(error);
+                this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+                  duration: 3000
+                });
+              },
+              () => {
+                console.log('Transfer submitted');
+                this.writeToDataverse(array);
               });
-            },
-            () => {
-              console.log('Transfer submitted');
-              this.writeToDataverse();
-            }
-        );
   }
 
-  writeToDataverse() {
+  // submit(array) {
+  //   console.log(array);
+  //   console.log('Start submitting!!!');
+  //   forkJoin(array)
+  //       .pipe(flatMap(obj => {
+  //         this.clientToken = obj[1];
+  //         console.log(obj);
+  //         return this.globusService.getPermission(obj[1], obj[0],
+  //                 this.transferData.datasetDirectory,
+  //                 this.transferData.globusEndpoint, 'rw');
+  //           }),
+  //           catchError(err => {
+  //             console.log(err);
+  //             if (err.status === 409) {
+  //               console.log('Rule exists');
+  //               return of(err);
+  //             } else {
+  //               return throwError(err); } }
+  //           ))
+  //       .pipe(flatMap(data => {
+  //           this.ruleId = data.access_id;
+  //           return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
+  //           }
+  //           ))
+  //           .pipe( flatMap(data => this.globusService.submitTransferItems(
+  //           this.listOfAllFiles,
+  //           this.transferData.datasetDirectory,
+  //           this.listOfAllStorageIdentifiers,
+  //           data['value'],
+  //           this.selectedEndPoint.id,
+  //           this.transferData.globusEndpoint,
+  //           this.transferData.userAccessTokenData.other_tokens[0].access_token)))
+  //       .subscribe(
+  //           data => {
+  //             console.log(data);
+  //             this.taskId = data['task_id'];
+  //           },
+  //           error => {
+  //             console.log(error);
+  //             this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+  //               duration: 3000
+  //             });
+  //           },
+  //           () => {
+  //             console.log('Transfer submitted');
+  //             this.writeToDataverse();
+  //           }
+  //       );
+  // }
+
+  writeToDataverse(array) {
     /*{
       "taskIdentifier":"d2ae147e-446a-11eb-8ffa-0a34088e79f9",
         "files": [
@@ -533,6 +565,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
     //const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addGlobusFiles?persistentId=' + this.transferData.datasetPid;
     const formData: any = new FormData();
+
+
 
     console.log(this.listOfDirectoryLabels);
     console.log(this.listOfAllStorageIdentifiers);
@@ -575,36 +609,68 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     const bodyString = JSON.stringify(body);
 
 */
+
+
     let url = '';
+    let url_path = '';
     for (const urlObject  of this.transferData.signedUrls) {
       console.log(urlObject);
       if (urlObject['name'] === 'addGlobusFiles') {
         url = urlObject['signedUrl'];
       }
+      if (urlObject['name'] === 'requestGlobusTransferPaths') {
+        url_path = urlObject['signedUrl'];
+      }
     }
     console.log(url);
-    console.log(this.transferData.key);
-    this.globusService.postDataverse(url, formData, this.transferData.key)
+
+    forkJoin(array)
+        .pipe(flatMap(obj=> {
+              let path_json = '{ ' +
+                  '  "principal":"' + obj[0] + '",' +
+                  '  "numberOfFiles":' + this.listOfAllStorageIdentifiers.length + '}';
+              console.log(path_json);
+
+        }))
+
+    this.globusService.postSimpleDataverse(url_path, path_json)
         .subscribe(
             data => {
               console.log(data);
             },
             error => {
               console.log(error);
-              // this.removeRule();
-              this.snackBar.open('There was an error in transfer submission. ', '', {
-                duration: 3000
-              });
             },
             () => {
-              console.log('Submitted to dataverse');
-              // this.removeRule();
-              const urlDataset = this.transferData.siteUrl + '/' + 'dataset.xhtml?persistentId=' + this.transferData.datasetPid;
-              this.snackBar.open('Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.', '', {
-                duration: 5000
-              });
-            }
-        );
+
+            });
+        .subscribe( data => {console.log(data); } ,
+            error = {}, () =>
+            this.globusService.postDataverse(url, formData, this.transferData.key)
+                .subscribe(
+                    data => {
+                      console.log(data);
+                    },
+                    error => {
+                      console.log(error);
+                      // this.removeRule();
+                      this.snackBar.open('There was an error in transfer submission. ', '', {
+                        duration: 3000
+                      });
+                    },
+                    () => {
+                      console.log('Submitted to dataverse');
+                      // this.removeRule();
+                      const urlDataset = this.transferData.siteUrl + '/' +
+                          'dataset.xhtml?persistentId=' + this.transferData.datasetPid;
+                      this.snackBar.open(
+                          'Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.',
+                          '', {
+                            duration: 5000
+                          });
+                    }
+                );
+        )
   }
 
   removeRule() {
