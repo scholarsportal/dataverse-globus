@@ -228,7 +228,8 @@ export class InterfaceComponent implements OnInit {
                 + 3, this.transferData.storePrefix.length - 1) + '/') : '/';
         this.transferData.datasetDirectory = this.transferData.datasetDirectory +
             this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
-        this.transferData.key = this.config.apiToken;
+        // this.transferData.key = this.config.apiToken;
+        this.transferData.globusEndpoint = parameters.endpoint;
     }
     encodeStateDataset() {
         const state = btoa(this.transferData.datasetPid + '_'
