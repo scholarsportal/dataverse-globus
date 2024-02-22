@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnChanges, OnInit} from '@angular/core';
 import {GlobusService} from '../globus.service';
-import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
+import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 
 import { NavigateDirectoriesComponent } from '../navigate-directories/navigate-directories.component';
 import {TransferData} from '../upload/upload.component';

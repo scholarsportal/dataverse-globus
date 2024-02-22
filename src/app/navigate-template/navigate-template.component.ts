@@ -466,22 +466,22 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
 
     console.log('Start submitting!!!');
     forkJoin(array)
-        .pipe(flatMap(obj => {
-          this.clientToken = obj[1];
-          return this.globusService.getPermission(obj[1], obj[0],
-                  this.transferData.datasetDirectory,
-                  this.transferData.globusEndpoint, 'rw');
-            }),
-            catchError(err => {
-              console.log(err);
-              if (err.status === 409) {
-                console.log('Rule exists');
-                return of(err);
-              } else {
-                return throwError(err); } }
-            ))
+        // .pipe(flatMap(obj => {
+        //   this.clientToken = obj[1];
+        //   return this.globusService.getPermission(obj[1], obj[0],
+        //           this.transferData.datasetDirectory,
+        //           this.transferData.globusEndpoint, 'rw');
+        //     }),
+        //     catchError(err => {
+        //       console.log(err);
+        //       if (err.status === 409) {
+        //         console.log('Rule exists');
+        //         return of(err);
+        //       } else {
+        //         return throwError(err); } }
+        //     ))
         .pipe(flatMap(data => {
-            this.ruleId = data.access_id;
+            // this.ruleId = data.access_id;
             return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
             }
             ))
