@@ -68,10 +68,18 @@ export class GlobusService {
     if (key !== 'null') {
       httpOptions = {
         // headers: new HttpHeaders({
-        //  'X-Dataverse-key': key
+        //  'Content-Type': 'application/json'
         // })
       };
     }
+    return this.http.post(url, body, httpOptions);
+  }
+  postSimpleDataverse(url: string, body: string) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
     return this.http.post(url, body, httpOptions);
   }
   getDataverse(url: string, key: string ) {
@@ -177,16 +185,20 @@ export class GlobusService {
     return storageIdentifier;
   }
 
-  submitTransferItems(listOfAllFiles, datasetDirectory, listOfAllStorageIdentifiers, submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
+  submitTransferItems(listOfAllFiles, datasetDirectory, listOfAllStorageIdentifiersPaths,
+                      submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
+    // console.log(paths);
     console.log('Starting submit transfer Item');
     console.log(submissionId);
     const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
     const taskItemsArray = new Array();
+
     for (let i = 0; i < listOfAllFiles.length; i++) {
+      const storageId = listOfAllStorageIdentifiersPaths[i].substring(listOfAllStorageIdentifiersPaths[i].length - 24);
       const taskItem = {
         DATA_TYPE: 'transfer_item',
         source_path: listOfAllFiles[i],
-        destination_path: datasetDirectory + listOfAllStorageIdentifiers[i],
+        destination_path: datasetDirectory +  storageId,
         recursive: false
       };
       taskItemsArray.push(taskItem);
