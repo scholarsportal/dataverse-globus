@@ -56,20 +56,16 @@
 }
 #container {
     display: grid;
-    grid: repeat(2, 100%) / auto-flow 50%;
+    /*grid: repeat(2, 100%) / auto-flow 50%;*/
+    grid-template-columns: 49% 49%;
+    grid-template-rows: 45px 50%;
+    column-gap: 10px;
 }
 
 .first-row {
     background: lightgray;
 }
 
-
-
-#container > div {
-
-    width: 98%;
-    height: 100%;
-}
 
 
 
