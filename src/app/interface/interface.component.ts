@@ -222,12 +222,9 @@ export class InterfaceComponent implements OnInit {
         // this.transferData.fileMetadataId = this.globusService.getParameterByName('fileMetadataId');
         // this.transferData.storePrefix = this.globusService.getParameterByName('storePrefix');
         console.log(this.transferData);
-
-        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' +
-            this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://')
-                + 3, this.transferData.storePrefix.length - 1) + '/') : '/';
-        this.transferData.datasetDirectory = this.transferData.datasetDirectory +
+        this.transferData.datasetDirectory = '/' +
             this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
+        console.log(this.transferData.datasetDirectory);
         // this.transferData.key = this.config.apiToken;
         this.transferData.globusEndpoint = parameters.endpoint;
     }
