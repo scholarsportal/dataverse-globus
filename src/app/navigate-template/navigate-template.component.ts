@@ -505,7 +505,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
             ))
             .pipe( flatMap(data => this.globusService.submitTransferItems(
             this.listOfAllFiles,
-                this.transferData.datasetDirectory,
+                this.listOfAllStorageIdentifiersPaths,
             this.listOfAllStorageIdentifiersPaths,
             data['value'],
             this.selectedEndPoint.id,

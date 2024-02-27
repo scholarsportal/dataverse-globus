@@ -185,11 +185,11 @@ export class GlobusService {
     return storageIdentifier;
   }
 
-  submitTransferItems(listOfAllFiles, datasetDirectory, listOfAllStorageIdentifiersPaths,
+  submitTransferItems(listOfAllFiles, paths, listOfAllStorageIdentifiersPaths,
                       submissionId, selectedEndPointId, globusEndpoint, userOtherAccessToken) {
     // console.log(paths);
     console.log('Starting submit transfer Item');
-    console.log(submissionId);
+    console.log(submissionId);;
     const url = 'https://transfer.api.globusonline.org/v0.10/transfer';
     const taskItemsArray = new Array();
 
@@ -198,7 +198,7 @@ export class GlobusService {
       const taskItem = {
         DATA_TYPE: 'transfer_item',
         source_path: listOfAllFiles[i],
-        destination_path: datasetDirectory +  storageId,
+        destination_path: paths[i],
         recursive: false
       };
       taskItemsArray.push(taskItem);
