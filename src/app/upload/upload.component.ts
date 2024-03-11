@@ -11,6 +11,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {SearchEndpointComponent} from '../search-endpoint/search-endpoint.component';
 import {PersonalConnectComponent} from '../personal-connect/personal-connect.component';
 import {RecentlyViewedComponentComponent} from '../recently-viewed-component/recently-viewed-component.component';
+import {ReferencedComponent} from '../referenced/referenced.component';
 
 export interface TransferData {
   load: boolean;
@@ -27,6 +28,8 @@ export interface TransferData {
   fileMetadataId: string;
   storePrefix: string;
   signedUrls: any;
+  managed: boolean;
+  referenceEndpointsWithPaths: Array<string>;
 }
 
 @Component({
@@ -44,7 +47,8 @@ export interface TransferData {
     MatTabsModule,
     SearchEndpointComponent,
     PersonalConnectComponent,
-    RecentlyViewedComponentComponent
+    RecentlyViewedComponentComponent,
+    ReferencedComponent
   ],
   templateUrl: './upload.component.html',
   styleUrls: ['./upload.component.css']
@@ -66,6 +70,8 @@ export class UploadComponent implements OnInit {
 
   ifLoaded(dataTransfer: TransferData) {
     this.dataTransfer = dataTransfer;
+    console.log(this.dataTransfer);
+    console.log('Loaded!!!');
   }
 
 }

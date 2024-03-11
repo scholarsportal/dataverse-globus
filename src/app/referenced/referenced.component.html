@@ -1,0 +1,17 @@
+<app-endpoint-template (newItemEvent)="setSelectedEndpoint($event)"
+                       (loadedEvent)="ifLoaded($event)"
+                       [type]="0"
+                       [transferData] = "dataTransfer"
+                       [typeOfTab]="4">
+</app-endpoint-template>
+<div class="center" *ngIf="!referencedExist() && load">
+    <h3 class="my-translated-paragraph">
+        {{'PERSONAL.ERROR' | translate}}
+    </h3>
+</div>
+
+<ng-container class="interface-container"*ngIf="referencedExist() && load ">
+    <app-navigate-template [transferData]="dataTransfer"
+                           [selectedEndPoint]="selectedEndPoint">
+    </app-navigate-template>
+</ng-container>

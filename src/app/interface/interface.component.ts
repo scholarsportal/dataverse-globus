@@ -10,6 +10,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {consumerDestroy} from '@angular/core/primitives/signals';
 
 export interface Permissions {
     DATA_TYPE: string;
@@ -179,10 +180,11 @@ export class InterfaceComponent implements OnInit {
                     },
                     complete: () => {
                         console.log(this.signedUrlData);
-                        this.newItemEvent.emit(this.signedUrlData["data"]);
+                        // this.newItemEvent.emit(this.signedUrlData["data"]);
                         this.getParameters(this.signedUrlData["data"]['queryParameters']);
-                        this.transferData.load = true;
                         this.transferData.signedUrls = this.signedUrlData['data']['signedUrls'];
+                        this.transferData.load = true;
+                        console.log('It is true');
                         this.newItemEvent.emit(this.transferData);
                     }
                 });
@@ -226,7 +228,18 @@ export class InterfaceComponent implements OnInit {
             this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
         console.log(this.transferData.datasetDirectory);
         // this.transferData.key = this.config.apiToken;
-        this.transferData.globusEndpoint = parameters.endpoint;
+        console.log(parameters.managed);
+        console.log(this.transferData.managed);
+        if (parameters.managed === 'true') {
+            this.transferData.managed = true;
+            this.transferData.globusEndpoint = parameters.endpoint;
+            console.log(this.transferData.globusEndpoint);
+        } else {
+            this.transferData.managed = false;
+            this.transferData.referenceEndpointsWithPaths = parameters.referenceEndpointsWithPaths;
+            console.log(this.transferData.referenceEndpointsWithPaths);
+        }
+
     }
     encodeStateDataset() {
         const state = btoa(this.transferData.datasetPid + '_'

@@ -39,5 +39,6 @@
     "CANCEL": "Cancel FR",
     "OK": "OK FR",
     "DOWNLOAD": "Directory to Download to FR "
-  }
+  },
+  "REFERENCED": "Referenced Endpoints FR"
 }

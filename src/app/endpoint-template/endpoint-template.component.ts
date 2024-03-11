@@ -8,6 +8,8 @@ import {MatSelectModule} from '@angular/material/select';
 import {NgForOf, NgIf} from '@angular/common';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatGridListModule} from '@angular/material/grid-list';
+import {forkJoin, Observable, Subject, throwError} from 'rxjs';
+import {catchError, flatMap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-endpoint-template',
@@ -27,8 +29,9 @@ import {MatGridListModule} from '@angular/material/grid-list';
 })
 export class EndpointTemplateComponent implements OnInit, OnChanges {
 
-   selectedEndPoint: any;
-   personalConnectEndpoints: Array<object>;
+  selectedEndPoint: any;
+
+  personalConnectEndpoints: Array<object>;
 
   @Input() type: number;
   @Input() transferData: TransferData;
@@ -44,28 +47,65 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
     console.log('hello');
     this.load = false;
     console.log(this.personalConnectEndpoints);
+
   }
 
   ngOnChanges() {
     console.log(this.personalConnectEndpoints);
     console.log('Changes');
+    this.personalConnectEndpoints = new Array<object>();
     if (typeof this.transferData.userAccessTokenData !== 'undefined') {
-      this.getPersonalConnect(this.transferData.userAccessTokenData)
-          .subscribe(
-              data => this.processPersonalConnect(data),
-              error => {
-                console.log(error);
-                this.loadedEvent.emit(this.personalConnectEndpoints);
-              },
-              () => {
-                this.loadedEvent.emit(this.personalConnectEndpoints);
-                if (this.personalConnectExist()) {
-                  this.selectedEndPoint =  this.personalConnectEndpoints[0];
-                  this.newItemEvent.emit(this.selectedEndPoint);
+      console.log('typeTab');
+      console.log(this.typeOfTab);
+      if (this.typeOfTab === 0 || this.typeOfTab === 1) {
+        this.getPersonalConnect(this.transferData.userAccessTokenData)
+            .subscribe(
+                data => this.processPersonalConnect(data),
+                error => {
+                  console.log(error);
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                },
+                () => {
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                  if (this.personalConnectExist()) {
+                    this.selectedEndPoint = this.personalConnectEndpoints[0];
+                    this.newItemEvent.emit(this.selectedEndPoint);
+                  }
                 }
-              }
-          );
+            );
+      } else {
+        console.log('Referenced');
+        const endpoitsObsevables = this.getAllEndpoints();
+        forkJoin(endpoitsObsevables)
+            .subscribe(obj => {
+                  console.log(obj);
+                  this.processPersonalConnect(obj);
+                },
+                error => {
+                  console.log(error);
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                },
+                () => {
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                  if (this.personalConnectExist()) {
+                    this.selectedEndPoint = this.personalConnectEndpoints[0];
+                    this.newItemEvent.emit(this.selectedEndPoint);
+                  }
+                });
+      }
     }
+  }
+  getAllEndpoints() {
+    const array = new Array();
+    for (const endPoint of this.transferData.referenceEndpointsWithPaths) {
+      console.log(endPoint);
+      const userOtherAccessToken = this.transferData.userAccessTokenData.other_tokens[0].access_token;
+      // this.userAccessToken = userAccessTokenData.access_token;
+      const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + endPoint;
+      console.log(url);
+      array.push(this.globusService.getGlobus(url, 'Bearer ' + userOtherAccessToken));
+    }
+    return array;
   }
 
   getPersonalConnect(userAccessTokenData) {
@@ -82,6 +122,7 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
   }
 
   processPersonalConnect(data) {
+    console.log(data);
     this.personalConnectEndpoints = new Array<object>();
     if (this.typeOfTab === 0) {
       for (const obj of data.DATA) {
@@ -92,6 +133,12 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
       }
     } else if (this.typeOfTab === 1) {
       for (const obj of data.DATA) {
+        this.personalConnectEndpoints.push(obj);
+        console.log(obj);
+      }
+    } else {
+      console.log(data);
+      for (const obj of data) {
         this.personalConnectEndpoints.push(obj);
         console.log(obj);
       }

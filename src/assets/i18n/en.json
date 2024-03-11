@@ -39,5 +39,6 @@
     "CANCEL": "Cancel",
     "OK": "OK",
     "DOWNLOAD": "Directory to Download to "
-  }
+  },
+  "REFERENCED": "Referenced Endpoints"
 }

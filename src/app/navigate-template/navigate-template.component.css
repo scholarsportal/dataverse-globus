@@ -10,6 +10,9 @@
 .left {
     padding-left:20px;
 }
+.right {
+    padding-right:20px;
+}
 .center-grid {
     display: flex;
     justify-content: center;
