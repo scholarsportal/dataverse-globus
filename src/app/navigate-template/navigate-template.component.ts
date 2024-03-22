@@ -463,104 +463,149 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   submit(array: Observable<Object> | Observable<Object>[]) {
-    const url = '';
-    const body = '{' +
-      '"principal":"' + // d15d4244-fc10-47f3-a790-85bdb6db9a75",
-      '"numberOfFiles":' +
-    '}';
-    const key = '';
-
     let urlPath = '';
-    for (const urlObject  of this.transferData.signedUrls) {
-      console.log(urlObject);
-      if (urlObject['name'] === 'requestGlobusTransferPaths') {
-        urlPath = urlObject['signedUrl'];
-        break;
+    let body = null;
+    if (this.transferData.managed) {
+      // body = '{' +
+      //     '"principal":"' + // d15d4244-fc10-47f3-a790-85bdb6db9a75",
+      //     '"numberOfFiles":' +
+      //     '}';
+
+      for (const urlObject of this.transferData.signedUrls) {
+        console.log(urlObject);
+        if (urlObject['name'] === 'requestGlobusTransferPaths') {
+          urlPath = urlObject['signedUrl'];
+          break;
+        }
+      }
+    } else {
+      for (const urlObject of this.transferData.signedUrls) {
+        console.log(urlObject);
+        if (urlObject['name'] === 'requestGlobusReferencePaths') {
+          urlPath = urlObject['signedUrl'];
+          break;
+        }
       }
     }
     console.log('Start submitting!!!');
-    forkJoin(array)
+    let data = forkJoin(array)
         .pipe(flatMap(obj => {
           const user = obj[0];
           console.log(user);
-          const body =  '{' +
-              '"principal":"' + user['sub'] + '",' +
-              '"numberOfFiles":' + this.listOfAllFiles.length +
-              '}';
+          if (this.transferData.managed) {
+            body = '{' +
+                '"principal":"' + user['sub'] + '",' +
+                '"numberOfFiles":' + this.listOfAllFiles.length +
+                '}';
+          } else {
+            let i =0;
+            let files = '';
+            for (let f of this.listOfAllFiles) {
+              i = i + 1;
+              console.log(i)
+              console.log(this.listOfAllFiles.length)
+              if (i < this.listOfAllFiles.length) {
+                files = files + '"' + this.selectedEndPoint.id + f + '",';
+              } else {
+                files = files + '"' + this.selectedEndPoint.id  + f + '"';
+              }
+
+            }
+
+            body = '{"referencedFiles":[' + files + ']}';
+          }
           console.log(body);
           return this.globusService.postSimpleDataverse(urlPath, body); }),
               catchError(err => {
                 console.log(err);
                 return throwError(err);
          }))
-        .pipe(flatMap(data => {
-            console.log(data['data']);
-            Object.keys(data['data']).forEach(prop => {
-              this.listOfAllStorageIdentifiers.push(prop);
-              this.listOfAllStorageIdentifiersPaths.push(data['data'][prop]);
-            });
-            return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
-            // const transferArray = [transfer, data];
-            }
-            ))
-            .pipe( flatMap(data => this.globusService.submitTransferItems(
+        if (this.transferData.managed) {
+         data.
+          pipe(flatMap(data => this.my_func2(data)))
+              .pipe(flatMap(data => this.my_func(data)))
+              .subscribe(
+                  data => {
+                    console.log(data);
+                      this.taskId = data['task_id'];
+                  },
+                  error => {
+                    console.log(error);
+                    this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+                      duration: 3000
+                    });
+                  },
+                  () => {
+                    console.log('Transfer submitted');
+                    this.writeToDataverse();
+                  }
+              );
+        } else {
+          data
+              .subscribe(
+                  data => {
+                    console.log(data['data']);
+                    Object.keys(data['data']).forEach(prop => {
+                      this.listOfAllStorageIdentifiers.push(prop);
+                      this.listOfAllStorageIdentifiersPaths.push(data['data'][prop]);
+                    });
+                  },
+                  error => {
+                    console.log(error);
+                    this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+                      duration: 3000
+                    });
+                  },
+                  () => {
+                    console.log('Transfer submitted');
+                    this.writeToDataverse();
+                  }
+              )
+        }
+  }
+
+  my_func2(data) {
+      console.log(data['data']);
+      Object.keys(data['data']).forEach(prop => {
+        this.listOfAllStorageIdentifiers.push(prop);
+        this.listOfAllStorageIdentifiersPaths.push(data['data'][prop]);
+      });
+
+      data = this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
+
+      console.log('my_func2');
+      return data;
+      // const transferArray = [transfer, data];
+  }
+
+  my_func(data) {
+      console.log('my_func');
+      console.log(data);
+      console.log('again my_func');
+        return this.globusService.submitTransferItems(
             this.listOfAllFiles,
-                this.listOfAllStorageIdentifiersPaths,
+            this.listOfAllStorageIdentifiersPaths,
             this.listOfAllStorageIdentifiersPaths,
             data['value'],
             this.selectedEndPoint.id,
             this.transferData.globusEndpoint,
-            this.transferData.userAccessTokenData.other_tokens[0].access_token)))
-        .subscribe(
-            data => {
-              console.log(data);
-              this.taskId = data['task_id'];
-            },
-            error => {
-              console.log(error);
-              this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
-                duration: 3000
-              });
-            },
-            () => {
-              console.log('Transfer submitted');
-              this.writeToDataverse();
-            }
-        );
-  }
+            this.transferData.userAccessTokenData.other_tokens[0].access_token);
+}
 
   writeToDataverse() {
-    /*{
-      "taskIdentifier":"d2ae147e-446a-11eb-8ffa-0a34088e79f9",
-        "files": [
-      {
-        "description":"My jpg-j description.",
-        "directoryLabel":"data/subdir2",
-        "restrict":"false",
-        "storageIdentifier":"s3://1762f94da75-e29bf77450b0",
-        "fileName":"test-j.jpg",
-        "contentType":"image/jpeg"
-      }
-    ]
-    } */
-
-    // curl -H X-Dataverse-key:c1428301-e301-4818-95d8-0fc01fd1d242 -X POST https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=doi:10.5072/FK2/IMK6JR -F jsonData=@mytest.json
-    // "Content-Type", "application/json;
-    // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
-
-    // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
-    //const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addGlobusFiles?persistentId=' + this.transferData.datasetPid;
     const formData: any = new FormData();
 
     console.log(this.listOfDirectoryLabels);
     console.log(this.listOfAllStorageIdentifiers);
-    let body = '{ \"taskIdentifier\": \"' + this.taskId + '\"'; // + " , \"files\": [';
-    if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
-      body = body + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
+    let body = '';
+    if (this.transferData.managed) {
+      body = '{ \"taskIdentifier\": \"' + this.taskId + '\","files":';
     } else {
-      body = body + ',\"ruleId\":' + '\"' + '\"';
+
     }
-    body = body + ', \"files\": [';
+
+    body = body + '[';
+
     let file = '';
     for (let i = 0; i < this.listOfAllStorageIdentifiers.length; i++) {
       if (i > 0) {
@@ -570,33 +615,35 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":\"' + // 's3://dataverse:' + // this.transferData.storePrefix +
-          this.listOfAllStorageIdentifiers[i] + '\",' +
-          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
+          '\"storageIdentifier\":\"'; // 's3://dataverse:' + // this.transferData.storePrefix +
+          if (this.transferData.managed) {
+            file = file + this.listOfAllStorageIdentifiers[i] + '\",' +
+            '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"';
+          } else {
+            file = file + this.listOfAllStorageIdentifiersPaths[i] + '\",' +
+                '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"';
+          }
+      if (!this.transferData.managed) {
+        file = file + ',"mimeType":"text/plain", "checksum": {"@type": "MD5", "@value": "1234"}'
+      }
       file = file +  ' } ';
       body = body + file;
     }
-    body = body + ']}';
+
+    if (this.transferData.managed) {
+      body = body + ']}';
+    } else {
+      body = body + ']';
+    }
     console.log(body);
     formData.append('jsonData', body);
     console.log(this.transferData.signedUrls);
-    /* {
-          description: '',
-          directoryLabel: this.listOfDirectoryLabels[0],
-          restrict: 'false',
-          storageIdentifier: 's3://' + this.listOfAllStorageIdentifiers[0],
-          fileName: this.listOfFileNames[0],
-          contentType: 'plain/text'
-        }
 
-
-    const bodyString = JSON.stringify(body);
-
-*/
     let url = '';
     for (const urlObject  of this.transferData.signedUrls) {
       console.log(urlObject);
-      if (urlObject['name'] === 'addGlobusFiles') {
+      if ((this.transferData.managed && urlObject['name'] === 'addGlobusFiles') ||
+          (!this.transferData.managed && urlObject['name'] === 'addFiles')) {
         url = urlObject['signedUrl'];
       }
     }
@@ -622,23 +669,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
               });
             }
         );
-  }
-
-  removeRule() {
-    console.log(this.ruleId);
-    if (this.ruleId !== null && this.clientToken !== null && typeof this.ruleId !== 'undefined') {
-      this.globusService.deleteRule(this.ruleId, this.transferData.globusEndpoint, this.clientToken)
-          .subscribe(
-              data => {
-              },
-              error => {
-                console.log(error);
-              },
-              () => {
-                console.log('Rule deleted');
-              }
-          );
-    }
   }
 
   selectedDirectoryExist() {
