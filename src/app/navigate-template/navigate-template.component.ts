@@ -16,6 +16,7 @@ import {MatListModule, MatListOption} from '@angular/material/list';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatInputModule} from '@angular/material/input';
 import {CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import mime from 'mime';
 
 export interface SelFilesType {
   fileNameObject: any;
@@ -616,7 +617,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
           '\"storageIdentifier\":\"'; // 's3://dataverse:' + // this.transferData.storePrefix +
-          if (this.transferData.managed) {
+      if (this.transferData.managed) {
             file = file + this.listOfAllStorageIdentifiers[i] + '\",' +
             '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"';
           } else {
@@ -624,7 +625,11 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
                 '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"';
           }
       if (!this.transferData.managed) {
-        file = file + ',"mimeType":"text/plain", "checksum": {"@type": "MD5", "@value": "1234"}'
+        let type = mime.getType(this.listOfFileNames[i]);
+        if (type == null) {
+          type = 'text/plain';
+        }
+        file = file + ',"mimeType":"' + type + '", "checksum": {"@type": "MD5", "@value": "Not in Dataverse"}';
       }
       file = file +  ' } ';
       body = body + file;
