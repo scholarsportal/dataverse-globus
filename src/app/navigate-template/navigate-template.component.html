@@ -39,7 +39,7 @@
     <div>
          <cdk-virtual-scroll-viewport itemSize="50" [style.height.px]=5*100>
          <mat-selection-list #directory
-                             (selectionChange)="onSelection(directory.selectedOptions.selected)">
+                             (selectionChange)="onSelection($event)">
              <h2 matSubheader style="min-width: 250px">{{'TEMPLATE.SUBDIR' | translate}}</h2>
              <mat-list-option  *ngFor="let item of personalDirectories" [value]="item">
                  <mat-list-item color="primary"

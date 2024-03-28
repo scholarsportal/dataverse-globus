@@ -118,7 +118,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       this.selectedDirectory = '~/';
     } else {
       this.selectedDirectory = this.selectedEndPoint.default_directory;
+      console.log(this.selectedDirectory);
     }
+    console.log(this.selectedEndPoint);
     const url = 'https://transfer.api.globusonline.org/v0.10/operation/endpoint/' + this.selectedEndPoint.id + '/ls';
     return this.globusService
         .getGlobus(url, 'Bearer ' + this.transferData.userAccessTokenData.other_tokens[0].access_token);
@@ -158,7 +160,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
         console.log(file);
         console.log(this.selectedFiles);
         const indx = this.selectedFiles.findIndex(x =>
-            x.fileNameObject === file.fileNameObject &&
+            x.fileNameObject['name'] === file.fileNameObject['name'] &&
+            x.fileNameObject['type'] === file.fileNameObject['type'] &&
             x.directory === file.directory
         );
         console.log(indx);
@@ -175,7 +178,15 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       for (const obj of this.personalDirectories) {
 
         const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory};
-        const indx = this.selectedFiles.indexOf(file);
+        console.log(this.selectedFiles);
+        console.log(file.fileNameObject);
+        const indx = this.selectedFiles.findIndex(x =>
+            x.fileNameObject['name'] === file.fileNameObject['name'] &&
+            x.fileNameObject['type'] === file.fileNameObject['type'] &&
+            x.directory === this.selectedDirectory
+        );
+        console.log('Remove');
+        console.log(indx);
         if (indx !== -1) {
           this.selectedFiles.splice(indx, 1);
         }
@@ -186,7 +197,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   UpOneFolder() {
-
+    if (this.selectedDirectory === '/~/' ) {
+      return;
+    }
     this.globusService.getDirectory(this.selectedDirectory,
         this.selectedEndPoint.id,
         this.transferData.userAccessTokenData.other_tokens[0].access_token)
@@ -207,9 +220,11 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   upFolderProcess(data) {
-    let absolutePath = data.absolute_path;
+    console.log(data);
+    // let absolutePath = data.absolute_path;
+    let absolutePath = data['path'];
     if (data.absolute_path == null || data.absolute_path === 'null') {
-      absolutePath = data['path'];
+       absolutePath = data.absolute_path;
     }
     if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
       const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
@@ -225,6 +240,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   processDirectories(data) {
     this.selectedOptions = new Array<object>();
     this.personalDirectories = new Array<object>();
+    console.log(data.path);
     this.selectedDirectory = data.path;
     for (const obj of data.DATA) {
       // if (obj.type === 'dir') {
@@ -233,41 +249,35 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     }
   }
 
-  onSelection(selectedFile: MatListOption[]) {
-    console.log(selectedFile);
-    const files = selectedFile.map(o => o.value);
-    this.isSingleClick = true;
-    setTimeout(() => {
-      if (this.isSingleClick) {
-        console.log('It is single click');
+  onSelection($event) {
+    console.log($event);
+    if (this.selectedFiles == null) {
         this.selectedFiles = new Array<SelFilesType>();
-        files.forEach(file => {
-          this.selectedFiles.push({fileNameObject: file, directory: this.selectedDirectory});
-        });
+    }
+    if ($event.options[0].selected) {
+        const indx = this.selectedFiles.findIndex(x =>
+            x.fileNameObject['type'] === $event.options[0]._value['type'] &&
+            x.fileNameObject['name'] === $event.options[0]._value['name'] &&
+            x.directory === this.selectedDirectory
+        );
+        if (indx === -1) {
+          this.selectedFiles.push({fileNameObject: $event.options[0]._value, directory: this.selectedDirectory});
+        }
         console.log(this.selectedFiles);
-        //
-        //     if (selectedFile.) {
-        //       console.log("event selected");
-        //       console.log(file);
-        //       console.log(this.selectedFiles);
-        //       const indx = this.selectedFiles.findIndex(x =>
-        //         x.fileNameObject === file.fileNameObject &&
-        //         x.directory === file.directory
-        //       );
-        //       console.log(indx);
-        //       if ( indx === -1) {
-        //         this.selectedFiles.push(file);
-        //       }
-        //     } else {
-        //       const indx = this.selectedFiles.indexOf(file);
-        //       if ( indx !== -1) {
-        //         this.selectedFiles.splice(indx, 1);
-        //       }
-        //       this.checkFlag = false;
-        //     }
-        //   }
-      }
-    }, 250);
+    } else {
+        console.log(this.selectedFiles);
+        console.log("Not found");
+        const indx = this.selectedFiles.findIndex(x =>
+                x.fileNameObject['type'] === $event.options[0]._value['type'] &&
+                x.fileNameObject['name'] === $event.options[0]._value['name'] &&
+                x.directory === this.selectedDirectory
+        );
+        console.log(indx);
+        if ( indx !== -1) {
+           this.selectedFiles.splice(indx, 1);
+           this.checkFlag = false;
+        }
+    }
   }
 
   checkBox($event, item) {
