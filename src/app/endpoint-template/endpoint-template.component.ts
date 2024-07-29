@@ -1,19 +1,37 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
 import {TransferData} from '../upload/upload.component';
-import {SelectDirectoryComponent} from '../select-directory/select-directory.component';
-import {PassingDataSelectType} from '../navigate-template-download/navigate-template-download.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {GlobusService} from '../globus.service';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {forkJoin, Observable, Subject, throwError} from 'rxjs';
+import {catchError, flatMap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-endpoint-template',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatGridListModule
+  ],
   templateUrl: './endpoint-template.component.html',
   styleUrls: ['./endpoint-template.component.css']
 })
 export class EndpointTemplateComponent implements OnInit, OnChanges {
 
-   selectedEndPoint: any;
-   personalConnectEndpoints: Array<object>;
+  selectedEndPoint: any;
+
+  personalConnectEndpoints: Array<object>;
 
   @Input() type: number;
   @Input() transferData: TransferData;
@@ -22,49 +40,75 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
   @Output() loadedEvent = new EventEmitter<any>();
 
   selectedDirectory: string;
-  public dialogRef: MatDialogRef<SelectDirectoryComponent>;
   constructor(private globusService: GlobusService) { }
   load: boolean;
 
   ngOnInit(): void {
-    console.log("hello");
     this.load = false;
-    console.log(this.personalConnectEndpoints);
   }
 
   ngOnChanges() {
-    console.log(this.personalConnectEndpoints);
-    console.log("Changes");
+
+    this.personalConnectEndpoints = new Array<object>();
     if (typeof this.transferData.userAccessTokenData !== 'undefined') {
-      this.getPersonalConnect(this.transferData.userAccessTokenData)
-          .subscribe(
-              data => this.processPersonalConnect(data),
-              error => {
-                console.log(error),
-                    this.loadedEvent.emit(this.personalConnectEndpoints);
-              },
-              () => {
-                this.loadedEvent.emit(this.personalConnectEndpoints);
-                if (this.personalConnectExist()) {
-                  this.selectedEndPoint =  this.personalConnectEndpoints[0];
-                  this.newItemEvent.emit(this.selectedEndPoint);
+
+      if (this.typeOfTab === 0 || this.typeOfTab === 1) {
+        this.getPersonalConnect(this.transferData.userAccessTokenData.other_tokens[0].access_token)
+            .subscribe(
+                data => this.processPersonalConnect(data),
+                error => {
+                  console.log(error);
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                },
+                () => {
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                  if (this.personalConnectExist()) {
+                    this.selectedEndPoint = this.personalConnectEndpoints[0];
+                    this.newItemEvent.emit(this.selectedEndPoint);
+                  }
                 }
-              }
-          );
+            );
+      } else {
+        //referenced
+        const endpoitsObsevables = this.getAllEndpoints();
+        forkJoin(endpoitsObsevables)
+            .subscribe(obj => {
+                  this.processPersonalConnect(obj);
+                },
+                error => {
+                  console.log(error);
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                },
+                () => {
+                  this.loadedEvent.emit(this.personalConnectEndpoints);
+                  if (this.personalConnectExist()) {
+                    this.selectedEndPoint = this.personalConnectEndpoints[0];
+                    this.newItemEvent.emit(this.selectedEndPoint);
+                  }
+                });
+      }
     }
   }
+  getAllEndpoints() {
+    const array = new Array();
+    for (const endPoint of this.transferData.referenceEndpointsWithPaths) {
+      const userOtherAccessToken = this.transferData.userAccessTokenData.other_tokens[0].access_token;
+      const url = 'https://transfer.api.globusonline.org/v0.10/endpoint/' + endPoint;
+      array.push(this.globusService.getGlobus(url, 'Bearer ' + userOtherAccessToken));
+    }
+    return array;
+  }
 
-  getPersonalConnect(userAccessTokenData) {
+  getPersonalConnect(userAccessToken) {
     let url = '';
     if (this.typeOfTab === 0) {
       url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=my-gcp-endpoints';
     } else if (this.typeOfTab === 1) {
       url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_scope=recently-used';
     }
-    const userOtherAccessToken = this.transferData.userAccessTokenData.other_tokens[0].access_token;
-    // this.userAccessToken = userAccessTokenData.access_token;
+
     return this.globusService
-        .getGlobus(url, 'Bearer ' + userOtherAccessToken);
+        .getGlobus(url, 'Bearer ' + userAccessToken);
   }
 
   processPersonalConnect(data) {
@@ -73,13 +117,15 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
       for (const obj of data.DATA) {
         if (obj.gcp_connected) {
           this.personalConnectEndpoints.push(obj);
-          console.log(obj);
         }
       }
     } else if (this.typeOfTab === 1) {
       for (const obj of data.DATA) {
         this.personalConnectEndpoints.push(obj);
-        console.log(obj);
+      }
+    } else {
+      for (const obj of data) {
+        this.personalConnectEndpoints.push(obj);
       }
     }
     if (this.personalConnectEndpoints.length === 0) {
@@ -91,11 +137,7 @@ export class EndpointTemplateComponent implements OnInit, OnChanges {
   }
 
   personalConnectExist() {
-    if (typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return typeof this.personalConnectEndpoints !== 'undefined' && this.personalConnectEndpoints.length > 0;
   }
 
   setSelectedEndpoint(event) {

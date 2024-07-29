@@ -1,11 +1,23 @@
-import {Component, Inject, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {catchError, flatMap} from 'rxjs/operators';
-import {forkJoin, of, throwError} from 'rxjs';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Observable, forkJoin, of, throwError} from 'rxjs';
 import {GlobusService} from '../globus.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {TransferData} from '../upload/upload.component';
-import {ConfigService} from '../config.service';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldControl, MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatListModule, MatListOption} from '@angular/material/list';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatInputModule} from '@angular/material/input';
+import {CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import mime from 'mime';
+import {CustomSnackbarComponent} from "../custom-snackbar/custom-snackbar.component";
 
 export interface SelFilesType {
   fileNameObject: any;
@@ -14,14 +26,32 @@ export interface SelFilesType {
 
 @Component({
   selector: 'app-navigate-template',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatGridListModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatListModule,
+    FormsModule,
+    MatInputModule,
+    CdkVirtualScrollViewport,
+    CdkFixedSizeVirtualScroll
+  ],
   templateUrl: './navigate-template.component.html',
   styleUrls: ['./navigate-template.component.css']
 })
 export class NavigateTemplateComponent implements OnInit, OnChanges {
 
   constructor(private globusService: GlobusService,
-              private configService: ConfigService,
-              public snackBar: MatSnackBar) { }
+              public snackBar: MatSnackBar) {
+  }
 
   @Input() transferData: TransferData;
   @Input() selectedEndPoint: any;
@@ -31,20 +61,20 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   selectedOptions: any;
   selectedFiles: Array<SelFilesType>;
   selectedDirectory: any;
-  isSingleClick: boolean;
   listOfAllFiles: Array<string>;
   listOfFileNames: Array<string>;
   listOfAllStorageIdentifiers: Array<string>;
+  listOfAllStorageIdentifiersPaths: Array<string>;
   listOfDirectoryLabels: Array<string>;
   taskId: string;
   accessEndpointFlag: boolean;
   load: boolean;
   ruleId: string;
   clientToken: any;
+  preventSingleClick = false;
+  timer: any;
 
   ngOnInit(): void {
-    //Duplicates ngOnChange
-    ///this.startComponent();
   }
 
   ngOnChanges() {
@@ -55,19 +85,17 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     this.load = false;
     this.ruleId = null;
     this.clientToken = null;
-    console.log(this.transferData.datasetDirectory);
-    console.log(this.selectedEndPoint);
     this.accessEndpointFlag = false;
     this.selectedFiles = new Array<SelFilesType>();
     this.checkFlag = false;
-    this.isSingleClick = true;
     this.listOfAllFiles = new Array<string>();
     this.listOfFileNames = new Array<string>();
     this.listOfDirectoryLabels = new Array<string>();
     this.listOfAllStorageIdentifiers = new Array<string>();
+    this.listOfAllStorageIdentifiersPaths = new Array<string>();
     if (typeof this.transferData.userAccessTokenData !== 'undefined' && typeof this.selectedEndPoint !== 'undefined') {
-     // this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
-     // this.userAccessToken = this.userAccessTokenData.access_token;
+      // this.userOtherAccessToken = this.userAccessTokenData.other_tokens[0].access_token;
+      // this.userAccessToken = this.userAccessTokenData.access_token;
       this.findDirectories()
           .subscribe(
               data => this.processDirectories(data),
@@ -76,7 +104,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
                 this.load = true;
               },
               () => {
-                console.log(this.checkFlag);
                 this.accessEndpointFlag = true;
                 this.load = true;
               }
@@ -104,7 +131,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
         this.transferData.userAccessTokenData.other_tokens[0].access_token)
         .subscribe(
             data => {
-              console.log(data);
               this.processDirectories(data);
             },
             error => {
@@ -116,11 +142,7 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   preparedForTransfer() {
-    if (this.selectedFiles.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return this.selectedFiles.length > 0;
   }
 
   selectAll($event, directory) {
@@ -129,19 +151,15 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       for (const obj of this.personalDirectories) {
         this.selectedOptions.push(obj);
 
-        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        console.log(file);
-        console.log(this.selectedFiles);
+        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory};
         const indx = this.selectedFiles.findIndex(x =>
-              x.fileNameObject === file.fileNameObject &&
-              x.directory === file.directory
+            x.fileNameObject['name'] === file.fileNameObject['name'] &&
+            x.fileNameObject['type'] === file.fileNameObject['type'] &&
+            x.directory === file.directory
         );
-        console.log(indx);
-        if ( indx === -1) {
-            this.selectedFiles.push(file);
+        if (indx === -1) {
+          this.selectedFiles.push(file);
         }
-        // const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        // this.selectedFiles.push(file);
       }
       this.checkFlag = true;
       directory.writeValue(this.personalDirectories);
@@ -149,8 +167,12 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       this.checkFlag = false;
       for (const obj of this.personalDirectories) {
 
-        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory };
-        const indx = this.selectedFiles.indexOf(file);
+        const file: SelFilesType = {fileNameObject: obj, directory: this.selectedDirectory};
+        const indx = this.selectedFiles.findIndex(x =>
+            x.fileNameObject['name'] === file.fileNameObject['name'] &&
+            x.fileNameObject['type'] === file.fileNameObject['type'] &&
+            x.directory === this.selectedDirectory
+        );
         if (indx !== -1) {
           this.selectedFiles.splice(indx, 1);
         }
@@ -161,7 +183,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   UpOneFolder() {
-
+    if (this.selectedDirectory === '/~/' ) {
+      return;
+    }
     this.globusService.getDirectory(this.selectedDirectory,
         this.selectedEndPoint.id,
         this.transferData.userAccessTokenData.other_tokens[0].access_token)
@@ -182,9 +206,10 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   upFolderProcess(data) {
-    let absolutePath = data.absolute_path;
+    // let absolutePath = data.absolute_path;
+    let absolutePath = data['path'];
     if (data.absolute_path == null || data.absolute_path === 'null') {
-      absolutePath = data["path"];
+       absolutePath = data.absolute_path;
     }
     if (absolutePath !== null && absolutePath.localeCompare('/') !== 0) {
       const temp = absolutePath.substr(0, absolutePath.lastIndexOf('/') - 1);
@@ -202,38 +227,48 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
     this.personalDirectories = new Array<object>();
     this.selectedDirectory = data.path;
     for (const obj of data.DATA) {
-      // if (obj.type === 'dir') {
       this.personalDirectories.push(obj);
-      // }
     }
   }
 
-  onSelection($event,  selectedFiles) {
-    this.isSingleClick = true;
-    setTimeout(() => {
-      if (this.isSingleClick ){
-
-        const file: SelFilesType = {fileNameObject: $event.option._value, directory: this.selectedDirectory };
-        if ($event.option._selected) {
-          console.log(file);
-          console.log(this.selectedFiles);
+  onSelection($event) {
+    this.preventSingleClick = false;
+    const delay = 400;
+    this.timer = setTimeout(() => {
+      if (!this.preventSingleClick) {
+        if (this.selectedFiles == null) {
+          this.selectedFiles = new Array<SelFilesType>();
+        }
+        if ($event.options[0].selected) {
           const indx = this.selectedFiles.findIndex(x =>
-            x.fileNameObject === file.fileNameObject &&
-            x.directory === file.directory
+              x.fileNameObject['type'] === $event.options[0]._value['type'] &&
+              x.fileNameObject['name'] === $event.options[0]._value['name'] &&
+              x.directory === this.selectedDirectory
           );
-          console.log(indx);
-          if ( indx === -1) {
-            this.selectedFiles.push(file);
+          if (indx === -1) {
+            this.selectedFiles.push({fileNameObject: $event.options[0]._value, directory: this.selectedDirectory});
+            this.selectedOptions.push($event.options[0]._value);
           }
         } else {
-          const indx = this.selectedFiles.indexOf(file);
-          if ( indx !== -1) {
+          const indx = this.selectedFiles.findIndex(x =>
+              x.fileNameObject['type'] === $event.options[0]._value['type'] &&
+              x.fileNameObject['name'] === $event.options[0]._value['name'] &&
+              x.directory === this.selectedDirectory
+          );
+          if (indx !== -1) {
             this.selectedFiles.splice(indx, 1);
+            this.checkFlag = false;
           }
-          this.checkFlag = false;
+          const indx2 = this.selectedOptions.findIndex(x =>
+              x['type'] === $event.options[0]._value['type'] &&
+              x['name'] === $event.options[0]._value['name']
+          );
+          if (indx2 !== -1) {
+            this.selectedOptions.splice(indx, 1);
+          }
         }
       }
-    }, 250);
+    }, delay);
   }
 
   checkBox($event, item) {
@@ -243,7 +278,8 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   openDirectory($event, item, directory, check) {
-    this.isSingleClick = false;
+    this.preventSingleClick = true;
+    clearTimeout(this.timer);
     this.selectedOptions = new Array<object>();
     if (item.type === 'dir') {
       this.selectedDirectory = this.selectedDirectory + item.name;
@@ -253,7 +289,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
           this.transferData.userAccessTokenData.other_tokens[0].access_token)
           .subscribe(
               data => {
-                console.log(data);
                 this.processDirectories(data);
               },
               error => {
@@ -269,44 +304,41 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
   }
 
   isFolder(item) {
-    if (item.type === 'dir') {
-      return true;
-    } else {
-      return false;
-    }
+    return item.type === 'dir';
 
   }
 
   removeAllFromSelected(directory) {
     this.selectedFiles = new Array<SelFilesType>();
     directory.writeValue(null);
-    this.selectedOptions = new Array();
+    this.selectedOptions = [];
     this.checkFlag = false;
   }
 
-  onRemoving($event, selectedList) {
-    if ($event.option._selected) {
-      const indx = this.selectedFiles.indexOf($event.option._value);
-      if ( indx !== -1) {
+  onRemoving(selectedFile: MatListOption[], selectedList) {
+    const files = selectedFile.map(o => o.value);
+    files.forEach(file => {
+      const indx = this.selectedFiles.indexOf(file);
+      if (indx !== -1) {
         this.selectedFiles.splice(indx, 1);
-        const indx2 = this.selectedOptions.indexOf($event.option._value.fileNameObject);
+        const indx2 = this.selectedOptions.indexOf(file.fileNameObject);
         if (indx2 !== -1) {
           this.selectedOptions.splice(indx2, 1);
+
           selectedList.writeValue(this.selectedOptions);
           this.checkFlag = false;
         }
       }
-    }
+    });
   }
 
   onSubmitTransfer() {
-    console.log(this.transferData.datasetPid);
     if (this.transferData.datasetPid.localeCompare('null') !== 0) {
       this.snackBar.open('Preparing transfer', '', {
         duration: 3000
       });
-      const directoriesArray = new Array();
-      const labelsArray = new Array();
+      const directoriesArray = [];
+      const labelsArray = [];
 
       for (const obj of this.selectedFiles) {
         if (obj.fileNameObject.type === 'dir') {
@@ -315,7 +347,6 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
         } else {
           this.listOfAllFiles.push(obj.directory + obj.fileNameObject.name);
           this.listOfFileNames.push(obj.fileNameObject.name);
-          this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
           this.listOfDirectoryLabels.push('');
         }
       }
@@ -325,9 +356,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
         if (this.listOfAllFiles.length > 0) {
           const user = this.globusService.getUserInfo(this.transferData.userAccessTokenData.access_token);
 
-          const client = this.globusService.getClientToken(this.transferData.basicClientToken);
+          // const client = this.globusService.getClientToken(this.transferData.basicClientToken);
 
-          const array = [user, client]; // forkJoin;
+          const array = [user]; // forkJoin;
           this.submit(array);
         }
       }
@@ -358,9 +389,9 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
               } else {
                 const user = this.globusService.getUserInfo(this.transferData.userAccessTokenData.access_token);
 
-                const client = this.globusService.getClientToken(this.transferData.basicClientToken);
+                // const client = this.globusService.getClientToken(this.transferData.basicClientToken);
 
-                const array = [user, client]; // forkJoin;
+                const array = [user]; // forkJoin;
                 this.submit(array);
               }
             }
@@ -377,94 +408,133 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
           this.listOfAllFiles.push(dir.absolute_path + obj.name);
         }
         this.listOfFileNames.push(obj.name);
-        this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
+        // this.listOfAllStorageIdentifiers.push(this.globusService.generateStorageIdentifier());
 
         this.listOfDirectoryLabels.push(label);
       }
     }
   }
 
-  submit(array) {
+  submit(array: Observable<Object> | Observable<Object>[]) {
+    let urlPath = '';
+    let body = null;
+    if (this.transferData.managed) {
 
-    console.log("Start submitting!!!");
-    forkJoin(array)
+      for (const urlObject of this.transferData.signedUrls) {
+        if (urlObject['name'] === 'requestGlobusTransferPaths') {
+          urlPath = urlObject['signedUrl'];
+          break;
+        }
+      }
+    } else {
+      for (const urlObject of this.transferData.signedUrls) {
+        if (urlObject['name'] === 'requestGlobusReferencePaths') {
+          urlPath = urlObject['signedUrl'];
+          break;
+        }
+      }
+    }
+    const data = forkJoin(array)
         .pipe(flatMap(obj => {
-          this.clientToken = obj[1];
-          return this.globusService.getPermission(obj[1], obj[0],
-                  this.transferData.datasetDirectory,
-                  this.transferData.globusEndpoint, 'rw');
-            }),
-            catchError(err => {
-              console.log(err);
-              if (err.status === 409) {
-                console.log('Rule exists');
-                return of(err);
+          const user = obj[0];
+          if (this.transferData.managed) {
+            body = '{' +
+                '"principal":"' + user['sub'] + '",' +
+                '"numberOfFiles":' + this.listOfAllFiles.length +
+                '}';
+          } else {
+            let i = 0;
+            let files = '';
+            for (const f of this.listOfAllFiles) {
+              i = i + 1;
+              if (i < this.listOfAllFiles.length) {
+                files = files + '"' + this.selectedEndPoint.id + f + '",';
               } else {
-                return throwError(err); } }
-            ))
-        .pipe(flatMap(data => {
-            this.ruleId = data.access_id;
-            return this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
+                files = files + '"' + this.selectedEndPoint.id  + f + '"';
+              }
+
             }
-            ))
-            .pipe( flatMap(data => this.globusService.submitTransferItems(
+
+            body = '{"referencedFiles":[' + files + ']}';
+          }
+          return this.globusService.postSimpleDataverse(urlPath, body); }),
+              catchError(err => {
+                console.log(err);
+                return throwError(err);
+         }));
+    if (this.transferData.managed) {
+         data.
+          pipe(flatMap(data => this.my_func2(data)))
+              .pipe(flatMap(data => this.my_func(data)))
+              .subscribe(
+                  data => {
+                    this.taskId = data['task_id'];
+                  },
+                  error => {
+                    console.log(error);
+                    this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+                      duration: 3000
+                    });
+                  },
+                  () => {
+                    this.writeToDataverse();
+                  }
+              );
+        } else {
+          data
+              .subscribe(
+                  data => {
+                    Object.keys(data['data']).forEach(prop => {
+                      this.listOfAllStorageIdentifiers.push(prop);
+                      this.listOfAllStorageIdentifiersPaths.push(data['data'][prop]);
+                    });
+                  },
+                  error => {
+                    console.log(error);
+                    this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
+                      duration: 3000
+                    });
+                  },
+                  () => {
+                    this.writeToDataverse();
+                  }
+              );
+        }
+  }
+
+  my_func2(data) {
+      Object.keys(data['data']).forEach(prop => {
+        this.listOfAllStorageIdentifiers.push(prop);
+        this.listOfAllStorageIdentifiersPaths.push(data['data'][prop]);
+      });
+
+      data = this.globusService.submitTransfer(this.transferData.userAccessTokenData.other_tokens[0].access_token);
+
+      return data;
+  }
+
+  my_func(data) {
+        return this.globusService.submitTransferItems(
             this.listOfAllFiles,
-            this.transferData.datasetDirectory,
-            this.listOfAllStorageIdentifiers,
+            this.listOfAllStorageIdentifiersPaths,
+            this.listOfAllStorageIdentifiersPaths,
             data['value'],
             this.selectedEndPoint.id,
             this.transferData.globusEndpoint,
-            this.transferData.userAccessTokenData.other_tokens[0].access_token)))
-        .subscribe(
-            data => {
-              console.log(data);
-              this.taskId = data['task_id'];
-            },
-            error => {
-              console.log(error);
-              this.snackBar.open('There was an error in transfer submission. BIIG ', '', {
-                duration: 3000
-              });
-            },
-            () => {
-              console.log('Transfer submitted');
-              this.writeToDataverse();
-            }
-        );
-  }
+            this.transferData.userAccessTokenData.other_tokens[0].access_token);
+}
 
   writeToDataverse() {
-    /*{
-      "taskIdentifier":"d2ae147e-446a-11eb-8ffa-0a34088e79f9",
-        "files": [
-      {
-        "description":"My jpg-j description.",
-        "directoryLabel":"data/subdir2",
-        "restrict":"false",
-        "storageIdentifier":"s3://1762f94da75-e29bf77450b0",
-        "fileName":"test-j.jpg",
-        "contentType":"image/jpeg"
-      }
-    ]
-    } */
-
-    // curl -H X-Dataverse-key:c1428301-e301-4818-95d8-0fc01fd1d242 -X POST https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=doi:10.5072/FK2/IMK6JR -F jsonData=@mytest.json
-    // "Content-Type", "application/json;
-    // const url = 'https://dvdev.scholarsportal.info/api/globus/:persistentId/add?persistentId=' + this.datasetPid;
-
-    // const url = 'https://dvdev.scholarsportal.info/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.datasetPid;
-    const url = this.transferData.siteUrl + '/api/datasets/:persistentId/addglobusFiles?persistentId=' + this.transferData.datasetPid;
     const formData: any = new FormData();
-
-    console.log(this.listOfDirectoryLabels);
-    console.log(this.listOfAllStorageIdentifiers);
-    let body = '{ \"taskIdentifier\": \"' + this.taskId + '\"'; // + " , \"files\": [';
-    if (this.ruleId !== null && typeof this.ruleId !== 'undefined') {
-      body = body + ',\"ruleId\":' + '\"' + this.ruleId + '\"';
+    let body = '';
+    if (this.transferData.managed) {
+      body = '{ \"taskIdentifier\": \"' + this.taskId + '\","files":';
     } else {
-      body = body + ',\"ruleId\":' + '\"' + '\"';
+
     }
-    body = body + ', \"files\": [';
+
+    body = body + '[';
+
     let file = '';
     for (let i = 0; i < this.listOfAllStorageIdentifiers.length; i++) {
       if (i > 0) {
@@ -474,32 +544,42 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
       }
       file = file + '{ \"description\": \"\", \"directoryLabel\": \"' +
           this.listOfDirectoryLabels[i] + '\", \"restrict\": \"false\",' +
-          '\"storageIdentifier\":\"' + this.transferData.storePrefix + 
-          this.listOfAllStorageIdentifiers[i] + '\",' +
-          '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"'; // + ' }';
+          '\"storageIdentifier\":\"'; // 's3://dataverse:' + // this.transferData.storePrefix +
+      if (this.transferData.managed) {
+            file = file + this.listOfAllStorageIdentifiers[i] + '\",' +
+            '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"';
+          } else {
+            file = file + this.listOfAllStorageIdentifiersPaths[i] + '\",' +
+                '\"fileName\":' + '\"' + this.listOfFileNames[i] + '\"';
+          }
+      if (!this.transferData.managed) {
+        let type = mime.getType(this.listOfFileNames[i]);
+        if (type == null) {
+          type = 'text/plain';
+        }
+        file = file + ',"mimeType":"' + type + '", "checksum": {"@type": "MD5", "@value": "Not in Dataverse"}';
+      }
       file = file +  ' } ';
       body = body + file;
     }
-    body = body + ']}';
-    console.log(body);
-    /* {
-          description: '',
-          directoryLabel: this.listOfDirectoryLabels[0],
-          restrict: 'false',
-          storageIdentifier: 's3://' + this.listOfAllStorageIdentifiers[0],
-          fileName: this.listOfFileNames[0],
-          contentType: 'plain/text'
-        }
 
-
-    const bodyString = JSON.stringify(body);
-*/
+    if (this.transferData.managed) {
+      body = body + ']}';
+    } else {
+      body = body + ']';
+    }
     formData.append('jsonData', body);
-    console.log(this.transferData.key);
-    this.globusService.postDataverse(url, formData, this.transferData.key)
+
+    let url = '';
+    for (const urlObject  of this.transferData.signedUrls) {
+      if ((this.transferData.managed && urlObject['name'] === 'addGlobusFiles') ||
+          (!this.transferData.managed && urlObject['name'] === 'addFiles')) {
+        url = urlObject['signedUrl'];
+      }
+    }
+    this.globusService.postDataverse(url, formData)
         .subscribe(
             data => {
-              console.log(data);
             },
             error => {
               console.log(error);
@@ -509,31 +589,15 @@ export class NavigateTemplateComponent implements OnInit, OnChanges {
               });
             },
             () => {
-              console.log('Submitted to dataverse');
-              // this.removeRule();
+              // http://localhost:8080/dataset.xhtml?persistentId=doi:10.5072/FK2/CBYQG2
               const urlDataset = this.transferData.siteUrl + '/' + 'dataset.xhtml?persistentId=' + this.transferData.datasetPid;
-              this.snackBar.open('Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.', '', {
+              this.snackBar.openFromComponent(CustomSnackbarComponent, {
+                data: ['Transfer was initiated. \n Go to the dataverse dataset to monitor the progress.',
+                  urlDataset],
                 duration: 5000
               });
             }
         );
-  }
-
-  removeRule() {
-    console.log(this.ruleId);
-    if (this.ruleId !== null && this.clientToken !== null && typeof this.ruleId !== 'undefined') {
-      this.globusService.deleteRule(this.ruleId, this.transferData.globusEndpoint, this.clientToken)
-          .subscribe(
-              data => {
-              },
-              error => {
-                console.log(error);
-              },
-              () => {
-                console.log('Rule deleted');
-              }
-          );
-    }
   }
 
   selectedDirectoryExist() {

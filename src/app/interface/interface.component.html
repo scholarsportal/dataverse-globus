@@ -3,11 +3,15 @@
     <mat-toolbar-row>
       <h1 class="header-text title">{{'INTERFACE.TITLE' | translate}}</h1>
       <span class="fill-space"></span>
-      <mat-form-field class="lang-select">
-        <select matNativeControl title="{{'INTERFACE.LANG' | translate}}" [attr.aria-label]="'INTERFACE.LANG' | translate" #langSelect (change)="translate.use(langSelect.value)">
-          <option *ngFor="let lang of translate.getLangs()" [value]="lang" [selected]="lang === translate.currentLang">{{lang}}</option>
-        </select>
-      </mat-form-field>
+        <mat-form-field>
+            <mat-select placeholder="{{'INTERFACE.LANG' | translate}}"  [formControl]="languages"
+                        (selectionChange)="onLanguageChange($event.value)">
+                <mat-option *ngFor="let lng of langArray" [value]="lng.value" >
+                    {{ lng.viewValue }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
     </mat-toolbar-row>
   </mat-toolbar>
 </ng-container>

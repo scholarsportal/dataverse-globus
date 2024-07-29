@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { PersonalConnectDownloadComponent } from './personal-connect-download.component';
 
@@ -6,7 +6,7 @@ describe('PersonalConnectDownloadComponent', () => {
   let component: PersonalConnectDownloadComponent;
   let fixture: ComponentFixture<PersonalConnectDownloadComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ PersonalConnectDownloadComponent ]
     })

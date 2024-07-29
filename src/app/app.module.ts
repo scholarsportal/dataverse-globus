@@ -1,8 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import {APP_INITIALIZER, NgModule} from '@angular/core';
-import {MatSelectModule} from '@angular/material/select';
 
-//import { MatomoModule } from 'ngx-matomo';
+// import { MatomoModule } from 'ngx-matomo';
 import { ConfigService } from './config.service';
 import { of, Observable, ObservableInput } from '../../node_modules/rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -14,25 +13,11 @@ import {HttpClient, HttpClientModule} from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { GlobusDirective } from './globus.directive';
 import { UploadFileComponent } from './upload-file/upload-file.component';
-import {MatTabsModule} from '@angular/material/tabs';
 import { PersonalConnectComponent } from './personal-connect/personal-connect.component';
-import {MatButtonModule} from '@angular/material/button';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatListModule} from '@angular/material/list';
-import {MatIconModule} from '@angular/material/icon';
-import {MatGridListModule} from '@angular/material/grid-list';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {FormsModule} from '@angular/forms';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { ReactiveFormsModule} from '@angular/forms';
 import { RecentlyViewedComponentComponent } from './recently-viewed-component/recently-viewed-component.component';
 import { SearchEndpointComponent } from './search-endpoint/search-endpoint.component';
-import {MatTableModule} from '@angular/material/table';
-import {MatPaginatorModule} from '@angular/material/paginator';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { NavigateDirectoriesComponent } from './navigate-directories/navigate-directories.component';
-import { MatDialogModule } from '@angular/material/dialog';
 import { NavigateTemplateComponent } from './navigate-template/navigate-template.component';
 import {TranslateLoader, TranslateModule, TranslateParser, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
@@ -42,11 +27,13 @@ import {RouterModule} from '@angular/router';
 import { PersonalConnectDownloadComponent } from './personal-connect-download/personal-connect-download.component';
 import { NavigateTemplateDownloadComponent } from './navigate-template-download/navigate-template-download.component';
 import {MatTreeModule} from '@angular/material/tree';
-import {MatCardModule} from '@angular/material/card';
 import { SelectDirectoryComponent } from './select-directory/select-directory.component';
 import { RecentlyViewedDownloadComponent } from './recently-viewed-download/recently-viewed-download.component';
 import { DownloadFileComponent } from './download-file/download-file.component';
 import { EndpointTemplateComponent } from './endpoint-template/endpoint-template.component';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatCardModule} from '@angular/material/card';
+import {CustomSnackbarComponent} from "./custom-snackbar/custom-snackbar.component";
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http);
@@ -63,7 +50,6 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         .pipe(
           map((x: ConfigService) => {
             config.baseUrl = x.baseUrl;
-            console.log(config.baseUrl);
             config.id = x.id;
             config.redirectUploadURL = x.redirectUploadURL;
             config.redirectDownloadURL = x.redirectDownloadURL;
@@ -76,7 +62,6 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
             resolve(true);
           }),
           catchError((x: { status: number }, caught: Observable<void>): ObservableInput<{}> => {
-            console.log('error');
             if (x.status !== 404) {
               resolve(false);
             }
@@ -91,25 +76,10 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    InterfaceComponent,
-    GlobusDirective,
-    UploadFileComponent,
-    PersonalConnectComponent,
-    RecentlyViewedComponentComponent,
-    SearchEndpointComponent,
-    NavigateDirectoriesComponent,
-    NavigateTemplateComponent,
-    DownloadComponent,
-    UploadComponent,
-    PersonalConnectDownloadComponent,
-    NavigateTemplateDownloadComponent,
-    SelectDirectoryComponent,
-    RecentlyViewedDownloadComponent,
-    DownloadFileComponent,
-    EndpointTemplateComponent
-  ],
+    declarations: [
+        AppComponent,
+        GlobusDirective
+    ],
     imports: [
         BrowserModule,
         HttpClientModule,
@@ -117,25 +87,9 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
             {path: 'download', component: DownloadComponent},
             {path: 'upload', component: UploadComponent},
             {path: 'download-file', component: DownloadFileComponent}
-        ]),
+        ], {}),
         NoopAnimationsModule,
-        MatSelectModule,
-        //MatomoModule,
-        MatButtonModule,
-        MatTabsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatListModule,
-        MatIconModule,
-        MatGridListModule,
-        MatTooltipModule,
-        FormsModule,
-        MatCheckboxModule,
-        MatTableModule,
-        MatPaginatorModule,
-        MatToolbarModule,
-        MatSnackBarModule,
-        MatDialogModule,
+        // MatomoModule,
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
@@ -146,19 +100,44 @@ export function load(http: HttpClient, config: ConfigService): (() => Promise<bo
         RouterModule,
         MatTreeModule,
         MatCardModule,
+        ReactiveFormsModule,
+        InterfaceComponent,
+        EndpointTemplateComponent,
+        NavigateDirectoriesComponent,
+        SearchEndpointComponent,
+        NavigateTemplateComponent,
+        UploadComponent,
+        NavigateTemplateDownloadComponent,
+        SelectDirectoryComponent,
+        MatTabsModule,
+        UploadFileComponent,
+        PersonalConnectComponent,
+        RecentlyViewedComponentComponent,
+        DownloadComponent,
+        PersonalConnectDownloadComponent,
+        RecentlyViewedDownloadComponent,
+        DownloadFileComponent,
     ],
-    entryComponents: [NavigateDirectoriesComponent],
-  providers: [GlobusService, {
-    provide: APP_INITIALIZER,
-    useFactory: load,
-    deps: [
-      HttpClient,
-      ConfigService,
-        TranslateService,
-        TranslateParser
+    providers: [GlobusService, {
+        provide: APP_INITIALIZER,
+        useFactory: load,
+        deps: [
+            HttpClient,
+            ConfigService,
+            TranslateService,
+            TranslateParser
+        ],
+        multi: true
+    }],
+    exports: [
+        NavigateTemplateComponent,
+        NavigateTemplateDownloadComponent,
+        PersonalConnectComponent,
+        RecentlyViewedComponentComponent,
+        PersonalConnectDownloadComponent,
+        RecentlyViewedDownloadComponent,
+        GlobusDirective
     ],
-    multi: true
-  }],
-  bootstrap: [AppComponent]
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

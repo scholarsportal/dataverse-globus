@@ -1,7 +1,7 @@
 <app-interface [redirectURL]="redirectURL" (newItemEvent)="ifLoaded($event)">
 </app-interface>
 
-<ng-container class="interface-container" *ngIf="dataTransfer.load">
+<ng-container class="interface-container" *ngIf="dataTransfer.load && dataTransfer.managed">
     <mat-tab-group >
         <mat-tab label="{{'INTERFACE.PERSONAL' | translate}}" [attr.aria-label]="'INTERFACE.PERSONAL' | translate">
             <ng-template matTabContent>
@@ -26,3 +26,12 @@
         </mat-tab>
     </mat-tab-group>
 </ng-container>
+
+<ng-container class="interface-container" *ngIf="dataTransfer.load && !dataTransfer.managed">
+    <app-referenced
+        [type]="0"
+        [dataTransfer]="dataTransfer">
+    </app-referenced>
+</ng-container>
+
+

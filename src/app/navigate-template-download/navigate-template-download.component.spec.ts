@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { NavigateTemplateDownloadComponent } from './navigate-template-download.component';
 
@@ -6,7 +6,7 @@ describe('NavigateTemplateDownloadComponent', () => {
   let component: NavigateTemplateDownloadComponent;
   let fixture: ComponentFixture<NavigateTemplateDownloadComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ NavigateTemplateDownloadComponent ]
     })

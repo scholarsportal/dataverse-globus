@@ -16,6 +16,16 @@
     padding-top: 10px;
 
 }
+.right {
+    display: flex;
+    justify-content: right;
+    margin: auto;
+    padding-right: 20px;
+    padding-left:20px;
+    padding-bottom: 20px;
+    padding-top: 10px;
+
+}
 
 .class-icon {
     color: mediumblue;
@@ -58,16 +68,28 @@
     margin-bottom: 30px;
 }
 
-.div-class {
-    width:20%;
-    padding-left:40%;
-    padding-top:10px;
-    padding-bottom: 40px;
-}
+/*.div-class {*/
+/*    width:20%;*/
+/*    padding-left:40%;*/
+/*    padding-top:10px;*/
+/*    padding-bottom: 40px;*/
+/*}*/
 
 .class-icon-search {
     color: mediumblue;
     padding-right: 10px;
+}
+
+#container {
+    display: grid;
+    /*grid: repeat(2, 100%) / auto-flow 50%;*/
+    grid-template-columns: 49% 49%;
+    grid-template-rows: 45px 50%;
+    column-gap: 10px;
+}
+
+.first-row {
+    background: lightgray;
 }
 
 

@@ -1,24 +1,34 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { GlobusService } from '../globus.service';
-import {v4 as uuid } from 'uuid';
-import {Observable, of, merge, from, forkJoin } from 'rxjs';
-import {flatMap, map, tap, filter, concatMap} from 'rxjs/operators';
-import {ConfigService} from '../config.service';
-import {TranslateService} from '@ngx-translate/core';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {TransferData} from '../upload/upload.component';
+import {Config} from '../app.component';
+import * as ConfigJson from '../../assets/config.json';
 
-export interface Permissions {
-    DATA_TYPE: string;
-    principal_type: string;
-    principal: string;
-    path: string;
-    permissions: string;
-}
+import {NgForOf, NgIf} from '@angular/common';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import PKCE from 'js-pkce';
+
+
+
 
 @Component({
-  selector: 'app-interface',
-  templateUrl: './interface.component.html',
-  styleUrls: ['./interface.component.css']
+    selector: 'app-interface',
+    standalone: true,
+    imports: [
+        TranslateModule,
+        MatToolbarModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        NgIf,
+        ReactiveFormsModule,
+        NgForOf
+    ],
+    templateUrl: './interface.component.html',
+    styleUrls: ['./interface.component.css']
 })
 export class InterfaceComponent implements OnInit {
 
@@ -26,183 +36,150 @@ export class InterfaceComponent implements OnInit {
     @Input() redirectURL: string;
     @Output() newItemEvent = new EventEmitter<TransferData>();
     transferData: TransferData;
+    languages: FormControl;
+    langArray: Array<any> = [];
+    signedUrlData: any;
+    PkceAuth: PKCE;
+
+    config: Config = (ConfigJson as any).default;
+
 
   constructor(private globusService: GlobusService,
-              private config: ConfigService,
               private translatePar: TranslateService) {
-
       this.translate = translatePar;
-      this.translate.addLangs(['English', 'Français']);
-      this.translate.setDefaultLang('English');
+      this.translate.addLangs(['en', 'fr']);
+      this.translate.setDefaultLang('en');
+      this.langArray.push({value: 'en', viewValue: 'English'});
+      this.langArray.push({value: 'fr', viewValue: 'Français'});
 
       const browserLang = this.translate.getBrowserLang();
-      this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+      if (browserLang != null) {
+          this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
+      }
+      this.languages = new FormControl(this.translate.currentLang);
   }
   title: string;
   dvLocale: string;
 
   ngOnInit(): void {
+
+      this.PkceAuth = new PKCE({
+          client_id: this.config.globusClientId ,  // Update this using your native client ID
+          redirect_uri: this.redirectURL,  // Update this if you are deploying this anywhere else (Globus Auth will redirect back here once you have logged in)
+          authorization_endpoint: 'https://auth.globus.org/v2/oauth2/authorize',  // No changes needed
+          token_endpoint: 'https://auth.globus.org/v2/oauth2/token',  // No changes needed
+          requested_scopes:  'urn:globus:auth:scope:transfer.api.globus.org:all openid email profile'
+          //'urn:globus:auth:scope:transfer.api.globus.org:all'  // Update with any scopes you would need, e.g. transfer
+      });
+
         this.transferData = {} as TransferData;
         this.transferData.load = false;
         this.title = 'Globus';
-        console.log(this.redirectURL);
 
         this.transferData.datasetDirectory = null;
-        this.transferData.basicClientToken = this.config.basicGlobusToken;
-        this.transferData.globusEndpoint = this.config.globusEndpoint;
-        const code = this.globusService.getParameterByName('code');
-        console.log(code);
-        if (code === null || code === '') {
-            console.log(this.transferData);
-           this.getParameters(code);
-           this.setLanguage();
-           console.log(this.transferData.fileId);
-           if (this.transferData.fileId === null) {
-               console.log("Dataset level");
-               const state = this.encodeStateDataset();
-               this.getCode(state);
-           } else {
-               console.log("file level");
-               const state = this.encodeStateFile();
-               this.getCode(state);
-           }
+        const code = this.globusService.getParameterByName('code',null);
+        const callback = this.globusService.getParameterByName('callback',null);
+        const dvLocale = this.globusService.getParameterByName('dvLocale',null);
+
+        if (typeof callback !== 'undefined' && callback != null) {
+          const code = this.getCode(callback, dvLocale);
         } else {
-            console.log(code);
-            const n = this.redirectURL.substring(0, this.redirectURL.length - 1 ).lastIndexOf('/');
-            const typeOfGlobus = this.redirectURL.substring(n);
-            console.log(typeOfGlobus);
-            if (typeOfGlobus.localeCompare('/download-file/') === 0) {
-                console.log('This is file level');
-                this.decodeStateFile();
-            } else {
-                this.decodeStateDataset();
-                console.log("The dataset " + this.transferData.datasetDirectory);
-            }
-            this.setLanguage();
-            this.getUserAccessToken(code);
+            const state = this.globusService.getParameterByName('state',null);
+            const decodedState = this.decodeCallback(state);
+            this.getUserAccessToken(code, state);
+
         }
     }
+
     setLanguage() {
         if (this.dvLocale != null) {
             if (this.dvLocale === 'en') {
-                this.translate.use('English');
+                this.translate.use('en');
             } else if (this.dvLocale === 'fr') {
-                this.translate.use('Français');
+                this.translate.use('fr');
             } else {
                 const browserLang = this.translate.getBrowserLang();
-                this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+                this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
             }
         } else {
             const browserLang = this.translate.getBrowserLang();
-            this.translate.use(browserLang.match(/English|Français/) ? browserLang : 'English');
+            this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
+        }
+    }
+    onLanguageChange(language: string) {
+        this.translate.use(language);
+    }
+
+    getUserAccessToken(code, state) {
+        const url = window.location.href;
+        const additionalParams = {state: state};
+        this.PkceAuth.exchangeForAccessToken(url).then((resp) => {
+            const token = resp;
+            this.transferData.userAccessTokenData = token;
+            this.getDataverseInformation();
+            // Do stuff with the access token.
+        });
+    }
+
+    getDataverseInformation() {
+        const state = this.globusService.getParameterByName('state', null);
+        if (state !== undefined) {
+            const signedUrl = this.decodeCallback(state);
+            if (signedUrl != null) {
+                this.globusService.getDataverse(signedUrl).subscribe({
+                    next: (value: any) => {
+                        this.signedUrlData = value;
+                    },
+                    error: (error: any) => {
+                        console.log(error);
+                    },
+                    complete: () => {
+                        this.getParameters(this.signedUrlData["data"]['queryParameters']);
+                        this.transferData.signedUrls = this.signedUrlData['data']['signedUrls'];
+                        this.transferData.load = true;
+                        this.newItemEvent.emit(this.transferData);
+                    }
+                });
+            }
         }
     }
 
-    getUserAccessToken(code) {
-        console.log(code);
-        const url = 'https://auth.globus.org/v2/oauth2/token?code=' + code + '&redirect_uri=' + this.redirectURL + '&grant_type=authorization_code';
-        console.log(url);
-        const key = 'Basic ' + this.config.basicGlobusToken;
-        return this.globusService.postGlobus(url,  '', key)
-            /*----------------------*/
-            .subscribe(
-                data => {
-                    console.log('Data ');
-                    console.log(data);
-                    this.transferData.userAccessTokenData = data;
-                },
-                error => {
-                    console.log(error);
-                    this.transferData.load = true;
-                    this.newItemEvent.emit(this.transferData);
-                },
-                () => {
-                    this.transferData.load = true;
-                    this.newItemEvent.emit(this.transferData);
-                });
+
+    getCode(callback, dvLocale) {
+        const decodedCallback = this.decodeCallback(callback);
+        let state = decodedCallback + '&dvLocale=' + dvLocale;
+        state = btoa(state);
+        const clientId = this.config.globusClientId;
+
+        const additionalParams = {state: state};
+        const myWindows = window.location.replace(this.PkceAuth.authorizeUrl(additionalParams));
+    }
+    decodeCallback(callback) {
+        const decodedCallback = atob(callback);
+        return decodedCallback;
     }
 
-    getCode(state) {
-        const scope = encodeURI('openid+email+profile+urn:globus:auth:scope:transfer.api.globus.org:all');
-        const client_id = this.config.globusClientId;
-        let new_url =  'https://auth.globus.org/v2/oauth2/authorize?client_id=' + client_id + '&response_type=code&' +
-            'scope=' + scope + '&state=' + state;
-        new_url = new_url + '&redirect_uri=' + this.redirectURL ;
+    getParameters(parameters) {
+        this.transferData.datasetPid = parameters.datasetPid;
+        // this.transferData.key = this.globusService.getParameterByName('apiToken');
+        this.transferData.siteUrl = parameters.siteUrl;
+        this.transferData.datasetId = parameters.datasetId;
+        this.transferData.datasetVersion = parameters.datasetVersion;
 
-        const myWindows = window.location.replace(new_url);
-    }
-    getParameters(code) {
-        this.transferData.datasetPid = this.globusService.getParameterByName('datasetPid');
-        this.transferData.key = this.globusService.getParameterByName('apiToken');
-        this.transferData.siteUrl = this.globusService.getParameterByName('siteUrl');
-        console.log(this.transferData.siteUrl);
-        this.transferData.datasetId = this.globusService.getParameterByName('datasetId');
-        this.transferData.datasetVersion = this.globusService.getParameterByName('datasetVersion');
-        this.dvLocale = this.globusService.getParameterByName('dvLocale');
-        this.transferData.fileId = this.globusService.getParameterByName('fileId');
-        this.transferData.fileMetadataId = this.globusService.getParameterByName('fileMetadataId');
-        this.transferData.storePrefix = this.globusService.getParameterByName('storePrefix');
-        console.log(this.transferData.datasetVersion);
-    }
-    encodeStateDataset() {
-        const state = btoa(this.transferData.datasetPid + '_'
-            + this.transferData.key + '_'
-            + this.transferData.siteUrl + '_'
-            + this.transferData.datasetId + '_'
-            + this.transferData.datasetVersion + '_'
-            + this.transferData.storePrefix + '_'
-            + this.dvLocale); // encode
-        return state;
-    }
-    encodeStateFile() {
-        const state = btoa(this.transferData.key + '_'
-            + this.transferData.siteUrl + '_'
-            + this.transferData.fileId + '_'
-            + this.transferData.fileMetadataId + '_'
-            + this.transferData.datasetVersion + '_'
-            + this.transferData.storePrefix + '_'
-            + this.dvLocale); // encode
-        return state;
-    }
-    decodeStateDataset() {
-        const state = this.globusService.getParameterByName('state');
-        const decodedState = atob(state);
-        console.log(decodedState);
-        const parameters = decodedState.split('_');
-        this.transferData.datasetPid = parameters[0];
-        this.transferData.siteUrl = parameters[2];
-        console.log(this.transferData.datasetPid);
-        console.log(this.transferData.siteUrl);
-        this.transferData.datasetId = parameters[3];
-        this.transferData.datasetVersion = parameters[4];
-        this.transferData.storePrefix = parameters[5];
-        console.log(this.transferData.datasetId);
-        console.log(this.transferData.datasetVersion);
-        this.dvLocale = parameters[6];
-        console.log(this.dvLocale);
-        
-        this.transferData.datasetDirectory = this.config.includeBucketInPath ? ('/' + this.transferData.storePrefix.substring(this.transferData.storePrefix.indexOf('://') + 3, this.transferData.storePrefix.length -1) + '/') : '/';
-        this.transferData.datasetDirectory = this.transferData.datasetDirectory + this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
-        this.transferData.key = parameters[1];
+        this.transferData.datasetDirectory = '/' +
+            this.transferData.datasetPid.substring(this.transferData.datasetPid.indexOf(':') + 1) + '/';
+
+        if ( typeof parameters.managed !== 'undefined' && parameters.managed === 'true') {
+            this.transferData.managed = true;
+            this.transferData.globusEndpoint = parameters.endpoint;
+
+        } else {
+            this.transferData.managed = false;
+            this.transferData.referenceEndpointsWithPaths = parameters.referenceEndpointsWithPaths;
+        }
+        if (typeof parameters.files !== 'undefined' || parameters.files !== null) {
+            this.transferData.files = parameters.files;
+        }
     }
 
-    decodeStateFile() {
-        const state = this.globusService.getParameterByName('state');
-        const decodedState = atob(state);
-        console.log(decodedState);
-        const parameters = decodedState.split('_');
-        this.transferData.siteUrl = parameters[1];
-        console.log(this.transferData.siteUrl);
-        console.log(this.transferData.siteUrl);
-        this.transferData.fileId = parameters[2];
-        console.log(this.transferData.fileId);
-        this.transferData.fileMetadataId = parameters[3];
-        console.log(this.transferData.fileMetadataId);
-        this.transferData.datasetVersion = parameters[4];
-        console.log(this.transferData.datasetVersion);
-        this.transferData.storePrefix = parameters[5];
-        this.dvLocale = parameters[6];
-        console.log(this.dvLocale);
-        this.transferData.key = parameters[0];
-    }
 }

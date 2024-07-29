@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { NavigateDirectoriesComponent } from './navigate-directories.component';
 
@@ -6,7 +6,7 @@ describe('NavigateDirectoriesComponent', () => {
   let component: NavigateDirectoriesComponent;
   let fixture: ComponentFixture<NavigateDirectoriesComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ NavigateDirectoriesComponent ]
     })

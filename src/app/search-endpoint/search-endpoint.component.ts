@@ -1,11 +1,19 @@
-import {AfterViewInit, Component, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
-import {flatMap} from 'rxjs/operators';
+import {AfterViewInit, Component, Input, OnChanges, OnInit} from '@angular/core';
 import {GlobusService} from '../globus.service';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatPaginator} from '@angular/material/paginator';
+import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
+
 import { NavigateDirectoriesComponent } from '../navigate-directories/navigate-directories.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {TransferData} from '../upload/upload.component';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf, NgIf} from '@angular/common';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTableModule} from '@angular/material/table';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {MatInputModule} from '@angular/material/input';
 
 export interface PassingDataType {
   dataTransfer: TransferData;
@@ -15,6 +23,19 @@ export interface PassingDataType {
 
 @Component({
   selector: 'app-search-endpoint',
+  standalone: true,
+  imports: [
+    TranslateModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    NgIf,
+    ReactiveFormsModule,
+    NgForOf,
+    MatIconModule,
+    MatTableModule,
+    MatInputModule
+  ],
   templateUrl: './search-endpoint.component.html',
   styleUrls: ['./search-endpoint.component.css']
 })
@@ -48,12 +69,10 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
     this.loaded = false;
 
     if (typeof this.dataTransfer.userAccessTokenData !== 'undefined') {
-      this.getEndpoints(this.dataTransfer.userAccessTokenData, value)
+      this.getEndpoints(this.dataTransfer.userAccessTokenData.other_tokens[0].access_token, value)
           .subscribe(
               data => {
-                console.log(data);
                 this.dataSource.data = data['DATA'];
-                console.log(this.dataSource);
               },
                     error => console.log(error),
               () => {
@@ -65,12 +84,8 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   getEndpoints(userAccessTokenData, value) {
     const url = 'https://transfer.api.globusonline.org/v0.10/endpoint_search?filter_fulltext=' + value +
         '&filter_non_functional=0&limit=100&offset=0';
-    console.log(url);
-    console.log(userAccessTokenData);
-    // this.userOtherAccessToken = userAccessTokenData.other_tokens[0].access_token;
-    // this.userAccessToken = userAccessTokenData.access_token;
     return this.globusService
-        .getGlobus(url, 'Bearer ' + this.dataTransfer.userAccessTokenData.other_tokens[0].access_token);
+        .getGlobus(url, 'Bearer ' + userAccessTokenData);
   }
 
   getDisplayedColumns() {
@@ -86,11 +101,7 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   ifExists() {
-    if (typeof this.dataSource !== 'undefined' && this.loaded) {
-      return true;
-    } else {
-      return false;
-    }
+    return !!(typeof this.dataSource !== 'undefined' && this.loaded);
   }
 
 
@@ -100,11 +111,11 @@ export class SearchEndpointComponent implements OnInit, AfterViewInit, OnChanges
       data,
       action: this.action
     };
-    console.log("opening dialog");
     this.dialogRef = this.dialog.open(NavigateDirectoriesComponent, {
         data: passingData,
-        //panelClass: 'field_width',
-        width: '800px'
+      height: '80%',
+        // panelClass: 'field_width',
+        width: '80%'
       });
 
   }

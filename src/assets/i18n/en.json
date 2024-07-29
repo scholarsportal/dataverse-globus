@@ -15,7 +15,10 @@
     "SELECTALL": "Select All",
     "REMOVEALL": "Remove All",
     "SELECTEDFILES": "Selected files and folders",
-    "SUBMIT": "Submit Transfer"
+    "SUBMIT": "Submit Transfer",
+    "SELECTEFOLDERTODOWNLOADTO": "Select Folder to Download To",
+    "NOSELECTEDFILES": "No Files Selected",
+    "NOSUBFOLDERS": "There are no Subfolders"
   },
   "PERSONAL": {
     "ENDPOINTS": "Connect Personal endpoints",
@@ -39,5 +42,6 @@
     "CANCEL": "Cancel",
     "OK": "OK",
     "DOWNLOAD": "Directory to Download to "
-  }
+  },
+  "REFERENCED": "Referenced Endpoints"
 }
